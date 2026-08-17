@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>커리큘럼 최종 — 프론트에서 MES까지</title>
+<link rel="stylesheet" href="강의/assets/lecture.css">
+<style>
+/* 커리큘럼 전용 컴포넌트 (공용 스타일은 강의/assets/lecture.css) */
+.phaseflow{background:var(--ink);color:#F2F6F7;padding:20px 22px;margin:16px 0;font-family:var(--mono);font-size:13px;line-height:2;overflow-x:auto}
+.phaseflow .n{color:#5FBFA8;font-weight:600}
+.phaseflow .ar{color:#93A9B3}
+
+table.mapt td:nth-child(1){font-family:var(--mono);font-size:12px;color:var(--acc);font-weight:600;white-space:nowrap}
+table.mapt td:nth-child(3),table.mapt td:nth-child(4){font-family:var(--mono);font-size:12px;color:var(--ink2);white-space:nowrap}
+table.mapt td:nth-child(2){font-weight:600}
+table.mapt .must{color:var(--hot);font-weight:700}
+tr.ph td{background:var(--ink);color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 13px}
+tr.ph td b{color:#5FBFA8}
+
+.mbar{margin:38px 0 16px;padding:10px 0 8px;border-bottom:2px solid var(--ink);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.mbar .m{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:#fff;background:var(--acc);padding:3px 9px;font-weight:600}
+.mbar .th{font-size:20px;font-weight:700}
+.mbar .goal{margin-left:auto;font-size:13.5px;color:var(--ink2)}
+
+.mod{background:var(--card);border:1px solid var(--line);margin-bottom:16px}
+.mod-h{background:var(--ink);color:#fff;padding:13px 20px;display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+.mod-h.star{background:var(--acc)}
+.mod-h .mid{font-family:var(--mono);font-size:12.5px;font-weight:600;color:#93A9B3;letter-spacing:.08em}
+.mod-h.star .mid{color:#CFE8DF}
+.mod-h .g{font-size:17px;font-weight:700}
+.mod-h .d{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:#93A9B3;white-space:nowrap}
+.mod-h.star .d{color:#CFE8DF}
+.mod-b{padding:16px 20px}
+.mod-b .why{margin-bottom:14px}
+.mod-b h4{margin-top:16px}
+.mod-b h4:first-child{margin-top:0}
+.mod-b ul{font-size:15px}
+.pass{background:var(--accbg);padding:10px 14px;margin-top:14px;font-size:14.5px;border-left:4px solid var(--acc)}
+.pass .l{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--acc);display:block;margin-bottom:3px;text-transform:uppercase}
+.deliv{background:var(--hotbg);padding:10px 14px;margin-top:10px;font-size:14.5px;border-left:4px solid var(--hot)}
+.deliv .l{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--hot);display:block;margin-bottom:3px;text-transform:uppercase}
+
+.fixl,.risk{background:var(--card);border:1px solid var(--line)}
+.fixl ul,.risk ul{margin:0;padding:0}
+.fixl li,.risk li{list-style:none;padding:14px 20px;border-bottom:1px solid var(--line2);display:flex;gap:13px;font-size:15.5px}
+.fixl li:last-child,.risk li:last-child{border-bottom:0}
+.fixl li::before{content:"✎";font-family:var(--mono);color:var(--hot);font-weight:700;flex:0 0 auto}
+.risk li::before{content:"!";font-family:var(--mono);color:var(--hot);font-weight:700;flex:0 0 auto;font-size:17px}
+.fixl .d,.risk .d{display:block;font-size:14px;color:var(--ink2);margin-top:3px}
+.fixl .w,.risk .w{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--acc);border:1px solid var(--acc);padding:0 5px;margin-left:6px;vertical-align:1px}
+
+.bar{display:flex;height:38px;margin:16px 0;border:1px solid var(--line);font-family:var(--mono);font-size:11.5px;letter-spacing:.06em}
+.bar div{display:flex;align-items:center;justify-content:center;color:#fff}
+.bar .learn{background:var(--acc);flex:38}
+.bar .build{background:var(--ink);flex:62}
+
+@media print{ .mod-h{background:#fff;color:#000;border:2px solid #000} .mod-h .mid,.mod-h .d{color:#444} .phaseflow{background:#fff;color:#000;border:2px solid #000} .phaseflow .n,.phaseflow .ar{color:#000} tr.ph td{background:#fff;color:#000;border-top:2px solid #000} tr.ph td b{color:#000} .mod{break-inside:avoid} .bar div{color:#000;border:1px solid #000} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="cover">
+  <div class="kicker">ShotTrace MES · 학습 커리큘럼 최종본 · 2026-08-17</div>
+  <h1>프론트에서 MES까지</h1>
+  <p class="thesis">빈 폴더에서 시작해 배포된 제품까지. <b>28개 모듈, 8단계, 학습 53.5일.</b><br>
+  배워야 할 건 백엔드 프레임워크 문법이 아니라 <b>데이터를 소유한다는 게 무엇인가</b>이다.</p>
+  <div class="meta">
+    <span><b>시작</b> 2026-08-17</span>
+    <span><b>종료</b> 2027-02-28</span>
+    <span><b>모듈</b> M01 ~ M28</span>
+    <span><b>기준</b> 하루 4시간</span>
+    <span><b>상태</b> 확정 · 이후 변경 없음</span>
+  </div>
+</div>
+
+<nav>
+  <a href="#fix">최종 점검 결과</a>
+  <a href="#map">한 장 지도</a>
+  <a href="#budget">학습 vs 개발</a>
+  <a href="#screen">만들 화면</a>
+  <a href="#rule">원칙·상시 규칙</a>
+  <a href="#stack">확정 스택</a>
+  <a href="#p0">모듈 상세</a>
+  <a href="#cut">밀렸을 때</a>
+  <a href="#risk">선결 리스크</a>
+  <a href="#talk">면접 문장</a>
+  <a href="강의/index.html">강의 노트 →</a>
+</nav>
+
+<!-- ═══════ 00 최종 점검 ═══════ -->
+<section id="fix">
+  <div class="sh"><span class="sn">00</span><h2>최종 점검에서 고친 것</h2></div>
+  <p class="why">v2까지는 <b>내용</b>이 맞는지만 봤다. 최종 점검은 <b>이 일정으로 실제로 굴러가는가</b>를 봤고, 거기서 다섯 개가 걸렸다.</p>
+
+  <div class="fixl">
+    <ul>
+      <li><div><strong>Just-In-Time 원칙을 커리큘럼 자신이 어기고 있었다</strong><span class="w">M21로 이동</span>
+        <span class="d">데이터 모델링을 8월에 배치했는데, 실제로 쓰는 건 <strong>12월</strong>(downtime·defect_code 테이블 추가)이다. 4개월 뒤에 쓸 걸 미리 배우면 잊는다. 12월 M22 직전으로 옮겼다.</span></div></li>
+      <li><div><strong>8월이 물리적으로 불가능했다</strong><span class="w">단계 1</span>
+        <span class="d">8/18~25는 8일인데 모듈 합계가 8.5일이었다. 버퍼가 마이너스인데다 <strong>실제 세팅·적재 작업 시간은 계산에 없었다.</strong> 모델링을 빼서 7.5일로 맞췄다.</span></div></li>
+      <li><div><strong>만들어야 할 화면 2개가 어느 과제에도 없었다</strong><span class="w">M10 · M17</span>
+        <span class="d">현황판·파레토는 쿼리만 만들고 화면 구현이 붕 떠 있었고, 마스터 관리 화면도 마찬가지였다. 05절에 <strong>화면 6개와 담당 모듈 대응표</strong>를 만들어 못 빠지게 했다.</span></div></li>
+      <li><div><strong>디버깅 모듈 위치가 틀렸다</strong><span class="w">M05로 이동</span>
+        <span class="d">8/25에 뒀는데, 실제로 처음 크게 막히는 건 <strong>ETL의 한글 날짜 파싱</strong>이다. 막히고 나서 배우면 늦다. ETL 직전으로 당겼다.</span></div></li>
+      <li><div><strong>"학습 vs 개발" 비율이 안 보였다</strong><span class="w">02절 추가</span>
+        <span class="d">커리큘럼만 보면 6개월 내내 공부만 하는 것처럼 보인다. 실제로는 <strong>학습 38% / 개발 62%</strong>다. 이 비율이 안 보이면 "이걸 다 배우고 언제 만들지"라는 불안이 생긴다.</span></div></li>
+    </ul>
+  </div>
+
+  <div class="okbox"><span class="t">추가로 넣은 것</span>
+    <strong>밀렸을 때 버리는 순서</strong>(07절) · <strong>백업·복구와 동적 SQL 주입</strong> 리스크 2개 · 상시 규칙에 <strong>README 매달 갱신</strong>과 <strong>월말 점검</strong>.
+  </div>
+</section>
+
+<!-- ═══════ 01 한 장 지도 ═══════ -->
+<section id="map">
+  <div class="sh"><span class="sn">01</span><h2>한 장 지도 — 28개 모듈 전체</h2></div>
+
+<div class="phaseflow"><span class="n">0 출발선</span> <span class="ar">→</span> <span class="n">1 데이터를 소유한다</span> <span class="ar">→</span> <span class="n">2 화면을 붙인다</span> <span class="ar">→</span> <span class="n">3 데이터를 흐르게 한다</span>
+<span class="ar">                                                                    ↓</span>
+<span class="n">7 설명한다</span> <span class="ar">←</span> <span class="n">6 믿을 만하게 만든다</span> <span class="ar">←</span> <span class="n">5 차별화한다</span> <span class="ar">←</span> <span class="n">4 기록을 지킨다</span></div>
+
+  <div class="tw">
+  <table class="mapt">
+    <tr><th>모듈</th><th>주제</th><th>시기</th><th>분량</th></tr>
+
+    <tr class="ph"><td colspan="4"><b>단계 0</b> 　출발선 — 8/17 · <i>합 1일</i></td></tr>
+    <tr><td>M01</td><td>개발환경 · Git · 시크릿</td><td>8/17</td><td>반나절</td></tr>
+    <tr><td>M02</td><td>백엔드 사고방식 전환</td><td>8/17</td><td>반나절</td></tr>
+
+    <tr class="ph"><td colspan="4"><b>단계 1</b> 　데이터를 소유한다 — 8/18~8/25 · <i>합 7.5일 / 8일</i></td></tr>
+    <tr><td>M03</td><td>관계형 DB와 SQL 기본기</td><td>8/18~19</td><td>2일</td></tr>
+    <tr><td>M04</td><td>Supabase 실전 + 보안 모델</td><td>8/20~21</td><td>1.5일</td></tr>
+    <tr><td>M05</td><td>디버깅과 막힘 돌파</td><td>8/21</td><td>반나절</td></tr>
+    <tr><td>M06</td><td>ETL — CSV를 DB로</td><td>8/22</td><td>1.5일</td></tr>
+    <tr><td class="must">M07 ★</td><td>인덱스와 실행계획</td><td>8/23~25</td><td>2일</td></tr>
+
+    <tr class="ph"><td colspan="4"><b>단계 2</b> 　화면을 붙인다 — 8/26~9/30 · <i>합 9.5일 / 26일</i></td></tr>
+    <tr><td>M08</td><td>App Router — 이제 서버도 짠다</td><td>8/26~28</td><td>3일</td></tr>
+    <tr><td>M09</td><td>요구사항을 화면으로 번역하기</td><td>8/29~31</td><td>1.5일</td></tr>
+    <tr><td>M10</td><td>집계는 어디서 하는가 (SQL 심화 1)</td><td>9/1~2주</td><td>2일</td></tr>
+    <tr><td>M11</td><td>시계열을 화면에 그리는 법</td><td>9/2~3주</td><td>2일</td></tr>
+    <tr><td>M12</td><td>서버 상태 동기화 — 언제 다시 불러오나</td><td>9/3주</td><td>1일</td></tr>
+
+    <tr class="ph"><td colspan="4"><b>단계 3</b> 　데이터를 흐르게 한다 — 9/4주~10/31 · <i>합 10일 / 26일</i></td></tr>
+    <tr><td>M13</td><td>장기 실행 프로세스와 Node</td><td>9/4주~10/1주</td><td>3일</td></tr>
+    <tr><td>M14</td><td>MQTT와 메시징</td><td>10/1~2주</td><td>2일</td></tr>
+    <tr><td class="must">M15 ★</td><td>시간의 설계</td><td>10/2~3주</td><td>3일</td></tr>
+    <tr><td>M16</td><td>실시간 UI — 화면을 살아있게</td><td>10/3~4주</td><td>2일</td></tr>
+
+    <tr class="ph"><td colspan="4"><b>단계 4</b> 　기록을 지킨다 — 11/1~11/30 · <i>합 8일 / 21일</i></td></tr>
+    <tr><td>M17</td><td>인증 vs 인가</td><td>11/1주</td><td>2일</td></tr>
+    <tr><td>M18</td><td>폼과 검증 — 믿을 수 없는 입력</td><td>11/2주</td><td>1.5일</td></tr>
+    <tr><td class="must">M19 ★</td><td>트랜잭션과 무결성</td><td>11/2~3주</td><td>3일</td></tr>
+    <tr><td>M20</td><td>제약조건으로 무결성 강제 (SQL 심화 2)</td><td>11/3주</td><td>1.5일</td></tr>
+
+    <tr class="ph"><td colspan="4"><b>단계 5</b> 　차별화한다 — 12/1~12/31 · <i>합 6일 / 22일</i></td></tr>
+    <tr><td>M21</td><td>데이터 모델링 — 스키마를 스스로 짜는 법</td><td>12/1주</td><td>1일</td></tr>
+    <tr><td>M22</td><td>OEE — 도메인 로직을 순수함수로</td><td>12/1~2주</td><td>2일</td></tr>
+    <tr><td>M23</td><td>LLM 연동 — 대응 가이드</td><td>12/2~3주</td><td>3일</td></tr>
+
+    <tr class="ph"><td colspan="4"><b>단계 6</b> 　믿을 만하게 만든다 — 1/1~1/31 · <i>합 6.5일 / 21일</i></td></tr>
+    <tr><td>M24</td><td>테스트 — 무엇을 테스트하지 않을 것인가</td><td>1/1~2주</td><td>2.5일</td></tr>
+    <tr><td>M25</td><td>성능과 스케일 — 인덱스를 증명한다</td><td>1/2~3주</td><td>2일</td></tr>
+    <tr><td>M26</td><td>관측성과 CI — 죽으면 알아야 한다</td><td>1/3~4주</td><td>2일</td></tr>
+
+    <tr class="ph"><td colspan="4"><b>단계 7</b> 　설명한다 — 2/1~2/28 · <i>합 5일 / 20일</i></td></tr>
+    <tr><td>M27</td><td>프론트 품질 마감 — 이미 잘하는 영역</td><td>2/1주</td><td>2일</td></tr>
+    <tr><td>M28</td><td>아키텍처를 말로 만드는 법</td><td>2/2~4주</td><td>3일</td></tr>
+  </table>
+  </div>
+
+  <div class="key"><span class="t">★ 세 개는 절대 압축하지 않는다</span>
+    <strong>M07 인덱스 · M15 시간 · M19 트랜잭션.</strong> 이 셋이 "프론트 개발자가 만든 CRUD"와 "MES를 설계한 사람"을 가르는 지점이다. 일정이 밀리면 07절 순서대로 다른 걸 버리지, 이 셋은 건드리지 않는다.
+  </div>
+</section>
+
+<!-- ═══════ 02 학습 vs 개발 ═══════ -->
+<section id="budget">
+  <div class="sh"><span class="sn">02</span><h2>학습 vs 개발 — 공부만 하는 게 아니다</h2></div>
+  <p class="why">모듈 표만 보면 6개월 내내 배우기만 하는 것처럼 보인다. <b>실제로는 3분의 2가 개발 시간이다.</b> 이 비율이 안 보이면 "이걸 다 배우고 언제 만들지"라는 불안이 생긴다.</p>
+
+  <div class="bar">
+    <div class="learn">학습 53.5일 · 38%</div>
+    <div class="build">개발 · 약 87일 · 62%</div>
+  </div>
+
+  <div class="tw">
+  <table class="k">
+    <tr><th>단계</th><th>기간</th><th>학습</th><th>남는 개발 시간</th></tr>
+    <tr><td>0 출발선</td><td>1일</td><td>1일</td><td>—</td></tr>
+    <tr class="off"><td>1 데이터를 소유한다</td><td>8일</td><td>7.5일</td><td><strong>0.5일 — 가장 빡빡한 구간</strong></td></tr>
+    <tr><td>2 화면을 붙인다</td><td>26일</td><td>9.5일</td><td>16.5일</td></tr>
+    <tr><td>3 데이터를 흐르게 한다</td><td>26일</td><td>10일</td><td>16일</td></tr>
+    <tr><td>4 기록을 지킨다</td><td>21일</td><td>8일</td><td>13일</td></tr>
+    <tr><td>5 차별화한다</td><td>22일</td><td>6일</td><td>16일</td></tr>
+    <tr><td>6 믿을 만하게</td><td>21일</td><td>6.5일</td><td>14.5일</td></tr>
+    <tr><td>7 설명한다</td><td>20일</td><td>5일</td><td>15일</td></tr>
+  </table>
+  </div>
+
+  <div class="key"><span class="t">단계 1이 유일한 위험 구간</span>
+    8/18~25는 학습만으로 8일 중 7.5일을 쓴다. <strong>여기서 하루라도 밀리면 9월로 넘어간다.</strong><br>
+    대비책: 9월 1주는 마스터플랜상 "공통 레이아웃·타입 생성·기본 컴포넌트" 주간이라 <strong>학습 모듈이 가볍다(M10 2일).</strong> 단계 1이 밀리면 여기서 흡수한다. 그 이상 밀리면 M09(요구사항→화면)를 9월 2주로 미룬다.
+  </div>
+</section>
+
+<!-- ═══════ 03 만들 화면 ═══════ -->
+<section id="screen">
+  <div class="sh"><span class="sn">03</span><h2>만들 화면 6개 — 누가 언제 만드나</h2></div>
+  <p class="why">최종 점검에서 <b>화면 2개가 어느 모듈 과제에도 없는 것</b>을 발견해 만든 표다. 이 표에 없는 화면은 만들지 않고, 있는 화면은 반드시 담당 모듈에서 나온다.</p>
+
+  <div class="tw">
+  <table class="k">
+    <tr><th>화면</th><th>이 화면이 답하는 질문</th><th>담당 모듈</th><th>완성</th></tr>
+    <tr><td>현황판</td><td>오늘 잘 돌아가고 있나 · 설비는 살아있나 · OEE는</td><td>M10(쿼리) → M16(실시간) → M22(OEE)</td><td>10월·12월</td></tr>
+    <tr class="on"><td>LOT 추적 ★</td><td>이 LOT을 만들 때 설비가 어땠나 · 불량은 언제 났나</td><td>M11 → M23(대응 제안)</td><td>9월·12월</td></tr>
+    <tr><td>불량 파레토</td><td>어떤 불량부터 손대야 하나</td><td>M10</td><td>9월</td></tr>
+    <tr><td>실적 입력</td><td>(작업자) 생산·불량 수량을 기록한다</td><td>M18(폼) → M19(트랜잭션)</td><td>11월</td></tr>
+    <tr><td>마스터 관리</td><td>(관리자) 설비·제품·불량코드를 관리한다</td><td>M17</td><td>11월</td></tr>
+    <tr><td>로그인</td><td>나는 누구이고 무엇을 할 수 있나</td><td>M17</td><td>11월</td></tr>
+  </table>
+  </div>
+  <p><strong>9월 말 시점의 3화면</strong>(현황판·LOT추적·파레토)이 마스터플랜의 9월 완성 기준과 일치한다. 나머지 3개는 11월에 인증과 함께 나온다.</p>
+</section>
+
+<!-- ═══════ 04 원칙 ═══════ -->
+<section id="rule">
+  <div class="sh"><span class="sn">04</span><h2>원칙과 상시 규칙</h2></div>
+
+  <div class="okbox"><span class="t">Just-In-Time</span>
+    <strong>필요한 주 직전에만 배운다.</strong> 모듈이 배치된 주에 배우고, 그 주에 만드는 것에 즉시 쓴다. <strong>배우고 안 쓰는 모듈은 이 커리큘럼에 하나도 없다.</strong> (최종 점검에서 이 원칙을 어긴 M21을 12월로 옮겼다.)
+  </div>
+
+  <h3>강의 1회의 진행 순서</h3>
+  <div class="tw">
+  <table class="k">
+    <tr><th>단계</th><th>내용</th></tr>
+    <tr><td>① 왜</td><td>이 개념이 없으면 ShotTrace의 무엇이 깨지는가</td></tr>
+    <tr><td>② 개념</td><td>원리. 외우는 게 아니라 남에게 설명 가능한 수준까지</td></tr>
+    <tr><td>③ 적용점</td><td>어느 파일, 어느 쿼리, 어느 화면에 쓰이는지 지목</td></tr>
+    <tr><td>④ 과제</td><td><strong>직접 타이핑한다.</strong> 대신 짜주면 면접에서 설명을 못 한다</td></tr>
+    <tr><td>⑤ 확인</td><td>질문 3개. 못 답하면 그 모듈 재수강</td></tr>
+  </table>
+  </div>
+
+  <h3>전 과정을 관통하는 상시 규칙 6개</h3>
+  <div class="tw">
+  <table class="k">
+    <tr><th>규칙</th><th>내용</th></tr>
+    <tr><td>커밋</td><td>하루 최소 1커밋. 메시지는 <strong>무엇을 했나가 아니라 왜 했나</strong>. 6개월치 이력이 곧 성실성의 증거다</td></tr>
+    <tr><td>ADR</td><td>설계 결정을 내릴 때마다 <code>docs/decisions/NNN-제목.md</code>에 <strong>3줄</strong>: 무엇을 정했나 · 왜 · 버린 대안. "왜 그렇게 했습니까"가 면접의 90%다</td></tr>
+    <tr><td>증거</td><td>EXPLAIN 캡처·벤치마크·스크린샷을 <code>docs/evidence/</code>에. 2월 블로그·README·면접 답변이 전부 여기서 나온다</td></tr>
+    <tr><td>README</td><td><strong>매달 말 갱신 + 스크린샷 추가.</strong> 2월에 몰아서 쓰면 6개월 전 내용을 기억으로 복원해야 한다</td></tr>
+    <tr><td>월말 점검</td><td>매달 마지막 주, 마스터플랜의 그 달 "완성 기준"을 하나씩 확인. 통과 못 하면 <strong>다음 달로 넘기지 않고 그 주에 끝낸다</strong></td></tr>
+    <tr><td>30분</td><td>30분 넘게 혼자 못 풀면 즉시 질문. 단, <strong>M05에서 배운 절차를 밟은 뒤에</strong></td></tr>
+  </table>
+  </div>
+
+  <div class="key"><span class="t">범위 고정</span>
+    모듈에 없는 걸 배우고 싶어지면 <strong>메모만 하고 넘어간다.</strong> 이 커리큘럼은 <strong>무엇을 배울지</strong>의 기준이고, 마스터플랜은 <strong>무엇을 만들지</strong>의 기준이다. 둘이 어긋나면 마스터플랜이 우선한다.
+  </div>
+</section>
+
+<!-- ═══════ 05 스택 ═══════ -->
+<section id="stack">
+  <div class="sh"><span class="sn">05</span><h2>확정 스택과 폴더 구조</h2></div>
+  <div class="tw">
+  <table class="m">
+    <tr><th>영역</th><th>선택</th><th>이유</th></tr>
+    <tr><td>버전관리</td><td>Git + GitHub 공개 저장소</td><td>커밋 이력이 포트폴리오의 일부. 첫날 개설</td></tr>
+    <tr><td>DB</td><td>Supabase (Postgres)</td><td>Auth·Realtime·REST가 한 덩어리. 1인 개발의 인프라 시간을 0으로</td></tr>
+    <tr><td>스키마 관리</td><td>SQL 마이그레이션 파일</td><td>대시보드 클릭 금지. 재현 가능해야 신뢰를 얻는다</td></tr>
+    <tr><td>ETL·적재</td><td>Python 3 + pandas</td><td>45컬럼 전처리·LOT 집계는 pandas가 압도적. 일회성 스크립트</td></tr>
+    <tr><td>웹</td><td>Next.js 16 App Router + TS</td><td>서버 컴포넌트로 DB 직결</td></tr>
+    <tr><td>검증</td><td>Zod</td><td>같은 스키마를 클라이언트·서버에서 재사용</td></tr>
+    <tr><td>차트</td><td>Recharts</td><td>시계열 + 파레토 둘 다 커버</td></tr>
+    <tr><td>시뮬레이터·수집기</td><td>Node.js + TS (mqtt.js)</td><td>웹과 타입·유틸 공유. 상시 실행 프로세스</td></tr>
+    <tr><td>브로커</td><td>Mosquitto (Docker)</td><td>계획 그대로</td></tr>
+    <tr><td>테스트</td><td>Vitest + Playwright</td><td><strong>계획의 Jest에서 변경.</strong> Next 16/TS에서 설정 비용이 훨씬 낮고 API는 Jest와 거의 같다</td></tr>
+    <tr><td>CI</td><td>GitHub Actions</td><td>푸시마다 타입체크·테스트. 배지가 저장소 첫인상을 바꾼다</td></tr>
+    <tr><td>LLM</td><td>Claude API</td><td>서버에서만 호출</td></tr>
+    <tr><td>배포</td><td>Vercel(웹) + 별도(수집기)</td><td>수집기는 서버리스에 못 올린다 — M15에서 결정</td></tr>
+  </table>
+  </div>
+
+<pre>ShotTrace/
+├─ .gitignore              <span class="er">← 첫 커밋 전에. .env가 여기 없으면 사고</span>
+├─ .env.example            <span class="cm">키 이름만. 값은 절대 안 들어간다</span>
+├─ db/migrations/          <span class="cm">001_init.sql, 002_indexes.sql ...  ← 스키마의 유일한 진실</span>
+├─ scripts/etl/            <span class="cm">Python. CSV → Supabase (일회성)</span>
+├─ apps/web/               <span class="cm">Next.js 16</span>
+├─ services/
+│  ├─ simulator/           <span class="cm">Node. CSV를 시간순 MQTT 발행 (배속)</span>
+│  └─ collector/           <span class="cm">Node. MQTT 구독 → equipment_param upsert</span>
+├─ docs/
+│  ├─ 커리큘럼 — 프론트에서 MES까지.html   <span class="hi">← 이 문서</span>
+│  ├─ 강의/                <span class="cm">강의 노트 · index.html에서 진도 확인</span>
+│  ├─ decisions/           <span class="cm">ADR — 설계 결정 3줄 기록</span>
+│  └─ evidence/            <span class="cm">EXPLAIN 캡처 · 벤치마크 · 스크린샷</span>
+├─ .github/workflows/      <span class="cm">CI</span>
+├─ docker-compose.yml      <span class="cm">Mosquitto (M14에서 생성)</span>
+└─ README.md               <span class="cm">매달 말 갱신</span></pre>
+</section>
+
+<!-- ═══════ 06 모듈 상세 ═══════ -->
+<section id="p0">
+  <div class="sh"><span class="sn">06</span><h2>모듈 상세</h2></div>
+
+  <!-- 단계 0 -->
+  <div class="mbar"><span class="m">단계 0</span><span class="th">출발선</span><span class="goal">8/17 · 하루 → 첫 커밋이 GitHub에 올라간다</span></div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M01</span><span class="g">개발환경 · Git · 시크릿</span><span class="d">8/17 · 반나절</span></div>
+    <div class="mod-b">
+      <p class="why">6개월치 커밋 이력은 <b>나중에 만들 수 없다.</b> 그리고 <code>.gitignore</code> 없이 첫 커밋을 하면 나중에 키를 지워도 이력에 영원히 남는다. <b>순서가 중요한 유일한 모듈.</b></p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>Git 기본기 — add/commit/push, 커밋을 <strong>의미 단위로</strong> 쪼개는 감각</li>
+        <li>커밋 메시지 — "무엇을"이 아니라 <strong>"왜"</strong>. 6개월 뒤의 내가 독자</li>
+        <li>1인 프로젝트의 브랜치 전략 — 복잡한 건 필요 없지만 기능 단위 브랜치는 이력을 읽기 좋게 만든다</li>
+        <li><code>.gitignore</code> · <code>.env</code> · <code>.env.example</code> — 키가 저장소에 올라가면 무슨 일이 벌어지나</li>
+        <li>Node 버전 고정 · Python 가상환경(venv) · Docker Desktop 설치 확인</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>git 저장소 · <code>.gitignore</code> · <code>.env.example</code> · README 초안 · 폴더 뼈대 · GitHub 공개 저장소 · 첫 커밋</div>
+      <div class="pass"><span class="l">통과 기준</span><code>git log</code>에 의미 있는 첫 커밋이 있고, <code>.env</code>가 추적되지 않는다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M02</span><span class="g">백엔드 사고방식 전환</span><span class="d">8/17 · 반나절</span></div>
+    <div class="mod-b">
+      <p class="why">프론트에서 백엔드로 넘어올 때 진짜 벽은 문법이 아니라 <b>"이 값을 누가 믿을 수 있는가"</b>다. 이걸 안 잡고 Supabase를 쓰면 anon key로 테이블이 통째로 열린 채 배포된다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>신뢰 경계(trust boundary) — 브라우저에서 온 값은 전부 거짓말일 수 있다</li>
+        <li>코드가 실행되는 <strong>세 곳</strong> — 서버 / 클라이언트 / DB. 각각 무엇을 믿을 수 있나</li>
+        <li>Supabase를 쓴다는 건 <strong>DB를 브라우저에 반쯤 노출한다는 뜻</strong>이라는 사실</li>
+        <li>ISA-95 Level 3에서 MES가 지는 책임 = 기록의 진실성</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>화면 6개 각각의 "누가 읽고 누가 쓰나" 표 → <strong>11월 M17 RLS 정책의 초안</strong></div>
+      <div class="pass"><span class="l">통과 기준</span>"작업자가 브라우저 콘솔에서 직접 API를 때리면 마스터를 고칠 수 있는가?"에 근거를 대며 답한다</div>
+    </div>
+  </div>
+
+  <!-- 단계 1 -->
+  <div class="mbar"><span class="m">단계 1</span><span class="th">데이터를 소유한다</span><span class="goal">8/18~8/25 → DB에 7,996행이 있고 핵심 쿼리 3개가 돈다</span></div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M03</span><span class="g">관계형 DB와 SQL 기본기</span><span class="d">8/18~19 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">스키마 v2는 이미 설계했지만 <b>그걸 실행 가능한 DDL로 옮기고 결과를 검증하는 건 다른 일</b>이다. 여기서 타입을 잘못 고르면 10월에 전체 재적재를 하게 된다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>PK / FK / UNIQUE / NOT NULL / CHECK — 제약조건은 문서가 아니라 <strong>DB가 강제하는 규칙</strong></li>
+        <li>NULL의 진짜 의미 (<code>NULL = NULL</code>이 참이 아닌 이유, 3값 논리)</li>
+        <li>JOIN 4종 · GROUP BY · 집계 · HAVING · 서브쿼리 vs CTE</li>
+        <li>타입 선택: <code>timestamptz</code> vs <code>timestamp</code>, <code>numeric</code> vs <code>double precision</code></li>
+        <li><strong>시간 저장의 원칙</strong> — UTC로 저장하고 표시할 때 변환. ISO 8601</li>
+        <li>스키마 v2가 <strong>왜 이렇게 생겼는지</strong> 읽기 (본격 모델링은 12월 M21에서)</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><code>db/migrations/001_init.sql</code> — 4테이블 DDL, 33개 공정변수 포함</div>
+      <div class="pass"><span class="l">통과 기준</span>equipment_param에 lot_id FK가 왜 없고 무엇이 그 역할을 하는지 DDL을 짚으며 설명한다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M04</span><span class="g">Supabase 실전 + 보안 모델</span><span class="d">8/20~21 · 1.5일</span></div>
+    <div class="mod-b">
+      <p class="why">Supabase는 편한 만큼 <b>기본값이 위험</b>하다. RLS를 안 켜면 anon key 하나로 전 세계가 테이블을 읽는다. 프론트 개발자가 Supabase를 쓸 때 가장 흔한 사고가 정확히 이것이다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li><strong>대시보드 클릭 금지 원칙</strong> — 스키마 변경은 전부 마이그레이션 SQL 파일로</li>
+        <li><code>anon key</code> vs <code>service_role key</code> — 무엇이 브라우저에 나가도 되는가</li>
+        <li>RLS의 개념. 지금은 읽기 허용만 켜고 정책 작성은 M17에서</li>
+        <li>Supabase CLI · <code>gen types typescript</code>로 DB 타입을 TS로 흘리기</li>
+        <li>무료티어의 제약 — 용량·커넥션·<strong>미사용 시 일시정지</strong>·백업 없음</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>Supabase 프로젝트 · 001 마이그레이션 적용 · 생성된 TS 타입 파일 커밋</div>
+      <div class="pass"><span class="l">통과 기준</span>DB를 통째로 지우고 마이그레이션만 다시 돌려 동일 상태로 복원한다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M05</span><span class="g">디버깅과 막힘 돌파</span><span class="d">8/21 · 반나절</span></div>
+    <div class="mod-b">
+      <p class="why">6개월 완주율을 실제로 좌우하는 모듈. <b>바로 다음 모듈(ETL)에서 처음 크게 막힌다</b> — 한글 날짜 파싱, 타입 불일치, FK 위반. 막히고 나서 배우면 늦어서 여기에 뒀다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>스택트레이스를 <strong>아래에서 위로</strong> 읽기 — 내 코드가 나오는 첫 줄이 시작점</li>
+        <li>Postgres 에러 코드 (23505 중복, 23503 FK 위반, 22P02 타입) — 메시지보다 코드가 정확하다</li>
+        <li><strong>이분 탐색 디버깅</strong> — 되는 지점과 안 되는 지점 사이를 반으로 좁힌다</li>
+        <li>최소 재현 코드 만들기. 이걸 만들다 원인을 찾는 경우가 절반</li>
+        <li>공식 문서를 검색 결과보다 먼저 — Postgres·Supabase·Next 문서에서 답을 찾는 훈련</li>
+        <li>질문을 잘하는 법 — 무엇을 기대했고 무엇이 나왔고 무엇을 이미 해봤나</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>에러 3종(FK 위반·타입 불일치·인덱스 미적용)을 일부러 만들고 진단 과정 기록</div>
+      <div class="pass"><span class="l">통과 기준</span>막혔을 때 "여기저기 바꿔본다" 대신 밟을 절차가 머릿속에 있다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M06</span><span class="g">ETL — CSV를 DB로</span><span class="d">8/22 · 1.5일</span></div>
+    <div class="mod-b">
+      <p class="why"><b>실제로 시간이 가장 많이 녹는 구간.</b> 한글 날짜 형식, 죽은 컬럼, LOT 집계, 타입 변환 — 전부 여기서 터진다. 그래서 앞에 디버깅 모듈을 뒀다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>추출·변환·적재의 분리 — 변환 로직을 검증 가능하게 짜기</li>
+        <li>pandas로 45컬럼 → 33컬럼 정리, 결측·이상치 처리</li>
+        <li><strong>"2020-10-16 오전 12:00:00"</strong> 한글 날짜 파싱 · 오전 12시가 자정인지 정오인지 데이터로 확인</li>
+        <li><code>groupby</code>로 production_lot 25행 집계 생성 (total/pass/fail_qty, started_at, ended_at)</li>
+        <li>대량 INSERT의 현실 — 7,996행을 한 줄씩 넣으면 얼마나 걸리나, 배치로는?</li>
+        <li><strong>멱등한 적재</strong> — 스크립트를 두 번 돌려도 행이 안 늘어나게</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><code>scripts/etl/</code> 적재 스크립트 · 4테이블 실데이터 · 행 수 검증 쿼리</div>
+      <div class="pass"><span class="l">통과 기준</span>스크립트를 두 번 돌려도 결과가 같다 · 25 LOT의 합계가 7,996과 일치한다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h star"><span class="mid">M07 ★</span><span class="g">인덱스와 실행계획</span><span class="d">8/23~25 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">면접에서 이 프로젝트로 점수를 따는 지점이 <b>정확히 여기</b>다. "복합 인덱스를 걸었습니다"는 누구나 말한다. <b>왜 그 순서인지</b> 설명하는 사람이 드물다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>B-tree가 실제로 값을 찾아가는 과정</li>
+        <li><strong>왼쪽 접두사 규칙</strong> — 왜 <code>(equipment_id, measured_at)</code>이고 반대는 안 되는가</li>
+        <li>카디널리티와 선택도 — 인덱스가 있어도 무시되는 경우</li>
+        <li><code>EXPLAIN ANALYZE</code> 읽기: Seq Scan vs Index Scan, cost, 예상 행 수 대 실측</li>
+        <li>인덱스의 비용 — INSERT가 느려진다. 수집기가 초당 수십 건 넣을 때 의미가 생긴다</li>
+        <li><strong>시간 범위 조회의 함정</strong> — <code>BETWEEN</code>의 양끝 포함, 반열린 구간 <code>&gt;= AND &lt;</code>이 표준인 이유</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><code>002_indexes.sql</code> · 핵심 쿼리 3개 · <strong>EXPLAIN 3종 비교(없음/있음/순서반대) → evidence</strong></div>
+      <div class="pass"><span class="l">통과 기준</span>"인덱스 컬럼 순서를 바꾸면 왜 느려집니까"에 EXPLAIN 결과를 근거로 답한다. 이 캡처가 2월 기술블로그의 중심 자료다</div>
+    </div>
+  </div>
+
+  <!-- 단계 2 -->
+  <div class="mbar"><span class="m">단계 2</span><span class="th">화면을 붙인다</span><span class="goal">8/26~9/30 → 현황판·LOT추적·파레토가 실 DB로 동작</span></div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M08</span><span class="g">App Router — 이제 서버도 짠다</span><span class="d">8/26~28 · 3일</span></div>
+    <div class="mod-b">
+      <p class="why">익숙한 영역처럼 보이지만 아니다. <b>Server Component에서 Supabase를 직접 호출하는 순간 프론트 개발자가 아니라 풀스택</b>이 된다. 경계를 어디에 긋느냐가 이후 모든 화면의 성능을 결정한다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>Server Component vs Client Component, <code>"use client"</code>가 그리는 경계선</li>
+        <li>서버에서 Supabase 호출 vs 클라이언트에서 — 어느 쪽이 언제 맞는가</li>
+        <li>캐싱 / <code>revalidate</code> / <code>dynamic</code> — <strong>실시간 대시보드에서 캐시는 적이다</strong></li>
+        <li><code>NEXT_PUBLIC_</code> 접두사의 의미 = 이 값은 전 세계에 공개된다</li>
+        <li>Route Handler와 Server Action은 각각 언제</li>
+        <li>Vercel 환경변수 · 프리뷰 배포 · 자동 배포 파이프라인</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><code>apps/web/</code> 프로젝트 · Supabase 클라이언트 2종 · <strong>Vercel 배포 URL</strong></div>
+      <div class="pass"><span class="l">통과 기준</span>배포 URL 접속 가능 · 서버 컴포넌트에서 LOT 25행 출력 · service_role key가 번들에 없음을 확인</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M09</span><span class="g">요구사항을 화면으로 번역하기</span><span class="d">8/29~31 · 1.5일</span></div>
+    <div class="mod-b">
+      <p class="why">도메인 지식을 화면으로 옮기는 건 별개의 기술이고, <b>여기가 "MES를 아는 사람"과 "CRUD를 만든 사람"의 차이</b>가 드러나는 곳이다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>역할별 <strong>"이 화면에 와서 답을 얻고 싶은 질문"</strong>을 먼저 적기 — 관리자가 아침에 3초 안에 알고 싶은 것은?</li>
+        <li>질문 → 필요한 데이터 → 쿼리 → 화면 요소 순으로 역추적</li>
+        <li>MES 대시보드의 정보 위계 — 숫자 하나가 맨 위, 그다음 추세, 그다음 목록</li>
+        <li>화면과 테이블의 대응 확인 — <strong>그릴 수 없으면 스키마가 부족한 것이다</strong></li>
+        <li>인터뷰에서 나온 현장 요구(대응 가이드라인 부족)를 화면 요소로 예약해두기</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>화면 6개 와이어프레임 + 각 화면이 답하는 질문 3개씩 (03절 표를 채운다)</div>
+      <div class="pass"><span class="l">통과 기준</span>각 화면 요소마다 그것을 채우는 쿼리를 지목할 수 있다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M10</span><span class="g">집계는 어디서 하는가 (SQL 심화 1)</span><span class="d">9/1~2주 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">프론트 습관대로 하면 7,996행을 브라우저로 내려받아 <code>reduce</code>를 돌리게 된다. 지금은 동작한다. <b>1월에 수십만 행이 되면 화면이 죽는다.</b></p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>집계는 DB에서, 표현은 화면에서 — 25행만 네트워크로 보내는 설계</li>
+        <li>View와 Postgres 함수(RPC)로 쿼리를 캡슐화하고 이름 붙이기</li>
+        <li>윈도우 함수 <code>LAG()</code> — 샷 간 압력·온도 변화량. LOT 추적의 킬러 요소</li>
+        <li>파레토를 SQL로 — <code>GROUP BY</code> + 누적 비율 <code>SUM() OVER</code></li>
+        <li>RPC의 입출력 계약 설계 — 인자와 반환 타입을 정하는 것도 API 설계다</li>
+        <li><strong>동적 SQL의 위험</strong> — RPC 안에서 문자열을 이어붙이면 인젝션이 뚫린다</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>수율·파레토 뷰 · 시간구간 조인 RPC · <strong>현황판 화면 · 불량 파레토 화면</strong></div>
+      <div class="pass"><span class="l">통과 기준</span>어떤 화면도 1,000행 이상을 클라이언트로 받지 않는다 (차트 원본 제외)</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M11</span><span class="g">시계열을 화면에 그리는 법</span><span class="d">9/2~3주 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">LOT 하나에 수백~수천 샷이 들어있다. 그대로 넣으면 브라우저가 멈춘다. 그리고 <b>MES는 "데이터 없음"이 정상 상태</b>인 시스템이다 — 야간 미가동, 미생산 설비.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>다운샘플링 — 단순 간격 추출 vs <strong>최대·최소 보존</strong>(불량 스파이크를 지우면 안 된다)</li>
+        <li>불규칙 간격 시계열을 차트에 얹기, 축 설계</li>
+        <li>불량 시점을 시계열 위에 겹쳐 표시하기 위한 데이터 구조</li>
+        <li>어떤 차트가 어떤 질문에 답하는가 — 추세는 선, 구성은 막대, 순위는 정렬된 막대</li>
+        <li>로딩 / 빈 / 에러의 3분법. "빈 상태가 정상"인 화면 설계</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><strong>LOT 추적 화면 ★</strong> — 시간구간 조인 → 온도·압력 시계열 + 불량 시점 오버레이</div>
+      <div class="pass"><span class="l">통과 기준</span>가장 샷이 많은 LOT을 열어도 렌더가 매끄럽다 · 불량 순간이 그래프에서 눈에 보인다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M12</span><span class="g">서버 상태 동기화 — 언제 다시 불러오나</span><span class="d">9/3주 · 1일</span></div>
+    <div class="mod-b">
+      <p class="why">"화면의 이 숫자는 언제 갱신되는가"에 답이 없으면 10월 실시간에서 반드시 무너진다. <b>RSC 캐시와 클라이언트 캐시가 섞이면 프론트 경험자도 헤맨다.</b></p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>서버 상태와 클라이언트 상태의 구분 — 대부분의 "상태관리 문제"는 사실 캐시 문제다</li>
+        <li>Next의 재검증 경로들과 그 차이</li>
+        <li>낙관적 업데이트 — 실적을 입력했을 때 화면이 먼저 반응하게 (11월 예습)</li>
+        <li>폴링 간격 설계 — 1초마다 부르면 무료티어 한도를 언제 태우나</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>갱신 정책 ADR (폴링 간격 / 재검증 방식과 근거)</div>
+      <div class="pass"><span class="l">통과 기준</span>각 화면마다 "이 데이터는 몇 초 지난 것일 수 있다"를 숫자로 답한다</div>
+    </div>
+  </div>
+
+  <!-- 단계 3 -->
+  <div class="mbar"><span class="m">단계 3</span><span class="th">데이터를 흐르게 한다</span><span class="goal">9/4주~10/31 → 시뮬레이터를 켜면 화면이 살아 움직인다 · MVP</span></div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M13</span><span class="g">장기 실행 프로세스와 Node</span><span class="d">9/4주~10/1주 · 3일</span></div>
+    <div class="mod-b">
+      <p class="why">시뮬레이터와 수집기는 Next.js와 <b>완전히 별개로 계속 살아 있는 프로그램</b>이다. 요청-응답 모델만 겪어온 사람에게 가장 낯선 개념이 여기다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>이벤트 루프 — 무거운 동기 작업이 왜 전체를 멈추는가</li>
+        <li><strong>백프레셔</strong> — 초당 100건 들어오는데 INSERT가 초당 50건이면?</li>
+        <li>배치 INSERT와 버퍼링, 재시도와 지수 백오프</li>
+        <li>graceful shutdown — 종료 시 버퍼에 남은 데이터를 잃지 않기</li>
+        <li>구조화 로깅 — 콘솔에 문자열 던지는 것과 무엇이 다른가 (M26의 전제)</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><code>services/simulator/</code> 뼈대 — CSV를 배속대로 재생 (MQTT 없이 콘솔 출력 먼저)</div>
+      <div class="pass"><span class="l">통과 기준</span>Ctrl+C로 끄면 진행 상태를 남기고 정상 종료된다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M14</span><span class="g">MQTT와 메시징</span><span class="d">10/1~2주 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">"설비를 바꿔도 MES가 안 바뀐다"는 면접 문장의 <b>실제 근거</b>가 이 모듈이다. 그리고 메시징은 반드시 중복을 만든다 — 대비가 없으면 수율이 틀린다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>pub/sub이 왜 "교체가 쉽다"인가 — 발행자와 구독자가 서로를 모른다</li>
+        <li>토픽 계층 설계(UNS) — ShotTrace의 토픽 문자열을 직접 확정</li>
+        <li>QoS 0/1/2 · retained · clean session · <strong>Last Will</strong>(오프라인 감지)</li>
+        <li><strong>at-least-once → 중복 수신 → 멱등성.</strong> <code>param_id</code>에 원본 <code>_id</code>를 쓴 결정이 여기서 빛난다</li>
+        <li>Docker / docker-compose로 Mosquitto — 볼륨·포트·설정 파일</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><code>docker-compose.yml</code> · <code>services/collector/</code> · 발행→구독→upsert 전체 연결</div>
+      <div class="pass"><span class="l">통과 기준</span>중복 수신 실험에서 행 수가 유지된다 · 시뮬레이터를 죽이면 Last Will이 뜬다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h star"><span class="mid">M15 ★</span><span class="g">시간의 설계</span><span class="d">10/2~3주 · 3일</span></div>
+    <div class="mod-b">
+      <p class="why">이 프로젝트에서 <b>설계 난이도가 가장 높은 모듈</b>이다. 2020년 데이터를 2026년에 재생하면 "지금"은 언제인가? 이 질문의 답이 모든 화면 쿼리를 바꾼다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li><strong>가상 시계</strong> — <code>measured_at</code>에 원본 2020년 시각을 넣을 것인가, 재생 시점 현재 시각을 넣을 것인가. 각각의 대가</li>
+        <li>배속(1x/60x/3600x)을 시계에 반영하는 법</li>
+        <li>실시간에서 <strong>LOT은 언제 열리고 언제 닫히는가</strong> — <code>ended_at IS NULL</code>을 쿼리와 인덱스가 감당하게</li>
+        <li>시계열 데이터의 지연·순서 뒤바뀜 — 늦게 도착한 데이터를 어떻게</li>
+        <li><strong>상시 구동 호스팅</strong> — Vercel은 서버리스라 수집기를 못 올린다. Railway / Fly.io / 로컬 데모 중 결정</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>가상 시계 ADR (면접 단골 질문) · 수집기 상시 구동 위치 결정과 배포</div>
+      <div class="pass"><span class="l">통과 기준</span>60배속으로 켜면 현황판이 갱신되고, 죽이면 오프라인으로 바뀐다. 진행중 LOT이 정상 표시된다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M16</span><span class="g">실시간 UI — 화면을 살아있게</span><span class="d">10/3~4주 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">M12에서 정한 갱신 정책을 실제 실시간에 적용하는 모듈. <b>데모에서 가장 강렬한 인상을 남기는 구간</b>이라 완성도를 따로 챙긴다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>Supabase Realtime의 동작 원리와 비용·제약, 폴링과의 선택 기준</li>
+        <li>연결 끊김·재연결 처리 — 데모 중 와이파이가 끊기면</li>
+        <li>값이 갑자기 튀지 않게 하는 UI — 깜빡임 방지, 부드러운 전환</li>
+        <li>"마지막 갱신 N초 전" 표시가 신뢰를 만드는 이유</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><strong>현황판 실시간 갱신</strong> · 설비 온라인/오프라인 표시 · 5분 데모 리허설 1회</div>
+      <div class="pass"><span class="l">통과 기준</span><strong>여기서부터 완결된 제품이다.</strong> 시뮬레이터 켜고 화면 공유로 전체 흐름을 보여줄 수 있다</div>
+    </div>
+  </div>
+
+  <!-- 단계 4 -->
+  <div class="mbar"><span class="m">단계 4</span><span class="th">기록을 지킨다</span><span class="goal">11/1~11/30 → 역할이 나뉘고 기록이 함부로 안 바뀐다</span></div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M17</span><span class="g">인증 vs 인가</span><span class="d">11/1주 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">M02에서 미뤄둔 RLS 정책을 여기서 쓴다. <b>UI에서 버튼을 숨기는 건 보안이 아니다</b> — 프론트 출신이 가장 자주 놓치는 지점.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>인증(누구인가)과 인가(무엇을 할 수 있나)의 분리</li>
+        <li>세션 / JWT / 쿠키, <strong>서버에서 검증한다</strong>는 것의 의미</li>
+        <li>Supabase Auth + 역할별 RLS 정책 작성 (작업자 / 관리자)</li>
+        <li>이중 방어: 라우트 가드(편의) + RLS(진짜 방어선)</li>
+        <li>M02 과제에서 적은 "누가 읽고 쓰나" 표가 여기서 정책 SQL이 된다</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><strong>로그인 화면 · 마스터 관리 화면(관리자 전용)</strong> · RLS 정책 SQL · 데모 계정 2개</div>
+      <div class="pass"><span class="l">통과 기준</span>작업자 토큰으로 마스터 UPDATE를 직접 시도하면 <strong>DB가 거부한다</strong></div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M18</span><span class="g">폼과 검증 — 믿을 수 없는 입력</span><span class="d">11/2주 · 1.5일</span></div>
+    <div class="mod-b">
+      <p class="why">실적 입력은 이 시스템에서 <b>사람이 데이터를 만드는 유일한 지점</b>이다. 여기가 뚫리면 모든 집계가 오염된다. M02의 신뢰 경계가 실제 코드가 되는 곳.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>같은 Zod 스키마를 클라이언트·서버 양쪽에서 재사용 — <strong>검증은 서버에서 다시 한다</strong></li>
+        <li>도메인 규칙을 검증으로 표현 — 불량수량이 생산수량보다 클 수 없다</li>
+        <li>3중 방어: 폼(UX) → 서버(보안) → DB 제약(최후) — 왜 셋 다 필요한가</li>
+        <li>에러 메시지를 현장 언어로. 작업자가 "제약조건 위반"을 읽을 일은 없어야 한다</li>
+        <li>중복 제출 방지 — 버튼을 두 번 눌렀을 때</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><strong>실적 입력 화면</strong> + 검증 스키마 · 서버 우회 시도 실험 기록</div>
+      <div class="pass"><span class="l">통과 기준</span>클라이언트 검증을 우회해도 서버와 DB가 각각 막는다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h star"><span class="mid">M19 ★</span><span class="g">트랜잭션과 무결성</span><span class="d">11/2~3주 · 3일</span></div>
+    <div class="mod-b">
+      <p class="why">MES가 일반 CRUD 앱과 갈라지는 지점. <b>"수정 불가, 취소 후 재등록"</b>은 불편한 UX가 아니라 <b>제조 기록의 감사 요구</b>다. 이걸 설명하면 도메인을 이해한 사람으로 보인다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>ACID와 격리수준 — 두 작업자가 같은 LOT에 동시에 실적을 넣으면</li>
+        <li>Read Committed에서 실제로 생기는 이상현상, 언제 잠금이 필요한가</li>
+        <li>"수정 불가, 취소 후 재등록" = 감사 로그 / 이벤트 소싱 감각. 취소 플래그와 재등록 체인</li>
+        <li>Postgres 함수로 원자적 처리 — 클라이언트에서 INSERT를 두 번 나눠 하면 안 되는 이유</li>
+        <li>집계값을 저장할까 매번 계산할까 — 정합성 대 성능</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>실적 입력 RPC(원자적) · 취소/재등록 로직 · 동시 요청 2개 실험 기록</div>
+      <div class="pass"><span class="l">통과 기준</span>등록된 실적을 UPDATE로 고칠 수단이 앱 어디에도 없다 · 취소 이력이 남는다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M20</span><span class="g">제약조건으로 무결성 강제 (SQL 심화 2)</span><span class="d">11/3주 · 1.5일</span></div>
+    <div class="mod-b">
+      <p class="why"><code>ON CONFLICT</code>는 10월에 이미 썼지만 원리를 안 배웠다. 그리고 <b>LOT 시간 구간이 서로 겹치면 안 된다</b>는 이 프로젝트의 핵심 규칙을, 코드가 아니라 <b>DB가 직접 막게</b> 할 수 있다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li><code>INSERT ... ON CONFLICT DO UPDATE</code> — upsert의 실제 문법과 충돌 대상 지정</li>
+        <li><strong>부분 인덱스(partial index)</strong> — <code>WHERE ended_at IS NULL</code>. 진행중 LOT만 색인해 아주 작고 빠르게</li>
+        <li><strong>EXCLUDE 제약 + btree_gist</strong> — 같은 설비에서 LOT 구간이 겹치면 <strong>DB가 INSERT를 거부</strong>한다. 애플리케이션이 실수해도 데이터는 안 깨진다</li>
+        <li>범위 타입(tstzrange)과 구간 연산 — 시간 구간 조인을 더 정확하게</li>
+        <li>제약조건 위반을 사용자 메시지로 번역하기</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><code>003_constraints.sql</code> · 겹치는 LOT INSERT 거부 실험 → evidence</div>
+      <div class="pass"><span class="l">통과 기준</span>"애플리케이션 버그로 겹치는 LOT이 들어가면요?"에 <strong>"DB가 막습니다"</strong>로 답한다</div>
+    </div>
+  </div>
+
+  <!-- 단계 5 -->
+  <div class="mbar"><span class="m">단계 5</span><span class="th">차별화한다</span><span class="goal">12/1~12/31 → 면접에서 기억에 남는 기능</span></div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M21</span><span class="g">데이터 모델링 — 스키마를 스스로 짜는 법</span><span class="d">12/1주 · 1일</span></div>
+    <div class="mod-b">
+      <p class="why">지금까지는 이미 확정된 스키마를 썼다. <b>이번 주에 <code>downtime</code>과 <code>defect_code</code>를 직접 추가</b>해야 하고, 그때 "어디에 어떤 컬럼을 둘까"를 혼자 판단해야 한다. <b>남이 준 스키마를 쓰는 것과 짜는 것은 다른 능력이다.</b> (최종 점검에서 8월→12월로 옮긴 모듈)</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>정규화 1NF~3NF를 <strong>규칙이 아니라 증상으로</strong> — 중복이 생기면 반드시 불일치가 생긴다</li>
+        <li>마스터 테이블과 트랜잭션 테이블의 구분 — 잘 안 바뀌는 것 vs 계속 쌓이는 것</li>
+        <li>언제 비정규화하는가 — <code>production_lot</code>의 집계값 저장 결정을 다시 검토</li>
+        <li>코드값을 enum으로 둘까 테이블로 둘까 (불량 사유가 늘어난다면?)</li>
+        <li><strong>운영 중 스키마 변경</strong> — 이미 데이터가 있는 DB에 컬럼을 추가하는 법. 되돌릴 수 있게 쓰기</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span><code>004_downtime.sql</code> · <code>defect_code</code> 테이블 · 설계 근거 ADR</div>
+      <div class="pass"><span class="l">통과 기준</span>"이 컬럼은 왜 저 테이블에 있습니까"에 정규화 관점에서 답한다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M22</span><span class="g">OEE — 도메인 로직을 순수함수로</span><span class="d">12/1~2주 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">OEE는 이 프로젝트에서 <b>유일하게 복잡한 계산 로직</b>이다. 1월 테스트도, 성능도, 설명도 전부 여기서 나온다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>계산 로직을 <strong>DB·프레임워크와 분리된 순수함수</strong>로 — 여기서 안 나누면 1월에 테스트를 못 쓴다</li>
+        <li>가용성 × 성능 × 품질을 <strong>각각 저장</strong>. 값 하나만 남기면 진단 불가 (통합요약 "반드시 지킬 세 가지" ③)</li>
+        <li>계획 정지 / 비계획 정지의 분모·분자 구분 — 안 나누면 아무도 그 숫자를 안 믿는다</li>
+        <li>정격 사이클타임·캐비티 수를 마스터에 추가 (M21에서 설계한 것)</li>
+        <li>부동소수점과 반올림 — 수율 99.95%가 화면마다 다르게 보이는 사고</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>비가동 입력 화면 · OEE 계산 순수함수 · <strong>현황판 OEE 3요소 카드</strong></div>
+      <div class="pass"><span class="l">통과 기준</span>OEE 계산 함수가 DB 없이 단독 호출된다 · 세 요소가 각각 화면에 보인다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M23</span><span class="g">LLM 연동 — 대응 가이드</span><span class="d">12/2~3주 · 3일</span></div>
+    <div class="mod-b">
+      <p class="why">인터뷰에서 확인된 현장 최대 문제(대응 가이드라인 부족)를 실제로 푸는 모듈. <b>"AI 붙였습니다"가 아니라 "이 문제를 이 데이터로 풀었습니다"</b>가 되어야 한다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>API 키는 서버에서만 — 클라이언트에서 부르면 키가 공개된다</li>
+        <li>스트리밍 응답 · 타임아웃 · 재시도. LLM은 <strong>느리고 가끔 실패하는 외부 의존</strong></li>
+        <li>불량↔조건 매핑표를 구조화된 지식베이스로 (통합요약 05절) → 프롬프트에 주입</li>
+        <li><strong>환각을 줄이는 건 프롬프트가 아니라 데이터</strong> — 불량 시점 전후 공정조건을 쿼리로 뽑아 근거와 함께 넣기</li>
+        <li>비용 감각 — 호출당 토큰과 요금, 캐싱으로 줄이기</li>
+        <li>실패해도 화면은 살아있게 — LLM은 부가기능이지 핵심 경로가 아니다</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>LOT 추적 화면의 <strong>"대응 제안" 패널</strong> · 근거 데이터 표시 · 실패 시 폴백</div>
+      <div class="pass"><span class="l">통과 기준</span>LLM API가 죽어도 나머지 화면은 정상이다 · 제안에 <strong>근거 데이터가 함께</strong> 보인다</div>
+    </div>
+  </div>
+
+  <!-- 단계 6 -->
+  <div class="mbar"><span class="m">단계 6</span><span class="th">믿을 만하게 만든다</span><span class="goal">1/1~1/31 → 코드를 열어봐도 부끄럽지 않게</span></div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M24</span><span class="g">테스트 — 무엇을 테스트하지 않을 것인가</span><span class="d">1/1~2주 · 2.5일</span></div>
+    <div class="mod-b">
+      <p class="why">커버리지 숫자를 올리는 건 의미 없다. <b>깨지면 아픈 것</b>만 테스트한다. M22에서 순수함수로 분리해둔 게 여기서 회수된다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>테스트 가능한 코드 설계 — 순수함수 분리가 테스트의 전제인 이유</li>
+        <li>단위 / 통합 / E2E의 경계, <strong>무엇을 테스트하지 않을 것인가</strong></li>
+        <li>Vitest — 수율·OEE·다운샘플링·시간구간 계산</li>
+        <li>Playwright — 로그인 → 실적입력 → LOT조회 핵심 플로우</li>
+        <li>경계값 테스트: LOT 경계의 샷, 빈 LOT, 진행중 LOT — <strong>M07·M15의 함정이 그대로 테스트가 된다</strong></li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>단위 테스트 스위트 · E2E 핵심 플로우 1개</div>
+      <div class="pass"><span class="l">통과 기준</span>테스트가 통과하고, 각 테스트가 <strong>무엇이 깨지는 걸 막는지</strong> 설명된다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M25</span><span class="g">성능과 스케일 — 인덱스를 증명한다</span><span class="d">1/2~3주 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">7,996행에서는 인덱스가 있으나 없으나 빠르다. <b>M07에서 건 인덱스가 진짜로 일하는지 증명하는 달</b>이고, 이게 "스케일 고민을 해봤다"의 유일한 근거다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li><code>generate_series</code>로 equipment_param을 수십만 행으로 증식</li>
+        <li>M07의 EXPLAIN을 대량 데이터에서 재실행 → 그래프가 갈라지는 지점 확인</li>
+        <li>N+1 쿼리 탐지 — LOT 목록에서 각 LOT마다 쿼리를 날리고 있지 않은가</li>
+        <li>커넥션 풀과 무료티어 동시 접속 한계</li>
+        <li>더 갔다면 무엇을 했을까 — 파티셔닝·BRIN·집계 테이블. <strong>"고려했으나 이 규모엔 불필요"도 좋은 답변이다</strong></li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>부하 전후 성능 수치표 · 인덱스 유무 비교 그래프 → evidence</div>
+      <div class="pass"><span class="l">통과 기준</span>수십만 행에서도 LOT 추적이 체감상 즉시다 · 근거 수치가 문서로 남아 있다</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M26</span><span class="g">관측성과 CI — 죽으면 알아야 한다</span><span class="d">1/3~4주 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">수집기는 상시 실행 프로세스다. <b>새벽에 조용히 죽으면 데이터에 구멍이 뚫리고 아무도 모른다.</b> 그리고 데모 당일 배포가 죽어 있으면 6개월이 날아간다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>로그를 어디에 남기고 어떻게 찾는가 — 구조화 로그(M13)가 여기서 회수된다</li>
+        <li>에러 추적 도구 연동 — 프로덕션 에러가 나면 알림이 온다</li>
+        <li>헬스체크 — 수집기가 살아있는지 주기 확인하고 죽으면 재시작</li>
+        <li><strong>데이터 구멍 감지</strong> — 마지막 수신으로부터 N분이 지나면 화면에 경고</li>
+        <li>GitHub Actions — 푸시마다 타입체크·린트·테스트. README 배지</li>
+        <li>Supabase 무료티어 일시정지 대비 · <strong>DB 백업 절차</strong> (무료티어엔 자동 백업이 없다)</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>CI 워크플로 · 에러 추적 · 헬스체크 · <strong>데모 전 점검 체크리스트</strong> · 백업 절차 문서</div>
+      <div class="pass"><span class="l">통과 기준</span>수집기를 강제로 죽였을 때 <strong>내가 알아차릴 방법이 있다</strong> · CI 배지가 초록색</div>
+    </div>
+  </div>
+
+  <!-- 단계 7 -->
+  <div class="mbar"><span class="m">단계 7</span><span class="th">설명한다</span><span class="goal">2/1~2/28 → 5분 안에 시연하고 설명한다</span></div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M27</span><span class="g">프론트 품질 마감 — 이미 잘하는 영역</span><span class="d">2/1주 · 2일</span></div>
+    <div class="mod-b">
+      <p class="why">6개월 내내 백엔드를 배웠지만 <b>원래 강점은 여기</b>다. 백엔드가 탄탄한데 화면까지 깔끔하면 인상이 완전히 달라진다. <b>가장 적은 노력으로 가장 큰 점수를 얻는 구간.</b></p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>Lighthouse 90 만들기 — 번들 크기, 이미지, 폰트, RSC 스트리밍</li>
+        <li>모바일 반응형 — 현장에서 태블릿으로 본다는 시나리오가 설득력을 만든다</li>
+        <li>접근성 기본 — 키보드 탐색, 대비, 스크린리더용 레이블</li>
+        <li>에러 바운더리와 폴백 UI — 한 화면이 깨져도 전체가 안 죽게</li>
+        <li>일관성 점검 — 6개월 동안 조금씩 달라진 간격·색·용어를 통일</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>Lighthouse 전후 리포트 · 모바일 스크린샷 · 용어 통일표</div>
+      <div class="pass"><span class="l">통과 기준</span>Lighthouse 성능 90 이상 · 모바일에서 주요 화면이 정상 동작</div>
+    </div>
+  </div>
+
+  <div class="mod">
+    <div class="mod-h"><span class="mid">M28</span><span class="g">아키텍처를 말로 만드는 법</span><span class="d">2/2~4주 · 3일</span></div>
+    <div class="mod-b">
+      <p class="why">기술은 1월에 끝났다. 남은 건 <b>남이 5분 안에 이해하게 만드는 일</b>이고, 이건 별도의 기술이다. 재료는 <code>docs/evidence/</code>와 <code>docs/decisions/</code>에 6개월치가 이미 쌓여 있다.</p>
+      <h4>배울 것</h4>
+      <ul>
+        <li>mermaid로 아키텍처·시퀀스 다이어그램. Level 0~4 계층도를 그대로 옮기기</li>
+        <li>README 구조 — <strong>해결한 문제가 맨 위, 기술 스택 나열은 아래</strong></li>
+        <li>기술 글쓰기: "왜 시간구간 조인인가" — M07의 EXPLAIN이 중심 자료</li>
+        <li>ADR 6개월치를 훑어 <strong>면접 예상 질문·답변으로 변환</strong></li>
+        <li>5분 데모 시나리오 — 배속을 언제 올릴지까지 스크립트로 고정</li>
+        <li>한계를 먼저 말하는 법 — 실제 도입엔 게이트웨이·마스터세팅·무중단이 더 필요하다</li>
+      </ul>
+      <div class="deliv"><span class="l">산출물</span>README 완성본 · 기술 블로그 1편 · 데모 스크립트 · 예상 질문 문서</div>
+      <div class="pass"><span class="l">통과 기준</span>프로젝트를 모르는 사람이 README만 읽고 구조를 설명할 수 있다</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 07 밀렸을 때 ═══════ -->
+<section id="cut">
+  <div class="sh"><span class="sn">07</span><h2>일정이 밀렸을 때 — 버리는 순서</h2></div>
+  <p class="why">6개월 계획은 반드시 어딘가 밀린다. <b>그때 즉흥적으로 정하면 가장 중요한 걸 버리게 된다.</b> 미리 정해둔다.</p>
+
+  <div class="tw">
+  <table class="k">
+    <tr><th>순위</th><th>구간</th><th>판단</th></tr>
+    <tr class="on"><td>절대 사수</td><td>M01~M20 (10월 MVP + 11월 기록) + M28 (설명)</td><td>여기까지가 <strong>완결된 제품</strong>이다. 설명 못 하면 만든 것도 소용없으니 M28도 사수</td></tr>
+    <tr><td>버림 ①</td><td>M23 LLM 연동 (3일)</td><td>가장 화려하지만 <strong>없어도 MES는 완결</strong>이다. 시간이 없으면 매핑표 기반 정적 규칙만 남기고 AI는 뺀다</td></tr>
+    <tr><td>버림 ②</td><td>M21 데이터 모델링 (1일)</td><td>downtime 테이블을 안 만들면 OEE 가용성을 못 구한다 → M22와 함께 축소</td></tr>
+    <tr><td>버림 ③</td><td>M26 관측성 절반 (1일)</td><td>CI는 남기고 에러 추적·헬스체크를 뺀다. CI 배지가 가성비가 가장 좋다</td></tr>
+    <tr><td>버림 ④</td><td>M24 E2E 부분 (1일)</td><td>단위 테스트는 남기고 Playwright를 뺀다. 단위 테스트가 설명하기 더 쉽다</td></tr>
+  </table>
+  </div>
+
+  <div class="key"><span class="t">버리기 전에 먼저 할 것</span>
+    <strong>밀린 이유가 "학습이 오래 걸려서"인지 "개발이 오래 걸려서"인지 구분한다.</strong><br>
+    학습이 원인이면 → 그 모듈을 압축하지 말고 <strong>질문 빈도를 올린다</strong>(30분 규칙을 15분으로).<br>
+    개발이 원인이면 → <strong>기능 범위를 줄인다.</strong> 화면 하나를 덜 예쁘게 만드는 건 손해가 아니다.
+  </div>
+</section>
+
+<!-- ═══════ 08 리스크 ═══════ -->
+<section id="risk">
+  <div class="sh"><span class="sn">08</span><h2>선결 리스크 — 지금 안 정하면 비싸지는 것</h2></div>
+  <div class="risk">
+    <ul>
+      <li><div><strong><code>BETWEEN</code>은 양끝을 포함한다</strong><span class="w">M07</span>
+        <span class="d">LOT A의 <code>ended_at</code>과 LOT B의 <code>started_at</code>이 같으면 그 샷이 양쪽에 모두 잡힌다. 수율이 미세하게 틀어지고 원인 추적이 매우 어렵다. 반열린 구간을 표준으로 채택할지 지금 정한다.</span></div></li>
+      <li><div><strong>타임존</strong><span class="w">M03</span>
+        <span class="d">KAMP <code>TimeStamp</code>는 타임존 정보가 없다. <code>timestamp</code>냐 <code>timestamptz</code>(KST)냐를 적재 전에 확정해야 한다. 10월에 9시간 어긋난 걸 발견하면 전체 재적재다.</span></div></li>
+      <li><div><strong>한글 날짜 형식</strong><span class="w">M06</span>
+        <span class="d"><code>PART_FACT_PLAN_DATE</code>가 "2020-10-16 오전 12:00:00"이다. 표준 파서로는 안 읽힌다. "오전 12시"가 자정인지 정오인지도 데이터로 확인해야 한다.</span></div></li>
+      <li><div><strong><code>ended_at</code>이 NULL인 진행중 LOT</strong><span class="w">M15 · M20</span>
+        <span class="d">정적 데이터엔 없지만 실시간엔 항상 있다. 쿼리·인덱스·화면이 전부 이 경우를 감당해야 한다. 10월에 급조하면 화면 로직이 흔들린다.</span></div></li>
+      <li><div><strong>Vercel에 수집기를 올릴 수 없다</strong><span class="w">M15</span>
+        <span class="d">서버리스에는 상시 프로세스가 없다. MQTT 구독을 유지할 곳이 따로 필요하다. 10월 4주에 부딪히지 말고 미리 알고 간다.</span></div></li>
+      <li><div><strong>죽은 컬럼 12개를 스키마에 남길 것인가</strong><span class="w">M03 · M21</span>
+        <span class="d">빼면 깔끔하지만 실제 설비 교체 시 살아날 수 있는 값이다. 어느 쪽이든 <strong>판단 근거를 ADR로</strong> — "왜 45개가 아니라 33개입니까"는 반드시 나온다.</span></div></li>
+      <li><div><strong>키를 커밋하면 지워도 이력에 남는다</strong><span class="w">M01</span>
+        <span class="d">공개 저장소라 더 위험하다. <code>.gitignore</code>를 <strong>첫 커밋 전에</strong> 만들어야 하는 이유. 순서가 중요한 유일한 항목.</span></div></li>
+      <li><div><strong>무료티어엔 자동 백업이 없다</strong><span class="w">M04 · M26</span>
+        <span class="d">8~10월 데이터는 ETL 재실행으로 복원되지만, <strong>11월 이후 사람이 입력한 실적은 날아가면 끝</strong>이다. 미사용 시 프로젝트 일시정지도 있다. M26에서 백업 절차와 데모 전 점검을 문서화한다.</span></div></li>
+      <li><div><strong>RPC 안의 동적 SQL</strong><span class="w">M10</span>
+        <span class="d">Supabase 클라이언트를 쓰면 인젝션이 대부분 막히지만, Postgres 함수 안에서 문자열을 이어붙여 <code>EXECUTE</code>하면 그대로 뚫린다. 파라미터 바인딩을 원칙으로.</span></div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════ 09 면접 문장 ═══════ -->
+<section id="talk">
+  <div class="sh"><span class="sn">09</span><h2>면접 문장 지도 — 각 모듈이 남기는 것</h2></div>
+  <p>모듈은 배움으로 끝나지 않고 <strong>말할 수 있는 한 문장</strong>을 남긴다. 이게 커리큘럼의 최종 산출물이다.</p>
+  <div class="tw">
+  <table class="m">
+    <tr><th>모듈</th><th>남는 문장</th></tr>
+    <tr><td>M01</td><td>6개월간 하루 단위로 커밋했고, 설계 결정은 그때그때 ADR로 남겼습니다</td></tr>
+    <tr><td>M04</td><td>스키마는 전부 마이그레이션 파일로 관리해서, DB를 지워도 5분이면 복원됩니다</td></tr>
+    <tr><td>M06</td><td>적재 스크립트를 멱등하게 만들어서 몇 번을 돌려도 데이터가 중복되지 않습니다</td></tr>
+    <tr class="on"><td>M07 ★</td><td>인덱스를 <code>(equipment_id, measured_at)</code> 순서로 잡은 건 왼쪽 접두사 규칙 때문이고, 반대로 걸었을 때 EXPLAIN을 비교해 확인했습니다</td></tr>
+    <tr><td>M09</td><td>화면마다 "이 화면이 답하는 질문"을 먼저 정하고 거기서 쿼리를 역산했습니다</td></tr>
+    <tr><td>M10</td><td>집계는 전부 DB에서 끝냅니다. 클라이언트에서 수천 행을 도는 코드가 없습니다</td></tr>
+    <tr><td>M14</td><td>MQTT는 at-least-once라 중복이 옵니다. 원본 샷 ID를 PK로 써서 upsert로 멱등하게 처리했습니다</td></tr>
+    <tr class="on"><td>M15 ★</td><td>과거 데이터를 배속 재생하다 보니 "지금"을 무엇으로 볼지가 문제였고, ○○로 정한 이유는 이렇습니다</td></tr>
+    <tr><td>M17</td><td>권한은 RLS로 DB에서 막습니다. 화면에서 버튼을 숨기는 건 편의고 실제 방어선은 그 아래입니다</td></tr>
+    <tr><td>M18</td><td>검증은 폼·서버·DB 세 군데서 합니다. 앞의 둘은 UX와 보안이고, 마지막은 최후의 방어선입니다</td></tr>
+    <tr class="on"><td>M19 ★</td><td>실적은 수정이 안 되고 취소 후 재등록만 됩니다. 제조 기록은 감사 대상이라 덮어쓰면 안 되기 때문입니다</td></tr>
+    <tr><td>M20</td><td>LOT 시간 구간이 겹치는 건 EXCLUDE 제약으로 DB가 막습니다. 코드가 실수해도 데이터는 안 깨집니다</td></tr>
+    <tr><td>M21</td><td>운영 중인 DB에 테이블을 추가할 때 되돌릴 수 있게 마이그레이션을 썼습니다</td></tr>
+    <tr><td>M22</td><td>OEE는 세 요소를 각각 저장합니다. 합친 값 하나만 남기면 어디가 문제인지 알 수 없어서입니다</td></tr>
+    <tr><td>M23</td><td>LLM에 매핑표와 <strong>실제 그 시점의 공정 데이터</strong>를 함께 넣습니다. 근거 없이 답하지 않게 하려고요</td></tr>
+    <tr><td>M25</td><td>수십만 건까지 늘려서 인덱스가 실제로 버티는지 측정했고, 수치는 문서에 남겼습니다</td></tr>
+    <tr><td>M26</td><td>수집기가 죽으면 화면에 데이터 구멍 경고가 뜹니다. 조용히 실패하는 게 가장 위험해서요</td></tr>
+  </table>
+  </div>
+
+  <div class="okbox"><span class="t">가장 강한 한 문장은 그대로</span>
+    <strong>"현장에서 추적하는 목적이 자재가 아니라, 그 LOT을 만들 때 설비가 어땠나를 보는 거라고 들어서, 시간 구간 조인 구조로 만들었습니다."</strong><br><br>
+    <strong>M07 · M15 · M20</strong>을 마치면 이 문장 뒤에 붙는 모든 꼬리질문에 답할 수 있다. 커리큘럼의 목적지가 여기다.
+  </div>
+</section>
+
+<p class="foot">
+커리큘럼 최종본 — 프론트에서 MES까지 · 2026-08-17<br>
+<strong>이 문서는 확정본이다.</strong> 이후 변경은 하지 않는다 — 범위를 늘리고 싶어지면 상시 규칙 "범위 고정"을 다시 읽는다.<br>
+월별 일정의 기준은 <code>학습계획\복학 전까지 — MES 하나로.html</code>, 확정 스키마는 <code>MES 프로젝트 전체 계획과 현황.html</code>, 도메인 지식은 <code>스마트팩토리 강의\</code>.<br>
+강의 노트는 <a href="강의/index.html">docs\강의\index.html</a>에서 진도와 함께 확인.
+</p>
+
+</div>
+</body>
+</html>

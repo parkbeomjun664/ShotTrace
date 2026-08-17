@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>강의 목록 · ShotTrace</title>
+<link rel="stylesheet" href="assets/lecture.css">
+</head>
+<body>
+<div class="wrap">
+
+<div class="cover">
+  <div class="kicker">ShotTrace MES · 강의 노트</div>
+  <h1>강의 목록</h1>
+  <p class="thesis">강의 1회당 노트 1장. 개념은 여기 남고, 결과물은 코드로 남는다.<br>
+  막히면 이 목록에서 해당 모듈을 먼저 다시 편다.</p>
+  <div class="meta">
+    <span><b>진행</b> 0 / 28</span>
+    <span><b>현재</b> M01</span>
+    <span><b>학습</b> 53.5일 (전체의 38%)</span>
+    <span><b>마감</b> 2027-02-28</span>
+  </div>
+</div>
+
+<nav>
+  <a href="../커리큘럼 — 프론트에서 MES까지.html">← 커리큘럼 전체</a>
+  <a href="#p0">0 출발선</a>
+  <a href="#p1">1 소유</a>
+  <a href="#p2">2 화면</a>
+  <a href="#p3">3 흐름</a>
+  <a href="#p4">4 기록</a>
+  <a href="#p5">5 차별화</a>
+  <a href="#p6">6 신뢰</a>
+  <a href="#p7">7 설명</a>
+</nav>
+
+<section id="p0">
+  <div class="sh"><span class="sn">0</span><h2>출발선 <span style="font-size:14px;font-weight:400;color:var(--ink3)">· 8/17 · 1일</span></h2></div>
+  <div class="llist">
+    <div class="row"><span class="mid">M01</span><span class="ti">개발환경 · Git · 시크릿<span class="sub">저장소 개설 · .gitignore · venv · Docker</span></span><span class="stt now">다음 강의</span></div>
+    <div class="row"><span class="mid">M02</span><span class="ti">백엔드 사고방식 전환<span class="sub">신뢰 경계 · 코드가 실행되는 세 곳</span></span><span class="stt todo">예정</span></div>
+  </div>
+</section>
+
+<section id="p1">
+  <div class="sh"><span class="sn">1</span><h2>데이터를 소유한다 <span style="font-size:14px;font-weight:400;color:var(--ink3)">· 8/18~8/25 · 7.5일</span></h2></div>
+  <div class="llist">
+    <div class="row"><span class="mid">M03</span><span class="ti">관계형 DB와 SQL 기본기<span class="sub">제약조건 · JOIN · 타입 · 시간 저장 원칙</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M04</span><span class="ti">Supabase 실전 + 보안 모델<span class="sub">마이그레이션 · 키 3종 · RLS · 타입 생성</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M05</span><span class="ti">디버깅과 막힘 돌파<span class="sub">에러 코드 · 이분 탐색 · 최소 재현</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M06</span><span class="ti">ETL — CSV를 DB로<span class="sub">한글 날짜 · LOT 집계 · 멱등한 적재</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid star">M07 ★</span><span class="ti">인덱스와 실행계획<span class="sub">왼쪽 접두사 규칙 · EXPLAIN ANALYZE</span></span><span class="stt todo">예정</span></div>
+  </div>
+</section>
+
+<section id="p2">
+  <div class="sh"><span class="sn">2</span><h2>화면을 붙인다 <span style="font-size:14px;font-weight:400;color:var(--ink3)">· 8/26~9/30 · 9.5일</span></h2></div>
+  <div class="llist">
+    <div class="row"><span class="mid">M08</span><span class="ti">App Router — 이제 서버도 짠다<span class="sub">서버/클라이언트 경계 · 캐싱 · 키 노출</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M09</span><span class="ti">요구사항을 화면으로 번역하기<span class="sub">이 화면이 답하는 질문 · 정보 위계</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M10</span><span class="ti">집계는 어디서 하는가<span class="sub">View · RPC · 윈도우 함수 · 현황판 · 파레토</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M11</span><span class="ti">시계열을 화면에 그리는 법<span class="sub">다운샘플링 · 빈 상태 · LOT 추적 화면</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M12</span><span class="ti">서버 상태 동기화<span class="sub">캐시 무효화 · 폴링 간격 · 낙관적 업데이트</span></span><span class="stt todo">예정</span></div>
+  </div>
+</section>
+
+<section id="p3">
+  <div class="sh"><span class="sn">3</span><h2>데이터를 흐르게 한다 <span style="font-size:14px;font-weight:400;color:var(--ink3)">· 9/4주~10/31 · 10일 · MVP</span></h2></div>
+  <div class="llist">
+    <div class="row"><span class="mid">M13</span><span class="ti">장기 실행 프로세스와 Node<span class="sub">이벤트 루프 · 백프레셔 · graceful shutdown</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M14</span><span class="ti">MQTT와 메시징<span class="sub">토픽 설계 · QoS · Last Will · 멱등성</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid star">M15 ★</span><span class="ti">시간의 설계<span class="sub">가상 시계 · 진행중 LOT · 상시 구동 호스팅</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M16</span><span class="ti">실시간 UI — 화면을 살아있게<span class="sub">Realtime vs 폴링 · 재연결 · 깜빡임 방지</span></span><span class="stt todo">예정</span></div>
+  </div>
+</section>
+
+<section id="p4">
+  <div class="sh"><span class="sn">4</span><h2>기록을 지킨다 <span style="font-size:14px;font-weight:400;color:var(--ink3)">· 11월 · 8일</span></h2></div>
+  <div class="llist">
+    <div class="row"><span class="mid">M17</span><span class="ti">인증 vs 인가<span class="sub">세션·JWT · RLS 정책 · 로그인 · 마스터 관리</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M18</span><span class="ti">폼과 검증 — 믿을 수 없는 입력<span class="sub">Zod 재사용 · 3중 방어 · 실적 입력 화면</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid star">M19 ★</span><span class="ti">트랜잭션과 무결성<span class="sub">ACID · 동시성 · 취소 후 재등록</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M20</span><span class="ti">제약조건으로 무결성 강제<span class="sub">ON CONFLICT · 부분 인덱스 · EXCLUDE</span></span><span class="stt todo">예정</span></div>
+  </div>
+</section>
+
+<section id="p5">
+  <div class="sh"><span class="sn">5</span><h2>차별화한다 <span style="font-size:14px;font-weight:400;color:var(--ink3)">· 12월 · 6일</span></h2></div>
+  <div class="llist">
+    <div class="row"><span class="mid">M21</span><span class="ti">데이터 모델링 — 스키마를 스스로 짜는 법<span class="sub">정규화 · 운영 중 스키마 변경 · downtime 추가</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M22</span><span class="ti">OEE — 도메인 로직을 순수함수로<span class="sub">3요소 분리 저장 · 계획/비계획 정지</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M23</span><span class="ti">LLM 연동 — 대응 가이드<span class="sub">지식베이스 주입 · 근거 데이터 · 폴백</span></span><span class="stt todo">예정</span></div>
+  </div>
+</section>
+
+<section id="p6">
+  <div class="sh"><span class="sn">6</span><h2>믿을 만하게 만든다 <span style="font-size:14px;font-weight:400;color:var(--ink3)">· 1월 · 6.5일</span></h2></div>
+  <div class="llist">
+    <div class="row"><span class="mid">M24</span><span class="ti">테스트 — 무엇을 테스트하지 않을 것인가<span class="sub">순수함수 · 경계값 · E2E 핵심 플로우</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M25</span><span class="ti">성능과 스케일 — 인덱스를 증명한다<span class="sub">수십만 행 부하 · N+1 · 커넥션 한계</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M26</span><span class="ti">관측성과 CI — 죽으면 알아야 한다<span class="sub">로그 · 헬스체크 · 데이터 구멍 감지 · 백업</span></span><span class="stt todo">예정</span></div>
+  </div>
+</section>
+
+<section id="p7">
+  <div class="sh"><span class="sn">7</span><h2>설명한다 <span style="font-size:14px;font-weight:400;color:var(--ink3)">· 2월 · 5일</span></h2></div>
+  <div class="llist">
+    <div class="row"><span class="mid">M27</span><span class="ti">프론트 품질 마감 — 이미 잘하는 영역<span class="sub">Lighthouse 90 · 반응형 · 접근성</span></span><span class="stt todo">예정</span></div>
+    <div class="row"><span class="mid">M28</span><span class="ti">아키텍처를 말로 만드는 법<span class="sub">다이어그램 · README · 데모 스크립트</span></span><span class="stt todo">예정</span></div>
+  </div>
+</section>
+
+<div class="okbox"><span class="t">사용법</span>
+  강의가 끝나면 해당 줄이 <strong>링크로 바뀌고 상태가 "완료"</strong>가 된다. 노트는 <code>M01_제목.html</code> 형식으로 이 폴더에 쌓인다.<br>
+  새 노트는 <code>_템플릿.html</code>을 복사해서 만든다 — 스타일은 <code>assets/lecture.css</code> 하나만 고치면 전부 반영된다.
+</div>
+
+<div class="key"><span class="t">★ 세 개는 절대 압축하지 않는다</span>
+  <strong>M07 인덱스 · M15 시간 · M19 트랜잭션.</strong> 일정이 밀리면 커리큘럼 07절의 순서대로 다른 걸 버리지, 이 셋은 건드리지 않는다.
+</div>
+
+<p class="foot">
+ShotTrace 강의 노트 · 2026-08-17 개설 · 커리큘럼 최종본 기준 (28모듈)<br>
+무엇을 배울지의 기준은 <code>docs\커리큘럼 — 프론트에서 MES까지.html</code>, 무엇을 만들지의 기준은 <code>학습계획\복학 전까지 — MES 하나로.html</code>.
+</p>
+
+</div>
+</body>
+</html>
