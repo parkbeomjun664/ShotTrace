@@ -69,8 +69,10 @@ KAMP 실데이터 (CSV, 7,996 샷 × 33 변수)
 | 영역 | 선택 |
 |---|---|
 | DB | Supabase (PostgreSQL) — 스키마는 SQL 마이그레이션으로만 관리 |
-| 웹 | Next.js 16 App Router · TypeScript · Recharts · Zod |
-| ETL | Python · pandas (일회성 적재) |
+| 웹 | Next.js 16 App Router · React 19 · TypeScript |
+| 스타일 · UI | Tailwind · shadcn/ui · Recharts |
+| 서버 상태 | TanStack Query · Zod |
+| ETL | TypeScript (일회성 적재 스크립트) |
 | 파이프라인 | Node.js · TypeScript · mqtt.js · Mosquitto (Docker) |
 | 테스트 | Vitest · Playwright |
 | 배포 | Vercel (웹) |
@@ -81,7 +83,7 @@ KAMP 실데이터 (CSV, 7,996 샷 × 33 변수)
 
 ```
 db/migrations/     스키마의 유일한 진실. 대시보드 클릭으로 바꾸지 않는다
-scripts/etl/       CSV → Supabase 적재 (Python)
+scripts/etl/       CSV → Supabase 적재 (TypeScript, 일회성)
 apps/web/          Next.js
 services/
   simulator/       CSV를 시간순 MQTT 발행
