@@ -1,0 +1,17 @@
+# 저장소에는 LF로 저장하고, 작업 디렉터리에서는 OS에 맞게 꺼낸다.
+# Windows에서 작업하지만 CI(GitHub Actions)는 Linux에서 돌기 때문에
+# 줄바꿈이 섞이면 파일 전체가 변경된 것으로 잡힌다.
+* text=auto eol=lf
+
+# 항상 LF여야 하는 것 — Linux에서 실행되거나 파싱된다
+*.sh   text eol=lf
+*.sql  text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+
+# 바이너리 — 건드리지 않는다
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary
+*.csv binary
