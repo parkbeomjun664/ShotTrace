@@ -72,8 +72,8 @@ KAMP 실데이터 (CSV, 7,996 샷 × 33 변수)
 | 웹 | Next.js 16 App Router · React 19 · TypeScript |
 | 스타일 · UI | Tailwind · shadcn/ui · Recharts |
 | 서버 상태 | TanStack Query · Zod |
-| ETL | TypeScript (일회성 적재 스크립트) |
-| 파이프라인 | Node.js · TypeScript · mqtt.js · Mosquitto (Docker) |
+| ETL | Python · pandas (일회성 적재 스크립트) |
+| 파이프라인 | 시뮬레이터 Python(paho-mqtt) · 수집기 TypeScript(mqtt.js) · Mosquitto (Docker) |
 | 테스트 | Vitest · Playwright |
 | 배포 | Vercel (웹) |
 
@@ -83,11 +83,11 @@ KAMP 실데이터 (CSV, 7,996 샷 × 33 변수)
 
 ```
 db/migrations/     스키마의 유일한 진실. 대시보드 클릭으로 바꾸지 않는다
-scripts/etl/       CSV → Supabase 적재 (TypeScript, 일회성)
+scripts/etl/       CSV → Supabase 적재 (Python, 일회성)
 apps/web/          Next.js
 services/
-  simulator/       CSV를 시간순 MQTT 발행
-  collector/       MQTT 구독 → DB 적재
+  simulator/       CSV를 시간순 MQTT 발행 (Python)
+  collector/       MQTT 구독 → DB 적재 (TypeScript)
 docs/
   강의/            학습 커리큘럼과 강의 노트
   decisions/       ADR — 설계 결정 기록
@@ -124,5 +124,5 @@ KAMP(인공지능 중소벤처 제조 플랫폼)에서 공개한 **사출성형�
 
 ## 배경 문서
 
-- `docs/커리큘럼 — 프론트에서 MES까지.html` — 이 프로젝트를 완성하기 위한 학습 커리큘럼 (28모듈)
+- `docs/커리큘럼 — 프론트에서 MES까지.html` — 이 프로젝트를 완성하기 위한 학습 커리큘럼 (30모듈)
 - `docs/decisions/` — 설계 결정과 그 근거
