@@ -34,7 +34,6 @@
 
 - [ ] `data/labeled_data.csv` 배치 (gitignore되어 있다)
 - [ ] **루트에** venv 만들고 `pip install -r scripts/etl/requirements.txt` (venv는 하나만!)
-equirements.txt` (venv는 하나만!)
 - [ ] `scripts/etl/load.py` 작성 (파일에 순서가 있다)
 - [ ] 실행 후 **검증 쿼리** — 행 수 · 합계 · `'None'` 잔존 여부
 
