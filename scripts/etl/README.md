@@ -4,14 +4,23 @@
 
 ## 준비 (Windows PowerShell)
 
+🔴 **venv는 프로젝트 루트에 하나만 둔다.** 여러 개면 어느 걸 활성화했는지 헷갈린다.
+
 ```powershell
-cd scripts\etl
+# 프로젝트 루트에서
 python -m venv .venv
-.venv\Scripts\activate          # 프롬프트에 (.venv) 가 뜨는지 확인
-pip install -r requirements.txt
+.venv\Scripts\activate                       # 프롬프트에 (.venv) 확인
+pip install -r scripts\etl\requirements.txt
 ```
 
 > 🔴 **활성화 전에 `pip install` 하면 전역에 깔린다.** `(.venv)` 표시를 먼저 확인한다. (M14 ③)
+>
+> 🔴 **venv를 두 개 만들지 않는다.** pandas는 A에, 다른 패키지는 B에 깔리면
+> *"아까는 됐는데"* 가 반복된다. 에러 메시지의 **python.exe 경로**를 보면
+> 어느 venv가 실행했는지 알 수 있다. (M04 ③)
+
+VS Code에서 `Ctrl+Shift+P` → `Python: Select Interpreter` → 루트 `.venv` 를 고르면
+터미널을 새로 열 때 자동으로 활성화된다.
 
 ## 데이터
 
@@ -20,8 +29,20 @@ pip install -r requirements.txt
 ## 실행
 
 ```powershell
+cd scripts\etl        # ← ../../data/ 경로 기준이라 여기서 실행한다
 python load.py
 ```
+
+### 저장하면 자동 실행 (선택)
+
+```powershell
+python -m watchfiles --filter python "python explore.py" .
+```
+
+터미널 하나를 이것 전용으로 쓴다. 프롬프트가 안 돌아오는 게 정상이다 — 계속
+살아서 감시하는 프로세스이기 때문. (M15 ①) 끄려면 `Ctrl+C`.
+
+`requirements.txt` 에는 넣지 않았다. 적재에 필요한 게 아니라 개발 편의 도구다.
 
 ## 끝나면 반드시 확인 (M04 ⑧)
 
