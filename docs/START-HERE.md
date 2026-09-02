@@ -5,53 +5,61 @@
 
 ---
 
-## 9월 1주 — 파이프라인이 끝에서 끝까지 한 번 도는 것이 목표
+## 9월 1주 — 파이프라인이 끝에서 끝까지 한 번 도는 것이 목표  ✅ 2026-09-02 완료
 
 화면이 비어 있어도 좋다. **데이터가 DB에 있고 배포된 URL이 뜨는 것**까지가 이번 주다.
 
+**결과** — https://shot-trace.vercel.app · shot 2,626 + shot_part 5,232행 적재 · ADR 004·005·006
+
+여기서 데이터가 설계를 세 번 반박했다. 중복행 2,764건(004), 패밀리 금형으로 인한
+샷/부품 분리(005), LOT 경계(006). **적재 전에 잡았다.**
+
 ### 1. Supabase 프로젝트 생성 · 📓 M03
 
-- [ ] 프로젝트 생성 (region: Northeast Asia — Seoul)
-- [ ] `.env.example`을 `.env`로 복사하고 키 채우기
-- [ ] `.env`가 git에 안 잡히는지 확인 — `git status`
+- [x] 프로젝트 생성 (region: Northeast Asia — Seoul)
+- [x] `.env.example`을 `.env`로 복사하고 키 채우기
+- [x] `.env`가 git에 안 잡히는지 확인 — `git status`
 
 > 🔴 `service_role key`에 `NEXT_PUBLIC_`을 붙이지 않는다.
 
 ### 2. `001_init.sql` 작성 · 📓 M02 · M03
 
-- [ ] `db/migrations/001_init.sql` 작성 (파일에 체크리스트가 있다)
-- [ ] SQL Editor에서 실행
-- [ ] RLS 켜고 **읽기 정책만** 부여
-- [ ] `supabase gen types typescript` → `apps/web/types/database.ts`
-- [ ] 커밋
+- [x] `db/migrations/001_init.sql` 작성 (파일에 체크리스트가 있다)
+- [x] SQL Editor에서 실행 (001 · 002)
+- [x] RLS 켜고 **읽기 정책만** 부여
+- [x] `supabase gen types typescript` → `apps/web/types/database.ts`
+- [x] 커밋
 
 **먼저 정해야 할 것 두 가지 — ADR로 남긴다**
 
-- [ ] `timestamptz` vs `timestamp` → `docs/decisions/002-타임존.md`
-- [ ] 죽은 컬럼 12개를 남길지 뺄지 → `docs/decisions/003-유효-컬럼.md`
+- [x] `timestamptz` vs `timestamp` → `docs/decisions/002-타임존.md`
+- [x] 죽은 컬럼 12개를 남길지 뺄지 → `docs/decisions/003-유효-컬럼.md`
 
 ### 3. ETL — 데이터 적재 · 📓 M05 · M14
 
-- [ ] `data/labeled_data.csv` 배치 (gitignore되어 있다)
-- [ ] **루트에** venv 만들고 `pip install -r scripts/etl/requirements.txt` (venv는 하나만!)
-- [ ] `scripts/etl/load.py` 작성 (파일에 순서가 있다)
-- [ ] 실행 후 **검증 쿼리** — 행 수 · 합계 · `'None'` 잔존 여부
+- [x] `data/labeled_data.csv` 배치 (gitignore되어 있다)
+- [x] **루트에** venv 만들고 `pip install -r scripts/etl/requirements.txt` (venv는 하나만!)
+- [x] `scripts/etl/load.py` 작성 (파일에 순서가 있다)
+- [x] 실행 후 **검증 쿼리** — 행 수 · 합계 · `'None'` 잔존 여부
 
 **여기서 정해질 것**
 
-- [ ] `ended_at = MAX + 1초` 처리 → `docs/decisions/004-lot-경계.md`
+- [x] `ended_at = MAX + 1초` 처리 → [ADR 006](decisions/006-LOT-경계.md)
+- [x] 완전 중복 2,764행 → [ADR 004](decisions/004-중복행-제거.md)
+- [x] 패밀리 금형 · 샷/부품 분리 → [ADR 005](decisions/005-샷과-부품-분리.md)
 
 ### 4. 웹에서 DB 읽기 · 📓 M08
 
-- [ ] Supabase 클라이언트 2종 (서버용 / 클라이언트용)
-- [ ] 서버 컴포넌트에서 LOT 25행을 읽어 화면에 출력
-- [ ] `service_role key`가 브라우저 번들에 없는지 확인
+- [x] Supabase 클라이언트 (서버용) — `apps/web/lib/supabase/server.ts`
+      클라이언트용은 필요해질 때 만든다 (M17 실시간)
+- [x] 서버 컴포넌트에서 LOT 25행을 읽어 화면에 출력
+- [x] `service_role key`가 브라우저 번들에 없는지 확인 — Vercel 에도 안 넣었다
 
 ### 5. 🚩 Vercel 배포
 
-- [ ] 저장소 연결 · 환경변수 등록
-- [ ] 배포 URL 접속 확인
-- [ ] README에 URL 추가
+- [x] 저장소 연결 · 환경변수 등록 (`NEXT_PUBLIC_` 2개만)
+- [x] 배포 URL 접속 확인
+- [x] README에 URL 추가
 
 > 화면이 초라해도 배포한다. **파이프라인이 도는 걸 먼저 확인**하는 게 목적이다.
 
@@ -61,7 +69,7 @@
 
 ### 인덱스와 증거 · 📓 M06 ★
 
-- [ ] `002_indexes.sql`
+- [ ] `003_indexes.sql`  ← 002 는 샷/부품 분리로 썼다
 - [ ] EXPLAIN 3종 → `docs/evidence/`
       (없이 / 있이 / 컬럼 순서 반대로)
 
@@ -76,7 +84,7 @@
 - [ ] 와이어프레임 (화면 4개 · 각 화면이 답하는 질문 3개씩)
 - [ ] 현황판 — 수율 · 설비 상태 · 파레토
 - [ ] LOT 추적 ★ — 시계열 + 불량 오버레이
-- [ ] 갱신 정책 → `docs/decisions/005-갱신-정책.md`
+- [ ] 갱신 정책 → `docs/decisions/007-갱신-정책.md`
 
 ---
 
