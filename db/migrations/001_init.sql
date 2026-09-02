@@ -77,7 +77,7 @@ CREATE TABLE production_lot (
 );
 
 
-CREATE TABLE equipment_param (
+CREATE TABLE equipment_param ( -- 살아있는 공정변수 24개
     param_id      text PRIMARY KEY,                   -- 원본 _id → 멱등성 (M05 ⑦)
     equipment_id  text NOT NULL REFERENCES equipment(equip_cd),
     measured_at   timestamptz NOT NULL,               -- UTC (ADR 002)
