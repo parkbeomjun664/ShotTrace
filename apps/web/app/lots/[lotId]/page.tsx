@@ -13,18 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLot, getLotShots, pareto } from "@/lib/queries";
 
-// 🔴 DB는 UTC로 저장하고 화면은 KST로 보여준다 (ADR 002).
-//    ISO 문자열을 잘라 쓰면 UTC가 그대로 나온다 — 한국 공장 기준으로 9시간 어긋난다.
-const KST = "Asia/Seoul";
-const fmt = (o: Intl.DateTimeFormatOptions) =>
-  new Intl.DateTimeFormat("ko-KR", { timeZone: KST, hour12: false, ...o });
-
-const 시각 = (iso: string) =>
-  fmt({ hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(iso));
-const 날짜 = (iso: string) =>
-  fmt({ month: "2-digit", day: "2-digit" }).format(new Date(iso));
-
-const 소수 = (v: number | null, n = 1) => (v == null ? "—" : v.toFixed(n));
+// 시각 포맷은 lib/format.ts 한 곳에서만 만든다 (ADR 002)
+import { 같은날, 날짜, 분길이, 소수, 시각 } from "@/lib/format";
 
 export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
   const { lotId } = await params;
@@ -35,10 +25,8 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
   const shots = await getLotShots(lot);
   const defects = pareto(shots);
   const rate = (lot.pass_qty / lot.total_qty) * 100;
-  const 분 = Math.round(
-    (Date.parse(lot.ended_at) - Date.parse(lot.started_at)) / 60000,
-  );
-  const 넘김 = 날짜(lot.started_at) !== 날짜(lot.ended_at); // 자정을 넘겼나
+  const 분 = 분길이(lot.started_at, lot.ended_at);
+  const 넘김 = !같은날(lot.started_at, lot.ended_at); // 자정을 넘겼나
 
   return (
     <section className="space-y-8">
