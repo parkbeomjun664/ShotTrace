@@ -52,27 +52,40 @@ python -m watchfiles --filter python "..\..\.venv\Scripts\python.exe explore.py"
 에러 없이 끝난 건 성공이 아니다. **숫자로 확인해야 성공이다.**
 
 ```sql
-SELECT COUNT(*) FROM equipment_param;    -- 5232
-SELECT COUNT(*) FROM production_lot;     -- 25
 SELECT COUNT(*) FROM equipment;          -- 3
 SELECT COUNT(*) FROM product;            -- 6
+SELECT COUNT(*) FROM production_lot;     -- 25
+SELECT COUNT(*) FROM shot;               -- 2626   ← 샷 (ADR 005)
+SELECT COUNT(*) FROM shot_part;          -- 5232   ← 부품
 
-SELECT SUM(total_qty) FROM production_lot;                          -- 5232
-SELECT COUNT(*) FROM equipment_param WHERE fail_reason = 'None';    -- 0
-SELECT COUNT(*) FROM equipment_param WHERE pass_or_fail = 'N';      -- 71
+SELECT SUM(total_qty) FROM production_lot;                     -- 5232
+SELECT COUNT(*) FROM shot_part WHERE fail_reason = 'None';     -- 0  (문자열 None 금지)
+SELECT COUNT(*) FROM shot_part WHERE pass_or_fail = 'N';       -- 60
 ```
 
-**마지막으로 LOT 경계 검증** — 결과가 0건이어야 한다 (M05 ⑤)
+**LOT 경계 검증** — 결과가 0건이어야 한다 (ADR 006)
 
 ```sql
-SELECT l.lot_id, l.total_qty, COUNT(p.param_id) AS 실제조회
-FROM production_lot l
-JOIN equipment_param p
-  ON  p.equipment_id = l.equip_cd
-  AND p.measured_at >= l.started_at
-  AND p.measured_at <  l.ended_at
-GROUP BY l.lot_id, l.total_qty
-HAVING l.total_qty <> COUNT(p.param_id);
+SELECT l.lot_id, l.total_qty, COUNT(sp.part_id) AS 실제조회
+FROM   production_lot l
+JOIN   shot s       ON  s.equipment_id = l.equip_cd
+                    AND s.measured_at >= l.started_at    -- 반열린 구간
+                    AND s.measured_at <  l.ended_at
+JOIN   shot_part sp ON  sp.equipment_id = s.equipment_id
+                    AND sp.measured_at  = s.measured_at
+                    AND sp.product_id   = l.product_id   -- 패밀리 금형 (ADR 005)
+GROUP  BY l.lot_id, l.total_qty
+HAVING l.total_qty <> COUNT(sp.part_id);
 ```
 
-결과가 나오면 `ended_at` 처리가 틀린 것이다.
+결과가 나오면 `ended_at` 처리나 제품 조건이 틀린 것이다.
+
+🔴 `sp.product_id = l.product_id` 를 빼면 **정확히 2배**가 나온다. S14 는 한 샷에서
+LH·RH 를 동시에 찍기 때문이다.
+
+**멱등성 검증** (M05 ⑦) — 두 번 돌려도 행 수가 같아야 한다
+
+```powershell
+..\..\.venv\Scripts\python.exe load.py
+..\..\.venv\Scripts\python.exe load.py   # 검증 출력이 완전히 동일해야 한다
+```

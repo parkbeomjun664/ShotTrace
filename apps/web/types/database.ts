@@ -32,113 +32,6 @@ export type Database = {
         }
         Relationships: []
       }
-      equipment_param: {
-        Row: {
-          average_back_pressure: number | null
-          average_screw_rpm: number | null
-          barrel_temperature_1: number | null
-          barrel_temperature_2: number | null
-          barrel_temperature_3: number | null
-          barrel_temperature_4: number | null
-          barrel_temperature_5: number | null
-          barrel_temperature_6: number | null
-          clamp_close_time: number | null
-          clamp_open_position: number | null
-          cushion_position: number | null
-          cycle_time: number | null
-          equipment_id: string
-          fail_reason: string | null
-          filling_time: number | null
-          hopper_temperature: number | null
-          injection_time: number | null
-          max_back_pressure: number | null
-          max_injection_pressure: number | null
-          max_injection_speed: number | null
-          max_screw_rpm: number | null
-          max_switch_over_pressure: number | null
-          measured_at: string
-          mold_temperature_3: number | null
-          mold_temperature_4: number | null
-          param_id: string
-          part_serial: number | null
-          pass_or_fail: string
-          plasticizing_position: number | null
-          plasticizing_time: number | null
-        }
-        Insert: {
-          average_back_pressure?: number | null
-          average_screw_rpm?: number | null
-          barrel_temperature_1?: number | null
-          barrel_temperature_2?: number | null
-          barrel_temperature_3?: number | null
-          barrel_temperature_4?: number | null
-          barrel_temperature_5?: number | null
-          barrel_temperature_6?: number | null
-          clamp_close_time?: number | null
-          clamp_open_position?: number | null
-          cushion_position?: number | null
-          cycle_time?: number | null
-          equipment_id: string
-          fail_reason?: string | null
-          filling_time?: number | null
-          hopper_temperature?: number | null
-          injection_time?: number | null
-          max_back_pressure?: number | null
-          max_injection_pressure?: number | null
-          max_injection_speed?: number | null
-          max_screw_rpm?: number | null
-          max_switch_over_pressure?: number | null
-          measured_at: string
-          mold_temperature_3?: number | null
-          mold_temperature_4?: number | null
-          param_id: string
-          part_serial?: number | null
-          pass_or_fail: string
-          plasticizing_position?: number | null
-          plasticizing_time?: number | null
-        }
-        Update: {
-          average_back_pressure?: number | null
-          average_screw_rpm?: number | null
-          barrel_temperature_1?: number | null
-          barrel_temperature_2?: number | null
-          barrel_temperature_3?: number | null
-          barrel_temperature_4?: number | null
-          barrel_temperature_5?: number | null
-          barrel_temperature_6?: number | null
-          clamp_close_time?: number | null
-          clamp_open_position?: number | null
-          cushion_position?: number | null
-          cycle_time?: number | null
-          equipment_id?: string
-          fail_reason?: string | null
-          filling_time?: number | null
-          hopper_temperature?: number | null
-          injection_time?: number | null
-          max_back_pressure?: number | null
-          max_injection_pressure?: number | null
-          max_injection_speed?: number | null
-          max_screw_rpm?: number | null
-          max_switch_over_pressure?: number | null
-          measured_at?: string
-          mold_temperature_3?: number | null
-          mold_temperature_4?: number | null
-          param_id?: string
-          part_serial?: number | null
-          pass_or_fail?: string
-          plasticizing_position?: number | null
-          plasticizing_time?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "equipment_param_equipment_id_fkey"
-            columns: ["equipment_id"]
-            isOneToOne: false
-            referencedRelation: "equipment"
-            referencedColumns: ["equip_cd"]
-          },
-        ]
-      }
       product: {
         Row: {
           car_model: string | null
@@ -204,6 +97,146 @@ export type Database = {
           },
           {
             foreignKeyName: "production_lot_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product"
+            referencedColumns: ["product_id"]
+          },
+        ]
+      }
+      shot: {
+        Row: {
+          average_back_pressure: number | null
+          average_screw_rpm: number | null
+          barrel_temperature_1: number | null
+          barrel_temperature_2: number | null
+          barrel_temperature_3: number | null
+          barrel_temperature_4: number | null
+          barrel_temperature_5: number | null
+          barrel_temperature_6: number | null
+          clamp_close_time: number | null
+          clamp_open_position: number | null
+          cushion_position: number | null
+          cycle_time: number | null
+          equipment_id: string
+          filling_time: number | null
+          hopper_temperature: number | null
+          injection_time: number | null
+          max_back_pressure: number | null
+          max_injection_pressure: number | null
+          max_injection_speed: number | null
+          max_screw_rpm: number | null
+          max_switch_over_pressure: number | null
+          measured_at: string
+          mold_temperature_3: number | null
+          mold_temperature_4: number | null
+          plasticizing_position: number | null
+          plasticizing_time: number | null
+        }
+        Insert: {
+          average_back_pressure?: number | null
+          average_screw_rpm?: number | null
+          barrel_temperature_1?: number | null
+          barrel_temperature_2?: number | null
+          barrel_temperature_3?: number | null
+          barrel_temperature_4?: number | null
+          barrel_temperature_5?: number | null
+          barrel_temperature_6?: number | null
+          clamp_close_time?: number | null
+          clamp_open_position?: number | null
+          cushion_position?: number | null
+          cycle_time?: number | null
+          equipment_id: string
+          filling_time?: number | null
+          hopper_temperature?: number | null
+          injection_time?: number | null
+          max_back_pressure?: number | null
+          max_injection_pressure?: number | null
+          max_injection_speed?: number | null
+          max_screw_rpm?: number | null
+          max_switch_over_pressure?: number | null
+          measured_at: string
+          mold_temperature_3?: number | null
+          mold_temperature_4?: number | null
+          plasticizing_position?: number | null
+          plasticizing_time?: number | null
+        }
+        Update: {
+          average_back_pressure?: number | null
+          average_screw_rpm?: number | null
+          barrel_temperature_1?: number | null
+          barrel_temperature_2?: number | null
+          barrel_temperature_3?: number | null
+          barrel_temperature_4?: number | null
+          barrel_temperature_5?: number | null
+          barrel_temperature_6?: number | null
+          clamp_close_time?: number | null
+          clamp_open_position?: number | null
+          cushion_position?: number | null
+          cycle_time?: number | null
+          equipment_id?: string
+          filling_time?: number | null
+          hopper_temperature?: number | null
+          injection_time?: number | null
+          max_back_pressure?: number | null
+          max_injection_pressure?: number | null
+          max_injection_speed?: number | null
+          max_screw_rpm?: number | null
+          max_switch_over_pressure?: number | null
+          measured_at?: string
+          mold_temperature_3?: number | null
+          mold_temperature_4?: number | null
+          plasticizing_position?: number | null
+          plasticizing_time?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shot_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["equip_cd"]
+          },
+        ]
+      }
+      shot_part: {
+        Row: {
+          equipment_id: string
+          fail_reason: string | null
+          measured_at: string
+          part_id: string
+          part_serial: number | null
+          pass_or_fail: string
+          product_id: number
+        }
+        Insert: {
+          equipment_id: string
+          fail_reason?: string | null
+          measured_at: string
+          part_id: string
+          part_serial?: number | null
+          pass_or_fail: string
+          product_id: number
+        }
+        Update: {
+          equipment_id?: string
+          fail_reason?: string | null
+          measured_at?: string
+          part_id?: string
+          part_serial?: number | null
+          pass_or_fail?: string
+          product_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shot_part_equipment_id_measured_at_fkey"
+            columns: ["equipment_id", "measured_at"]
+            isOneToOne: false
+            referencedRelation: "shot"
+            referencedColumns: ["equipment_id", "measured_at"]
+          },
+          {
+            foreignKeyName: "shot_part_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "product"
