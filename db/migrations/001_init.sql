@@ -8,14 +8,14 @@
 --   [ ] equipment        3행     설비.  PK = equip_cd ('S14')
 --   [ ] product          6행     제품.  car_model · side(LH/RH)
 --   [ ] production_lot   25행    LOT.   started_at · ended_at ← 조인의 기준
---   [ ] equipment_param  7,996행 샷.    PK = 원본 _id, 유효 33개 공정변수
+--   [x] equipment_param  5,232행 샷.    PK = 원본 _id, 유효 33개 공정변수
 --
 -- ─────────────────────────────────────────────────────────────
 -- 먼저 결정할 것 — ADR로 남긴다
 -- ─────────────────────────────────────────────────────────────
 --   [ ] timestamptz vs timestamp        → docs/decisions/002-타임존.md
 --       CSV의 TimeStamp 에 타임존 정보가 없다. 적재 전에 정해야 하고
---       나중에 발견하면 7,996행 전체 재적재다.
+--       나중에 발견하면 5,232행 전체 재적재다.
 --
 --   [ ] 죽은 컬럼 12개을 남길지 뺄지      → docs/decisions/003-유효-컬럼.md
 --       온도센서 19개 중 11개가 전 구간 0. 어느 쪽이든 근거를 남긴다.

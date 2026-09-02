@@ -52,12 +52,12 @@ python -m watchfiles --filter python "..\..\.venv\Scripts\python.exe explore.py"
 에러 없이 끝난 건 성공이 아니다. **숫자로 확인해야 성공이다.**
 
 ```sql
-SELECT COUNT(*) FROM equipment_param;    -- 7996
+SELECT COUNT(*) FROM equipment_param;    -- 5232
 SELECT COUNT(*) FROM production_lot;     -- 25
 SELECT COUNT(*) FROM equipment;          -- 3
 SELECT COUNT(*) FROM product;            -- 6
 
-SELECT SUM(total_qty) FROM production_lot;                          -- 7996
+SELECT SUM(total_qty) FROM production_lot;                          -- 5232
 SELECT COUNT(*) FROM equipment_param WHERE fail_reason = 'None';    -- 0
 SELECT COUNT(*) FROM equipment_param WHERE pass_or_fail = 'N';      -- 71
 ```
