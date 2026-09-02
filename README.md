@@ -17,23 +17,30 @@
 
 ```sql
 -- LOT 하나를 클릭하면 이 쿼리가 돈다
-SELECT * FROM equipment_param
-WHERE equipment_id = (SELECT equip_cd FROM production_lot WHERE lot_id = :lot_id)
-  AND measured_at >= (SELECT started_at FROM production_lot WHERE lot_id = :lot_id)
-  AND measured_at <  (SELECT ended_at   FROM production_lot WHERE lot_id = :lot_id)
-ORDER BY measured_at;
+SELECT s.*, sp.pass_or_fail, sp.fail_reason
+FROM   production_lot l
+JOIN   shot s       ON s.equipment_id = l.equip_cd
+                   AND s.measured_at >= l.started_at    -- 반열린 구간
+                   AND s.measured_at <  l.ended_at
+JOIN   shot_part sp ON sp.equipment_id = s.equipment_id
+                   AND sp.measured_at  = s.measured_at
+                   AND sp.product_id   = l.product_id
+WHERE  l.lot_id = :lot_id
+ORDER  BY s.measured_at;
 ```
 
-33개 공정변수와 불량 여부·사유가 이 한 번의 시간 범위 조회로 나온다. **불량이 언제 났고 그 직전 온도·압력이 어땠는지**가 이 쿼리 하나로 붙는다.
+24개 공정변수와 불량 여부·사유가 이 한 번의 시간 범위 조회로 나온다. **불량이 언제 났고 그 직전 온도·압력이 어땠는지**가 이 쿼리 하나로 붙는다.
 
-이 구조는 `(equipment_id, measured_at)` 복합 인덱스에 전적으로 의존한다. 인덱스가 없으면 LOT 하나 조회할 때마다 전체 테이블을 훑는다.
+이 구조는 `(equipment_id, measured_at)` 복합 인덱스에 전적으로 의존한다. `shot` 의 기본키가 곧 그 인덱스다. 인덱스가 없으면 LOT 하나 조회할 때마다 전체 테이블을 훑는다.
+
+`shot_part` 로 한 번 더 좁히는 이유는 **패밀리 금형** 때문이다. 설비 S14 는 한 번의 샷에서 LH·RH 두 부품을 동시에 찍는다. 공정변수는 샷의 속성이고 품질은 부품의 속성이라 테이블을 나눴다([ADR 005](docs/decisions/005-샷과-부품-분리.md)).
 
 ---
 
 ## 아키텍처
 
 ```
-KAMP 실데이터 (CSV, 5,232 샷 × 33 변수)
+KAMP 실데이터 (CSV, 부품 5,232 = 샷 2,626 × 24 변수)
       │
       ▼  시뮬레이터가 시간순 재생 (배속 1x / 60x / 3600x)
    MQTT 브로커 (Mosquitto)                    ← Level 2
@@ -56,11 +63,14 @@ KAMP 실데이터 (CSV, 5,232 샷 × 33 변수)
 | `equipment` | 마스터 — 설비 | 3 |
 | `product` | 마스터 — 제품 | 6 |
 | `production_lot` | 운영 — LOT (`started_at` ~ `ended_at`) | 25 |
-| `equipment_param` | 운영 — 공정변수 시계열 | 5,232 |
+| `shot` | 운영 — 한 번의 사출. 공정변수 24개 | 2,626 |
+| `shot_part` | 운영 — 그 샷에서 나온 부품. 품질 | 5,232 |
 
 `production_lot`은 `EQUIP_CD + PLAN_DATE + PART_NAME` 조합으로 정의했고, 원본 7,996행 중 완전 중복 2,764행을 제거한 5,232행을 실제 groupby로 검증해 25개 LOT을 확인했다(ADR 004).
 
-원본 45개 변수 중 **유효 33개**만 사용한다. 나머지 12개(금형온도 10~12번, 배럴온도 7번, 절환위치 등)는 전 구간 0으로 측정되는 죽은 컬럼이다.
+원본 45개 컬럼 중 12개(금형온도 10개, 배럴온도 7번, 절환위치)는 전 구간 0으로 측정되는 죽은 컬럼이라 뺐다([ADR 003](docs/decisions/003-유효-컬럼.md)). 남은 것은 메타 9개 + **공정변수 24개**다.
+
+원본 7,996행에는 완전 중복 2,764행이 섞여 있었다([ADR 004](docs/decisions/004-중복행-제거.md)). 실적은 설비 3대 중 S14 한 대에 집중돼 있고(5,230행), S01·S12 는 각 1행이다.
 
 ---
 
