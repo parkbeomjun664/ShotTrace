@@ -36,8 +36,11 @@ python load.py
 ### 저장하면 자동 실행 (선택)
 
 ```powershell
-python -m watchfiles --filter python "python explore.py" .
+python -m watchfiles --filter python "..\..\.venv\Scripts\python.exe explore.py" .
 ```
+
+🔴 자식 프로세스가 실행할 python을 **경로로 직접** 지목해야 한다. `python` 이라고만
+쓰면 watchfiles가 venv가 아닌 전역 python을 띄워서 `ModuleNotFoundError` 가 난다.
 
 터미널 하나를 이것 전용으로 쓴다. 프롬프트가 안 돌아오는 게 정상이다 — 계속
 살아서 감시하는 프로세스이기 때문. (M15 ①) 끄려면 `Ctrl+C`.
