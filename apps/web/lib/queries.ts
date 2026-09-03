@@ -1,46 +1,46 @@
-// DB 조회를 한곳에 모은다 — 화면 컴포넌트가 직접 쿼리하지 않는다
-// 담당: M11(View·RPC 로 옮길 자리) · M27(왕복 횟수)
-import { supabase } from "@/lib/supabase/server";
+// DB 조회를 한곳에 모은다 · M11(나중에 View로 옮길 자리) · M27(왕복 횟수)
+import { supabase } from "@/lib/supabase/server";      // 화면은 직접 쿼리하지 않는다
 
-// LOT 목록 + 각 LOT 의 제품명을 한 번에 가져온다.
-// 🔴 LOT 25건을 받고 제품명을 25번 더 물어보면 왕복 26번이다 (N+1, M27).
-//    PostgREST 는 FK 를 따라 한 번에 붙여준다.
-export async function getLots() {
-  const { data, error } = await supabase
-    .from("production_lot")
-    .select(
+export async function getLots() {                      // LOT 25건 + 각 제품명
+  const { data, error } = await supabase               // 성공/실패가 같이 온다
+    .from("production_lot")                            // 어느 테이블에서
+    .select(                                           // 어떤 컬럼을
       "lot_id, plan_date, equip_cd, total_qty, pass_qty, fail_qty, started_at, ended_at, product(part_name, car_model, side)",
-    )
-    .order("started_at", { ascending: false });
+    )                                                  // product(…) ← FK 따라 한 번에
+    .order("started_at", { ascending: false });        // 최근 LOT 먼저
 
-  if (error) throw error; // 조용히 빈 화면을 띄우지 않는다 (M04 ⑧)
-  return data;
+  if (error) throw error;                              // 🔴 빈 화면 대신 터뜨린다 (M04 ⑧)
+  return data;                                         // 여기 오면 data 는 null 이 아니다
 }
 
-export async function getEquipment() {
+export async function getEquipment() {                 // 설비 3건 (마스터)
   const { data, error } = await supabase
     .from("equipment")
-    .select("equip_cd, equip_name, tonnage")
-    .order("equip_cd");
+    .select("equip_cd, equip_name, tonnage")           // FK 임베드 없음 — 붙일 게 없다
+    .order("equip_cd");                                // 기본이 오름차순
 
   if (error) throw error;
   return data;
 }
 
-export type Lot = Awaited<ReturnType<typeof getLots>>[number];
+export type Lot =                                      // getLots 가 주는 LOT 한 건의 타입
+  Awaited<                                             // ① Promise 껍데기를 벗김
+    ReturnType<typeof getLots>                         // ② getLots 의 반환 타입
+  >[number];                                           // ③ 배열에서 원소 하나
+                                                       // 🔴 손으로 안 적는다.
+                                                       //    select 를 고치면 자동으로 따라온다
 
-// LOT 하나 — 없으면 null 을 돌려준다 (404 판단은 화면이 한다)
-export async function getLot(lotId: string) {
+export async function getLot(lotId: string) {          // LOT 한 건 — 상세 화면용
   const { data, error } = await supabase
     .from("production_lot")
-    .select(
+    .select(                                           // 임베드 2개 — 제품 + 설비
       "lot_id, plan_date, equip_cd, product_id, total_qty, pass_qty, fail_qty, started_at, ended_at, product(part_name, car_model, side), equipment(equip_name, tonnage)",
-    )
-    .eq("lot_id", lotId)
-    .maybeSingle(); // 0건이면 에러가 아니라 null
-
-  if (error) throw error;
-  return data;
+    )                                                  // product_id 도 같이 — D에서 쓴다
+    .eq("lot_id", lotId)                               // WHERE lot_id = ?
+    .maybeSingle();                                    // 배열 대신 객체 1개
+                                                       // 0건이면 에러가 아니라 null
+  if (error) throw error;                              // 진짜 실패만 여기로
+  return data;                                         // 없으면 null — 404 판단은 화면이
 }
 
 // ★ 이 프로젝트의 핵심 쿼리 — 시간 구간 조인 (ADR 001 · 005 · 006)
