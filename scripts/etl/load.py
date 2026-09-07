@@ -119,7 +119,7 @@ def to_lots(df: pd.DataFrame) -> pd.DataFrame:
         ended_at  =("measured_at", "max"),
     )
     g["fail_qty"] = g["total_qty"] - g["pass_qty"]
-    g["ended_at"] = g["ended_at"] + pd.Timedelta(seconds=1)   # 🔴 반열린 구간 (ADR 005)
+    g["ended_at"] = g["ended_at"] + pd.Timedelta(seconds=1)   # 🔴 반열린 구간 (ADR 006)
     return g
 
 
