@@ -1,19 +1,22 @@
 // 현황판 — 잘 돌아가고 있나 · 설비는 살아있나
-// 담당: M09(정보 위계) · M10(숫자 표시) → M11(View) → M17(실시간) → M23(OEE)
-//
-// 서버 컴포넌트다. 이 파일의 코드는 브라우저로 가지 않는다 (M01 ①).
+// 이 화면이 답하는 질문 (M09): 전체가 잘 나오나 · 어느 설비가 문제인가
+// M09(정보 위계) · M10(숫자 표시) → M11(View) → M18(실시간) → M24(OEE)
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { byEquipment, getEquipment, getLots, summarize } from "@/lib/queries";
 
-export const revalidate = 60; // 60초 캐시. 실시간은 M17 에서 (M13)
+export const revalidate = 60;                          // 60초 캐시 (M13)
+                                                       // 실시간 갱신은 M18에서
 
-export default async function Page() {
-  const [lots, equipment] = await Promise.all([getLots(), getEquipment()]); // 왕복 2번을 동시에
-  const sum = summarize(lots);
-  const perEquip = byEquipment(lots);
+export default async function Page() {                 // async = 서버 컴포넌트
+  const [lots, equipment] = await Promise.all([        // 서로 안 기다린다
+    getLots(),                                         // 130ms → 80ms
+    getEquipment(),
+  ]);
+  const sum = summarize(lots);                         // 전체 합계
+  const perEquip = byEquipment(lots);                  // 설비별 합계 (Map)
 
   return (
     <section className="space-y-8">

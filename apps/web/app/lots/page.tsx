@@ -1,13 +1,14 @@
 // LOT 목록 — 최근 LOT을 훑고 하나를 고른다
-// 담당: M09(정보 위계) · M10(표) · M27(N+1)
+// 이 화면이 답하는 질문 (M09): 어느 LOT이 문제였나 · 어디를 눌러야 하나
+// M09(정보 위계) · M10(표) · M27(N+1) → W05에서 페이지네이션
 import Link from "next/link";
 
 import { getLots } from "@/lib/queries";
 
-export const revalidate = 60;
+export const revalidate = 60;                          // 현황판과 같은 캐시
 
 export default async function Page() {
-  const lots = await getLots();
+  const lots = await getLots();                        // 제품명은 FK 임베드로 함께
 
   return (
     <section>
@@ -31,9 +32,9 @@ export default async function Page() {
           </thead>
           <tbody>
             {lots.map((lot) => {
-              const rate = (lot.pass_qty / lot.total_qty) * 100;
+              const rate = (lot.pass_qty / lot.total_qty) * 100;   // total 0 은 CHECK가 막음
               return (
-                <tr key={lot.lot_id} className="border-b last:border-0">
+                <tr key={lot.lot_id} className="border-b last:border-0">  {/* key = PK */}
                   <td className="py-2 pr-4 font-mono">
                     <Link
                       href={`/lots/${lot.lot_id}`}

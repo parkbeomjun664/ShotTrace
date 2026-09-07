@@ -17,16 +17,17 @@ import { getLot, getLotShots, pareto } from "@/lib/queries";
 import { 같은날, 날짜, 분길이, 소수, 시각 } from "@/lib/format";
 
 export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
-  const { lotId } = await params;
+  const { lotId } = await params;                      // 주소의 [lotId] · await 필요
 
   const lot = await getLot(lotId);
-  if (!lot) notFound(); // 없는 LOT은 404. 빈 화면을 띄우지 않는다 (M04 ⑧)
+  if (!lot) notFound();                                // 없는 LOT은 404 (M04 ⑧)
+                                                       // 이 아래로 lot 은 null 아님
 
-  const shots = await getLotShots(lot);
-  const defects = pareto(shots);
+  const shots = await getLotShots(lot);                // ★ 시간 구간 조인 (lot 이 필요)
+  const defects = pareto(shots);                       // 불량 사유별, 많은 순
   const rate = (lot.pass_qty / lot.total_qty) * 100;
   const 분 = 분길이(lot.started_at, lot.ended_at);
-  const 넘김 = !같은날(lot.started_at, lot.ended_at); // 자정을 넘겼나
+  const 넘김 = !같은날(lot.started_at, lot.ended_at);   // 자정을 넘겼나
 
   return (
     <section className="space-y-8">
