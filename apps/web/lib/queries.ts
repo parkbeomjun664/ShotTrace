@@ -102,3 +102,30 @@ export function byEquipment(lots: Lot[]) {             // 설비별로 묶어서
   }
   return map;                                          // 화면에서 map.get("S14")
 }
+
+
+// ── View 조회 — 집계는 DB가 한다 (M11 · 004_views.sql) ──
+//    View 컬럼은 전부 number | null 이다. Postgres 가 NOT NULL 을 보장 못 한다
+
+export async function getDefectPareto() {              // 불량 사유별 (3행)
+  const {data, error} = await supabase
+    .from("defect_pareto")                             // 테이블처럼 쓴다
+    .select("fail_reason, fail_qty, share_pct")        // share_pct 합계 = 100
+    .order("fail_qty", { ascending: false });          // 정렬은 여기서 (View엔 없다)
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getDailyYield() {                // 일별 수율 (13행)
+  const {data, error} = await supabase
+    .from("daily_yield")
+    .select("plan_date, total_qty, pass_qty, fail_qty, yield_pct")
+    .order("plan_date");                               // 오름차순 = 시간순
+                                                       // 뒤집기는 표시하는 쪽에서
+  if (error) throw error;
+  return data;
+}
+
+export type DefectRow = Awaited<ReturnType<typeof getDefectPareto>>[number];
+export type DailyRow = Awaited<ReturnType<typeof getDailyYield>>[number];
