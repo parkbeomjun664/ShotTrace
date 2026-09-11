@@ -266,7 +266,24 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_lot_shots: {
+        Args: { p_lot_id: string }
+        Returns: {
+          barrel_temperature_1: number
+          barrel_temperature_6: number
+          cushion_position: number
+          cycle_time: number
+          fail_reason: string
+          injection_time: number
+          max_back_pressure: number
+          max_injection_pressure: number
+          measured_at: string
+          mold_temperature_3: number
+          part_id: string
+          part_serial: number
+          pass_or_fail: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

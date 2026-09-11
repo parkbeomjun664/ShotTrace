@@ -1,4 +1,5 @@
 // DB 조회를 한곳에 모은다 · M11(나중에 View로 옮길 자리) · M27(왕복 횟수)
+import type { Database } from "@/types/database";  // DB 스키마 타입
 import { supabase } from "@/lib/supabase/server";      // 화면은 직접 쿼리하지 않는다
 
 export async function getLots() {                      // LOT 25건 + 각 제품명
@@ -43,26 +44,23 @@ export async function getLot(lotId: string) {          // LOT 한 건 — 상세
   return data;                                         // 없으면 null — 404 판단은 화면이
 }
 
-// ★ 이 프로젝트의 핵심 쿼리 — 시간 구간 조인 (ADR 001 · 005 · 006)
-export async function getLotShots(
-  lot: NonNullable<Awaited<ReturnType<typeof getLot>>>,  // getLot 결과에서 null 제외
-) {
-  const { data, error } = await supabase
-    .from("shot_part")                                 // 품질이 있는 쪽에서 출발
-    .select(                                           // 🔴 문자열을 이어붙이지 않는다
-      "part_id, measured_at, part_serial, pass_or_fail, fail_reason, shot(cycle_time, injection_time, max_injection_pressure, max_back_pressure, cushion_position, barrel_temperature_1, barrel_temperature_6, mold_temperature_3)",
-    )                                                  // shot(…) ← 복합 FK 로 공정변수
-    .eq("equipment_id", lot.equip_cd)                  // ① 어느 설비        ADR 001
-    .eq("product_id", lot.product_id)                  // ② 어느 제품        ADR 005
-    .gte("measured_at", lot.started_at)                // ③ >= 시작 ┐
-    .lt("measured_at", lot.ended_at)                   //    <  끝  ┘ 반열린  ADR 006
-    .order("measured_at");                             // 시간순 — 표가 곧 이력
 
-  if (error) throw error;                              // lot_id FK 는 없다. 시간으로만 이었다
+// ★ 이 프로젝트의 핵심 쿼리 — 시간 구간 조인 (ADR 001 · 005 · 006)
+type RpcRow = Database["public"]["Functions"]["get_lot_shots"]["Returns"][number];
+
+export type LotShot = Omit<RpcRow, "fail_reason"> & {
+  fail_reason: string | null;
+};
+
+export async function getLotShots(lotId: string): Promise<LotShot[]> {
+  const { data, error } = await supabase.rpc("get_lot_shots", {
+    p_lot_id: lotId,
+  });
+
+  if (error) throw error;
   return data;
 }
 
-export type LotShot = Awaited<ReturnType<typeof getLotShots>>[number];
 
 // ── 아래 셋은 DB를 안 부른다. 받은 배열만 계산하는 순수함수 ──
 //    async 가 없다 · M11에서 DB View 로 옮길 자리 · M26 테스트 대상

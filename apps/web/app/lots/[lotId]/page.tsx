@@ -5,7 +5,7 @@
 //   2. 불량은 언제 몇 개 났나              → 파레토 + 표의 표시
 //   3. 그때 설비는 어땠나                  → 시간 구간 조인으로 붙인 공정변수
 //
-// 담당: M09(정보 위계) · M11(집계) → M12(시계열 차트) → M24(대응 제안)
+// 담당: M09(정보 위계) · M11(RPC) → M12(시계열 차트) → M24(대응 제안)
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -23,7 +23,7 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
   if (!lot) notFound();                                // 없는 LOT은 404 (M04 ⑧)
                                                        // 이 아래로 lot 은 null 아님
 
-  const shots = await getLotShots(lot);                // ★ 시간 구간 조인 (lot 이 필요)
+  const shots = await getLotShots(lot.lot_id);         // ★ RPC — 조인은 DB 안에
   const defects = pareto(shots);                       // 불량 사유별, 많은 순
   const rate = (lot.pass_qty / lot.total_qty) * 100;
   const 분 = 분길이(lot.started_at, lot.ended_at);
@@ -107,7 +107,7 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
         <div className="flex items-baseline justify-between">
           <h2 className="font-semibold">샷 이력</h2>
           <p className="text-xs text-muted-foreground">
-            equipment_id + [started_at, ended_at) + product_id 로 조인
+            get_lot_shots(lot_id) — 조인은 DB 함수 안에
           </p>
         </div>
 
@@ -147,19 +147,19 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
                       )}
                     </td>
                     <td className="px-3 py-1.5 text-right tabular-nums">
-                      {소수(s.shot?.cycle_time ?? null, 2)}
+                      {소수(s.cycle_time, 2)}
                     </td>
                     <td className="px-3 py-1.5 text-right tabular-nums">
-                      {소수(s.shot?.max_injection_pressure ?? null)}
+                      {소수(s.max_injection_pressure)}
                     </td>
                     <td className="px-3 py-1.5 text-right tabular-nums">
-                      {소수(s.shot?.cushion_position ?? null, 2)}
+                      {소수(s.cushion_position, 2)}
                     </td>
                     <td className="px-3 py-1.5 text-right tabular-nums">
-                      {소수(s.shot?.barrel_temperature_1 ?? null)}
+                      {소수(s.barrel_temperature_1)}
                     </td>
                     <td className="px-3 py-1.5 text-right tabular-nums">
-                      {소수(s.shot?.mold_temperature_3 ?? null)}
+                      {소수(s.mold_temperature_3)}
                     </td>
                   </tr>
                 );
@@ -169,9 +169,8 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
         </div>
 
         <p className="mt-3 text-xs text-muted-foreground">
-          공정변수는 <code>shot</code>에, 판정은 <code>shot_part</code>에 있다. 한 샷이
-          LH·RH 두 부품을 찍으므로 <code>product_id</code>로 이 LOT의 부품만 남긴다
-          (ADR 005). 차트는 M12에서 붙인다.
+          시간 구간 조인은 <code>get_lot_shots</code> 함수 안에 있다 (005_rpc.sql).
+          화면은 <code>lot_id</code>만 넘긴다. 차트는 S02에서 붙인다.
         </p>
       </div>
     </section>
