@@ -1,5 +1,6 @@
 // 품질 — 불량이 어디에 몰려 있나 · M11(View) → M12(차트)
 import { getDailyYield, getDefectPareto } from "@/lib/queries";
+import { ParetoChart } from "./ParetoChart";
 
 export const revalidate = 60;
 
@@ -26,6 +27,10 @@ export default async function Page() {
 
       <div>
         <h2 className="font-semibold">불량 파레토</h2>
+          <div className="mt-3">
+            <ParetoChart data={pareto} />
+          </div>
+
         <div className="mt-3 space-y-3">
           {pareto.map((p) => (
             <div key={p.fail_reason}>
