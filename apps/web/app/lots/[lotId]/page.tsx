@@ -15,6 +15,8 @@ import { getLot, getLotShots, pareto } from "@/lib/queries";
 
 // 시각 포맷은 lib/format.ts 한 곳에서만 만든다 (ADR 002)
 import { 같은날, 날짜, 분길이, 소수, 시각 } from "@/lib/format";
+import { ShotChart } from "./ShotChart";
+
 
 export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
   const { lotId } = await params;                      // 주소의 [lotId] · await 필요
@@ -110,7 +112,10 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
             get_lot_shots(lot_id) — 조인은 DB 함수 안에
           </p>
         </div>
-
+        <div className="mt-3">
+          <p className="text-xs text-muted-foreground">사이클 타임 (초)</p>
+          <ShotChart data={shots} />
+        </div>
         <div className="mt-3 overflow-x-auto rounded border">
           <table className="w-full text-sm">
             <thead className="border-b bg-black/[0.02] text-left text-muted-foreground dark:bg-white/[0.03]">
@@ -170,7 +175,7 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
 
         <p className="mt-3 text-xs text-muted-foreground">
           시간 구간 조인은 <code>get_lot_shots</code> 함수 안에 있다 (005_rpc.sql).
-          화면은 <code>lot_id</code>만 넘긴다. 차트는 S02에서 붙인다.
+          화면은 <code>lot_id</code>만 넘긴다.
         </p>
       </div>
     </section>
