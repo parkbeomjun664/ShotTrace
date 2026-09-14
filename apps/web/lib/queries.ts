@@ -1,4 +1,4 @@
-// DB 조회를 한곳에 모은다 · M11(나중에 View로 옮길 자리) · M27(왕복 횟수)
+// DB 조회를 한곳에 모은다 · M11(집계는 DB에서) · M27(왕복 횟수)
 import type { Database } from "@/types/database";  // DB 스키마 타입
 import { supabase } from "@/lib/supabase/server";      // 화면은 직접 쿼리하지 않는다
 
@@ -12,16 +12,6 @@ export async function getLots() {                      // LOT 25건 + 각 제품
 
   if (error) throw error;                              // 🔴 빈 화면 대신 터뜨린다 (M04 ⑧)
   return data;                                         // 여기 오면 data 는 null 이 아니다
-}
-
-export async function getEquipment() {                 // 설비 3건 (마스터)
-  const { data, error } = await supabase
-    .from("equipment")
-    .select("equip_cd, equip_name, tonnage")           // FK 임베드 없음 — 붙일 게 없다
-    .order("equip_cd");                                // 기본이 오름차순
-
-  if (error) throw error;
-  return data;
 }
 
 export type Lot =                                      // getLots 가 주는 LOT 한 건의 타입
@@ -62,8 +52,8 @@ export async function getLotShots(lotId: string): Promise<LotShot[]> {
 }
 
 
-// ── 아래 셋은 DB를 안 부른다. 받은 배열만 계산하는 순수함수 ──
-//    async 가 없다 · M11에서 DB View 로 옮길 자리 · M26 테스트 대상
+// ── 순수함수 — DB를 안 부른다. 받은 배열만 계산 (M26 테스트 대상) ──
+//    summarize · byEquipment 는 006_summary_views.sql 로 옮겼다
 
 export function pareto(shots: LotShot[]) {             // 불량 사유별 건수, 많은 순
   const count = new Map<string, number>();             // 사유 → 건수
@@ -74,31 +64,6 @@ export function pareto(shots: LotShot[]) {             // 불량 사유별 건�
   }
   return [...count.entries()]                          // Map → [[사유, 건수], …]
     .sort((a, b) => b[1] - a[1]);                      // 건수 내림차순 = 파레토
-}
-
-export function summarize(lots: Lot[]) {               // LOT 전체를 한 줄 요약으로
-  const total = lots.reduce((a, l) => a + l.total_qty, 0);  // a = 누적, l = LOT 한 건
-  const pass = lots.reduce((a, l) => a + l.pass_qty, 0);    // 0 = 시작값
-  const fail = lots.reduce((a, l) => a + l.fail_qty, 0);
-  return {
-    total,
-    pass,
-    fail,
-    yield: total ? (pass / total) * 100 : 0,           // 🔴 0으로 나누면 NaN
-  };
-}
-
-export function byEquipment(lots: Lot[]) {             // 설비별로 묶어서 합계
-  const map = new Map<string, { shots: number; fail: number; lots: number }>();
-  for (const l of lots) {
-    const cur = map.get(l.equip_cd) ?? { shots: 0, fail: 0, lots: 0 };  // 처음이면 0
-    map.set(l.equip_cd, {                              // 덮어쓰기 = 누적
-      shots: cur.shots + l.total_qty,
-      fail: cur.fail + l.fail_qty,
-      lots: cur.lots + 1,                              // LOT 개수도 센다
-    });
-  }
-  return map;                                          // 화면에서 map.get("S14")
 }
 
 
@@ -127,3 +92,26 @@ export async function getDailyYield() {                // 일별 수율 (13행)
 
 export type DefectRow = Awaited<ReturnType<typeof getDefectPareto>>[number];
 export type DailyRow = Awaited<ReturnType<typeof getDailyYield>>[number];
+
+export async function getEquipmentSummary() {          // 설비별 (3행) · LEFT JOIN
+  const { data, error } = await supabase
+    .from("equipment_summary")
+    .select("equip_cd, equip_name, tonnage, lot_count, total_qty, pass_qty, fail_qty, yield_pct")
+    .order("equip_cd");                                // 실적 없는 설비도 나온다
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getPlantSummary() {             // 공장 전체 (1행)
+  const { data, error } = await supabase
+    .from("plant_summary")
+    .select("lot_count, total_qty, pass_qty, fail_qty, yield_pct")
+    .maybeSingle();                                    // 항상 1행 — 배열 대신 객체
+
+  if (error) throw error;
+  return data;                                         // LOT 0건이면 null
+}
+
+export type EquipRow = Awaited<ReturnType<typeof getEquipmentSummary>>[number];
+export type PlantRow = Awaited<ReturnType<typeof getPlantSummary>>;

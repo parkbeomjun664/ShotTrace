@@ -96,6 +96,13 @@ export type Database = {
             referencedColumns: ["equip_cd"]
           },
           {
+            foreignKeyName: "production_lot_equip_cd_fkey"
+            columns: ["equip_cd"]
+            isOneToOne: false
+            referencedRelation: "equipment_summary"
+            referencedColumns: ["equip_cd"]
+          },
+          {
             foreignKeyName: "production_lot_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -197,6 +204,13 @@ export type Database = {
             referencedRelation: "equipment"
             referencedColumns: ["equip_cd"]
           },
+          {
+            foreignKeyName: "shot_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_summary"
+            referencedColumns: ["equip_cd"]
+          },
         ]
       }
       shot_part: {
@@ -261,6 +275,29 @@ export type Database = {
           fail_qty: number | null
           fail_reason: string | null
           share_pct: number | null
+        }
+        Relationships: []
+      }
+      equipment_summary: {
+        Row: {
+          equip_cd: string | null
+          equip_name: string | null
+          fail_qty: number | null
+          lot_count: number | null
+          pass_qty: number | null
+          tonnage: number | null
+          total_qty: number | null
+          yield_pct: number | null
+        }
+        Relationships: []
+      }
+      plant_summary: {
+        Row: {
+          fail_qty: number | null
+          lot_count: number | null
+          pass_qty: number | null
+          total_qty: number | null
+          yield_pct: number | null
         }
         Relationships: []
       }
