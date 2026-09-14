@@ -113,7 +113,14 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
           </p>
         </div>
         <div className="mt-3">
-          <p className="text-xs text-muted-foreground">사이클 타임 (초)</p>
+                    <p className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>사이클 타임 (초)</span>
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block size-2 rounded-full bg-red-600" />
+              불량
+            </span>
+          </p>
+
           <ShotChart data={shots} />
         </div>
         <div className="mt-3 overflow-x-auto rounded border">
