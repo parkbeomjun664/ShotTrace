@@ -133,6 +133,42 @@ Execution Time: 0.157 ms
 
 ---
 
+## ⑤ 부분 인덱스는 쓰인다 — Index Only Scan (2026-09-18 측정)
+
+```sql
+EXPLAIN ANALYZE
+SELECT fail_reason, COUNT(*)
+FROM   shot_part
+WHERE  pass_or_fail = 'N'
+GROUP  BY fail_reason;
+```
+
+```
+GroupAggregate  (cost=0.14..3.57 rows=3 width=17) (actual time=1.917..1.923)
+  Group Key: fail_reason
+  ->  Index Only Scan using idx_shot_part_defect on shot_part  (cost=0.14..3.24)
+        Heap Fetches: 0
+Planning Time: 4.794 ms
+Execution Time: 2.034 ms
+```
+
+**`Index Only Scan` 이고 `Heap Fetches: 0` 이다.** 테이블 본체를 한 번도 안 읽었다.
+인덱스에 `fail_reason` 이 들어 있고 쿼리가 원하는 것이 그것뿐이라 색인만으로 답이 나온다.
+
+`Heap Fetches` 가 0이 아니면 이름만 Index Only 이고 결국 테이블을 본다. 0이어야 진짜다.
+
+cost 3.57 — `shot_part` 전체 Seq Scan 이 약 211 이므로 **약 59배 싸다.**
+불량이 60/5,232(1.15%)라 색인 항목이 87배 작은 덕이다. **선택도가 낮을수록 효과가 크다.**
+
+### 같은 날 만든 두 인덱스의 운명이 갈렸다
+
+| 인덱스 | 결과 |
+|---|---|
+| `idx_production_lot_started_at` | **안 쓰임** — 25행이라 Seq Scan + Sort 가 더 싸다 |
+| `idx_shot_part_defect` | **쓰임** — 5,232 중 60개만 본다 |
+
+옵티마이저가 매번 계산해서 고른다. **거는 것과 쓰이는 것은 다르다.**
+
 ## 남은 것
 
 - 1~2월 성능 심화(R04)에서 **50만 행**으로 같은 실험을 다시 한다.
