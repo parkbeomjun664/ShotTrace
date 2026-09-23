@@ -1,1 +1,2 @@
-pandas >= 2.2
+pandas>=2.2
+paho-mqtt>=2.1
