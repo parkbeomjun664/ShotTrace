@@ -38,8 +38,9 @@ export async function getLot(lotId: string) {          // LOT 한 건 — 상세
 // ★ 이 프로젝트의 핵심 쿼리 — 시간 구간 조인 (ADR 001 · 005 · 006)
 type RpcRow = Database["public"]["Functions"]["get_lot_shots"]["Returns"][number];
 
-export type LotShot = Omit<RpcRow, "fail_reason"> & {
+export type LotShot = Omit<RpcRow, "fail_reason" | "part_id"> & {
   fail_reason: string | null;
+  part_id: string | null;                // 007 이후 — CSV 로 들어온 행만 값이 있다
 };
 
 export async function getLotShots(lotId: string): Promise<LotShot[]> {

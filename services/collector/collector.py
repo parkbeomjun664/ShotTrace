@@ -30,6 +30,24 @@ def to_shot_row(msg: dict) -> dict:                     # 순수함수 — 브�
     }
 
 
+def load_products(db) -> dict[str, int]:
+    rows = db.table("product").select("product_id, part_name").execute().data
+    return {r["part_name"]: r["product_id"] for r in rows}
+
+
+def to_part_rows(msg: dict, product_id: dict[str, int]) -> list[dict]:
+    return [
+        {
+            "equipment_id": msg["equipment_id"],
+            "measured_at": msg["measured_at"],
+            "product_id": product_id[p["part_name"]],
+            "pass_or_fail": p["pass_or_fail"],
+            "fail_reason": p["fail_reason"],
+        }
+        for p in msg["parts"]
+    ]
+
+
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code != 0:
         log.error("브로커가 연결을 거부했다 — %s", reason_code)
@@ -40,20 +58,34 @@ def on_connect(client, userdata, flags, reason_code, properties):
 
 def on_message(client, userdata, msg):
     try:
-        row = to_shot_row(json.loads(msg.payload))
-    except (ValueError, KeyError) as e:                 # 메시지가 이상하다
+        payload = json.loads(msg.payload)
+        shot_row = to_shot_row(payload)
+        names = [p["part_name"] for p in payload["parts"]]
+    except (ValueError, KeyError) as e:
         userdata["bad"] += 1
         log.error("메시지를 못 읽었다 %s — %s", msg.topic, e)
         return
-    try:
-        userdata["db"].table("shot").upsert(       # 없으면 넣고 있으면 덮는다 · 행이 안 는다
-            row, on_conflict="equipment_id,measured_at").execute()      # shot 의 PK
-    except Exception as e:                              # DB 가 거부했다 · 한 건 실패로 안 죽는다
+
+    unknown = [n for n in names if n not in userdata["products"]]
+    if unknown:
         userdata["bad"] += 1
-        log.error("적재 실패 %s %s — %s", row["equipment_id"], row["measured_at"], e)
+        log.error("모르는 제품 %s — product 테이블에 없다", unknown)
         return
-    userdata["ok"] += 1                                 # 🔴 조용히 버리지 않는다 · 센다
-    log.info("%s  %s  %6.2fs", row["equipment_id"], row["measured_at"][:19], row["cycle_time"])
+
+    part_rows = to_part_rows(payload, userdata["products"])
+    try:
+        db = userdata["db"]
+        db.table("shot").upsert(shot_row, on_conflict="equipment_id,measured_at").execute()
+        db.table("shot_part").upsert(
+            part_rows, on_conflict="equipment_id,measured_at,product_id").execute()
+    except Exception as e:
+        userdata["bad"] += 1
+        log.error("적재 실패 %s %s — %s", shot_row["equipment_id"], shot_row["measured_at"], e)
+        return
+
+    userdata["ok"] += 1
+    log.info("%s  %s  %6.2fs  %d부품", shot_row["equipment_id"],
+             shot_row["measured_at"][:19], shot_row["cycle_time"], len(part_rows))
 
 
 def parse_args() -> argparse.Namespace:
@@ -72,8 +104,13 @@ def main() -> None:
     if not SUPABASE_URL or not SUPABASE_KEY:
         sys.exit("🔴 .env 에 NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 가 없다")
 
-    state = {"db": create_client(SUPABASE_URL, SUPABASE_KEY), "ok": 0, "bad": 0}
+    db = create_client(SUPABASE_URL, SUPABASE_KEY)
+    products = load_products(db)
+    if not products:
+        sys.exit("🔴 product 테이블이 비어 있다 — ETL 을 먼저 돌린다")
+    log.info("제품 %d개 읽음", len(products))
 
+    state = {"db": db, "products": products, "ok": 0, "bad": 0}
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, userdata=state)
     client.on_connect = on_connect
     client.on_message = on_message

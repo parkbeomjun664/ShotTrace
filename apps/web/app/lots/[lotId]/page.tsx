@@ -141,7 +141,7 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
                 const bad = s.pass_or_fail === "N";
                 return (
                   <tr
-                    key={s.part_id}
+                    key={s.measured_at}     // LOT 안에서 시각이 곧 부품이다 (007)
                     // 불량 행만 배경으로 띄운다 — 눈이 여기 먼저 가야 한다 (M09)
                     className={`border-b last:border-0 ${
                       bad ? "bg-red-50 dark:bg-red-950/30" : ""
