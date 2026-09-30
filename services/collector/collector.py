@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -22,10 +23,11 @@ SHOT_TOPIC = "shottrace/+/shot"                         # 설비는 여럿 · �
 QOS = 1                                                 # 🔴 구독에도 붙인다 · QoS 는 구간별
 
 
-def to_shot_row(msg: dict) -> dict:                     # 순수함수 — 브로커도 DB도 안 건드린다
+def to_shot_row(msg: dict, now: datetime) -> dict:      # 🔴 시계를 밖에서 받는다 → 테스트 가능
     return {
         "equipment_id": msg["equipment_id"],
         "measured_at": msg["measured_at"],
+        "received_at": now.isoformat(),                 # 처리 시각 — measured_at 은 이벤트 시각
         **msg["values"],                                # 키를 DB 컬럼명에 맞춰둔 값 (ADR 009)
     }
 
@@ -59,7 +61,7 @@ def on_connect(client, userdata, flags, reason_code, properties):
 def on_message(client, userdata, msg):
     try:
         payload = json.loads(msg.payload)
-        shot_row = to_shot_row(payload)
+        shot_row = to_shot_row(payload, datetime.now(timezone.utc))
         names = [p["part_name"] for p in payload["parts"]]
     except (ValueError, KeyError) as e:
         userdata["bad"] += 1
