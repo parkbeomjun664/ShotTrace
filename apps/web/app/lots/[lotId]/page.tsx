@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLot, getLotShots, pareto } from "@/lib/queries";
 
 // 시각 포맷은 lib/format.ts 한 곳에서만 만든다 (ADR 002)
-import { 같은날, 날짜, 분길이, 소수, 시각 } from "@/lib/format";
+import { 같은날, 날짜, 분길이, 소수, 시각, 진행중 } from "@/lib/format";
 import { ShotChart } from "./ShotChart";
 
 
@@ -28,8 +28,9 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
   const shots = await getLotShots(lot.lot_id);         // ★ RPC — 조인은 DB 안에
   const defects = pareto(shots);                       // 불량 사유별, 많은 순
   const rate = (lot.pass_qty / lot.total_qty) * 100;
-  const 분 = 분길이(lot.started_at, lot.ended_at);
-  const 넘김 = !같은날(lot.started_at, lot.ended_at);   // 자정을 넘겼나
+  const 진행 = 진행중(lot.ended_at);                    // 아직 안 끝난 LOT (009)
+  const 분 = 진행 ? null : 분길이(lot.started_at, lot.ended_at);
+  const 넘김 = !진행 && !같은날(lot.started_at, lot.ended_at);   // 🔴 순서 — 단축 평가
 
   return (
     <section className="space-y-8">
@@ -94,11 +95,17 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
             <p className="font-mono text-lg tabular-nums">
               {넘김 ? `${날짜(lot.started_at)} ` : ""}
               {시각(lot.started_at)} –{" "}
-              {넘김 ? `${날짜(lot.ended_at)} ` : ""}
-              {시각(lot.ended_at)}
+              {진행 ? (
+                <span className="text-emerald-600 dark:text-emerald-400">진행 중</span>
+              ) : (
+                <>
+                  {넘김 ? `${날짜(lot.ended_at)} ` : ""}
+                  {시각(lot.ended_at)}
+                </>
+              )}
             </p>
             <p className="mt-1 text-sm tabular-nums text-muted-foreground">
-              {분}분 · 샷 {shots.length}개
+              {진행 ? "" : `${분}분 · `}샷 {shots.length}개
             </p>
           </CardContent>
         </Card>

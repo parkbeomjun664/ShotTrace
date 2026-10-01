@@ -24,3 +24,5 @@ export const 분길이 = (from: string, to: string) =>    // 구간 길이(분)
 
 export const 소수 = (v: number | null | undefined, n = 1) =>  // n 생략하면 1
   v == null ? "—" : v.toFixed(n);                      // == 는 null·undefined 둘 다
+
+export const 진행중 = (iso: string) => iso === "infinity";  // 아직 안 끝난 LOT (009)
