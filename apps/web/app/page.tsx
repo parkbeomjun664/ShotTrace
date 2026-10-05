@@ -6,8 +6,9 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getEquipmentSummary, getPlantSummary } from "@/lib/queries";
+import { LiveRefresh } from "./LiveRefresh";       // 알림을 듣고 이 화면을 다시 그리게 한다
 
-export const revalidate = 60;
+export const revalidate = 0;   // 🔴 캐시를 끈다. 60 이면 refresh 해도 묵은 화면이 온다 (M18)
 
 export default async function Page() {
   const [plant, equipment] = await Promise.all([
@@ -17,6 +18,7 @@ export default async function Page() {
 
   return (
     <section className="space-y-8">
+      <LiveRefresh />                        {/* 🔵 보이는 게 없다 — 신호만 담당 */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">현황판</h1>
         <p className="mt-1 text-sm text-muted-foreground">
