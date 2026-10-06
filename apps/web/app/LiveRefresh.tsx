@@ -22,7 +22,11 @@ export function LiveRefresh() {
           dirty.current = true;                       // 🔵 여기서 조회하지 않는다. 표시만 남긴다
         },
       )
-      .subscribe((status) => console.log("[realtime]", status));  // SUBSCRIBED → 수요일의 ● 수신 중
+      .subscribe((status) => {
+        console.log("[realtime]", status);           // 수요일의 ● 수신 중 표시에 쓸 재료
+        if (status === "SUBSCRIBED") dirty.current = true;
+      });   // 🔴 붙는 순간 한 번 받아온다. 끊긴 동안 놓친 알림은 다시 안 온다
+            //    첫 연결의 틈 메우기와 재연결 복구를 이 한 줄이 같이 한다
 
     const timer = setInterval(() => {
       if (!dirty.current) return;                     // 조용하면 아무것도 안 한다

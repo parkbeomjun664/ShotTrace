@@ -1,8 +1,10 @@
-# MQTT 브로커. 📓 M16
+# MQTT 브로커 + 수집기. 📓 M16 · M17 · ADR 011
 #
-#   docker compose up -d      켜기
-#   docker compose down       끄기
-#   docker compose logs -f    로그 보기
+#   docker compose up -d                켜기 (둘 다)
+#   docker compose down                 끄기
+#   docker compose logs -f collector    수집기 로그 보기
+#   docker compose up -d --build        코드를 고쳤을 때 다시 굽는다
+#   docker compose config               🔵 들여쓰기가 맞는지 미리 확인
 #
 # 포트 매핑 "1883:1883" = 내 컴퓨터 : 컨테이너 안
 
@@ -16,3 +18,14 @@ services:
     volumes:
       # 🔴 컨테이너를 지우면 안의 데이터도 사라진다. 설정은 내 폴더에 둔다.
       - ./mosquitto/config:/mosquitto/config
+
+  collector:                        # 🔴 mosquitto 와 같은 2칸 — 형제 서비스다
+    build: ./services/collector     # image: 가 아니다. Dockerfile 로 직접 굽는다
+    container_name: shottrace-collector
+    depends_on:
+      - mosquitto                   # 🔴 순서만 보장한다. "준비됐다" 는 뜻이 아니다
+    env_file: .env                  # 🔴 켤 때 넣는다. 이미지에 굽지 않는다 (ADR 011)
+    command: ["python", "collector.py", "--host", "mosquitto"]
+                                    # 🔵 상자 안에서 localhost 는 자기 자신이다.
+                                    #    compose 는 서비스 이름을 주소로 만들어 준다
+    restart: unless-stopped         # 브로커보다 먼저 떠서 실패해도 다시 붙는다

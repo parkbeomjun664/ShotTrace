@@ -16,7 +16,10 @@ import { getLot, getLotShots, pareto } from "@/lib/queries";
 // 시각 포맷은 lib/format.ts 한 곳에서만 만든다 (ADR 002)
 import { 같은날, 날짜, 분길이, 소수, 시각, 진행중 } from "@/lib/format";
 import { ShotChart } from "./ShotChart";
+import { LiveRefresh } from "@/app/LiveRefresh";   // 어제 만든 부품을 그대로 (M18)
 
+
+export const revalidate = 0;   // 🔴 캐시를 끈다. 실시간 화면에 캐시를 켜두면 실시간이 아니다
 
 export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
   const { lotId } = await params;                      // 주소의 [lotId] · await 필요
@@ -34,6 +37,7 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
 
   return (
     <section className="space-y-8">
+      <LiveRefresh />                       {/* 신호만 담당 — 알림이 오면 이 화면을 다시 받는다 */}
       <div>
         <Link
           href="/lots"

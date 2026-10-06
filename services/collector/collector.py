@@ -6,7 +6,6 @@ import logging
 import os
 import sys
 from datetime import datetime, timezone
-from pathlib import Path
 
 from dotenv import load_dotenv
 from paho.mqtt import client as mqtt
@@ -14,8 +13,8 @@ from supabase import create_client
 
 log = logging.getLogger(__name__)
 
-ROOT = Path(__file__).resolve().parents[2]
-load_dotenv(ROOT / ".env")
+load_dotenv()                                           # 있는 곳에서 위로 올라가며 .env 를 찾는다
+                                                        # 🔴 컨테이너엔 .env 가 없다 — env_file 이 이미 넣어줬다
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")   # RLS 우회 — 서버 전용 · 절대 공개 금지
 
