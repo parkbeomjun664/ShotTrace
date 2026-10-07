@@ -80,7 +80,7 @@ export default async function Page() {
                     {d.fail_qty}
                   </td>
                   <td className="py-2 text-right tabular-nums">
-                    {(d.yield_pct ?? 0).toFixed(2)}%
+                    {d.yield_pct === null ? "—" : `${d.yield_pct.toFixed(2)}%`}
                   </td>
                 </tr>
               ))}

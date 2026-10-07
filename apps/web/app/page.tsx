@@ -18,7 +18,8 @@ export default async function Page() {
 
   return (
     <section className="space-y-8">
-      <LiveRefresh />                        {/* 🔵 보이는 게 없다 — 신호만 담당 */}
+      {/* 🔵 신호 담당 — 알림을 받아 이 화면을 다시 받아온다 (M18) */}
+      <LiveRefresh />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">현황판</h1>
         <p className="mt-1 text-sm text-muted-foreground">

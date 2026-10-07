@@ -32,9 +32,16 @@ export default async function Page() {
           </thead>
           <tbody>
             {lots.map((lot) => {
-              const rate = (lot.pass_qty / lot.total_qty) * 100;   // total 0 은 CHECK가 막음
+              // 🔴 "total 0 은 CHECK 가 막음" 이라고 적어뒀었지만 틀렸다.
+              //    CHECK 는 total_qty >= 0 과 pass + fail = total 뿐이다 — 0 을 허용한다.
+              //    진행 중 LOT(수량 0)을 만들고서야 드러났다
+              const rate = lot.total_qty
+                ? (lot.pass_qty / lot.total_qty) * 100
+                : null;                              // 🔴 0 이 아니라 null — "계산 안 함"
+              // key = PK · 🔴 이 주석을 <tr> 태그 뒤에 두면 공백이 "글자" 로 들어간다.
+              //    <tr> 의 자식은 <td> 뿐이라 하이드레이션 경고가 났었다
               return (
-                <tr key={lot.lot_id} className="border-b last:border-0">  {/* key = PK */}
+                <tr key={lot.lot_id} className="border-b last:border-0">
                   <td className="py-2 pr-4 font-mono">
                     <Link
                       href={`/lots/${lot.lot_id}`}
@@ -61,7 +68,8 @@ export default async function Page() {
                     {lot.fail_qty}
                   </td>
                   <td className="py-2 text-right tabular-nums">
-                    {rate.toFixed(2)}%
+                    {rate === null ? "—" : `${rate.toFixed(2)}%`}
+
                   </td>
                 </tr>
               );

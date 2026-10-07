@@ -38,7 +38,8 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
 
   return (
     <section className="space-y-8">
-      <LiveRefresh />                       {/* 신호만 담당 — 알림이 오면 이 화면을 다시 받는다 */}
+      {/* 신호 담당 — 알림이 오면 이 화면을 다시 받는다 */}
+      <LiveRefresh />
       <div>
         <Link
           href="/lots"
