@@ -56,6 +56,13 @@ export async function getLotShots(lotId: string): Promise<LotShot[]> {
 // ── 순수함수 — DB를 안 부른다. 받은 배열만 계산 (M26 테스트 대상) ──
 //    summarize · byEquipment 는 006_summary_views.sql 로 옮겼다
 
+export function tally(shots: LotShot[]) {              // LOT 수량을 샷에서 직접 센다
+  const total = shots.length;                          // 🔴 production_lot 의 저장값은
+  const fail = shots.filter((s) => s.pass_or_fail === "N").length;   //    진행 중이면 낡는다
+  const pass = total - fail;                           // 🔵 둘만 세면 나머지는 따라온다
+  return { total, pass, fail, yield_pct: total ? (pass / total) * 100 : null };
+}                                                      // 🔴 0/0 은 NaN · "계산 안 함" 은 null
+
 export function pareto(shots: LotShot[]) {             // 불량 사유별 건수, 많은 순
   const count = new Map<string, number>();             // 사유 → 건수
   for (const s of shots) {

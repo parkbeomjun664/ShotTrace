@@ -11,7 +11,8 @@ import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getLot, getLotShots, pareto } from "@/lib/queries";
+import { getLot, getLotShots, pareto, tally } from "@/lib/queries";
+
 
 // 시각 포맷은 lib/format.ts 한 곳에서만 만든다 (ADR 002)
 import { 같은날, 날짜, 분길이, 소수, 시각, 진행중 } from "@/lib/format";
@@ -30,7 +31,7 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
 
   const shots = await getLotShots(lot.lot_id);         // ★ RPC — 조인은 DB 안에
   const defects = pareto(shots);                       // 불량 사유별, 많은 순
-  const rate = (lot.pass_qty / lot.total_qty) * 100;
+  const 집계 = tally(shots);                            // 🔴 저장값(lot.*_qty) 은 진행 중이면 낡는다
   const 진행 = 진행중(lot.ended_at);                    // 아직 안 끝난 LOT (009)
   const 분 = 진행 ? null : 분길이(lot.started_at, lot.ended_at);
   const 넘김 = !진행 && !같은날(lot.started_at, lot.ended_at);   // 🔴 순서 — 단축 평가
@@ -65,11 +66,12 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold tabular-nums">
-              {rate.toFixed(2)}%
+              {집계.yield_pct === null ? "—" : `${집계.yield_pct.toFixed(2)}%`}
             </p>
             <p className="mt-1 text-sm tabular-nums text-muted-foreground">
-              양품 {lot.pass_qty} / {lot.total_qty}
+              {집계.total ? `양품 ${집계.pass} / ${집계.total}` : "아직 들어온 샷이 없다"}
             </p>
+
           </CardContent>
         </Card>
 
@@ -80,7 +82,7 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold tabular-nums">{lot.fail_qty}</p>
+            <p className="text-3xl font-bold tabular-nums">{집계.fail}</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {defects.length ? defects.map(([r, n]) => `${r} ${n}`).join(" · ") : "없음"}
             </p>

@@ -4,8 +4,8 @@ import argparse
 import json
 import logging
 import time
-from dataclasses import dataclass
-from datetime import datetime
+from dataclasses import dataclass, replace
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterator
 
@@ -75,6 +75,17 @@ def wait_for(prev: Shot | None, curr: Shot, speed: float) -> float:
     return min(gap, MAX_GAP) / speed                    # 🔴 자르고 나서 나눈다 · 순서가 배속을 정한다
 
 
+def to_live(shots: list[Shot], start: datetime, speed: float) -> list[Shot]:
+    """원본 시각을 "지금부터" 로 옮긴다 — 데모용 (ADR 010 이 버린 ①②③ 을 피한다)"""
+    out, due, prev = [], 0.0, None                      # 🔴 시계를 밖에서 받는다 → 테스트 가능
+    for shot in shots:
+        due += wait_for(prev, shot, speed)              # 🔵 재생기와 같은 함수를 쓴다 ·
+        out.append(replace(                             #    복사하면 언젠가 두 시계가 어긋난다
+            shot, measured_at=start + timedelta(seconds=due)))
+        prev = shot                                     # frozen 은 고치는 게 아니라 사본을 만든다
+    return out                                          # 🔴 구멍이 접힌 채로 들어간다 → 미래가 안 된다
+
+
 def is_hole(prev: Shot, curr: Shot) -> bool:            # "구멍이란 무엇인가" 를 한 군데 둔다
     return (curr.measured_at - prev.measured_at).total_seconds() > MAX_GAP
 
@@ -127,12 +138,19 @@ def replay(shots: list[Shot], speed: float) -> Iterator[Shot]:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="CSV 를 시각 순으로 재생한다.")
-    p.add_argument("--speed", type=float, default=3600.0, help="재생 배속 (기본 3600)")
+    # 🔴 --speed 에 default 를 주지 않는다. "안 줬다" 와 "이 값을 줬다" 를 구분해야 한다
+    p.add_argument("--speed", type=float, help="재생 배속 (기본 3600 · --live 면 1)")
+    p.add_argument("--live", action="store_true", help="지금 시각부터 1배속 — 데모용")
     p.add_argument("--equipment", default="S14", help="재생할 설비 (기본 S14)")   # 한 프로세스 = 한 설비
     p.add_argument("--limit", type=int, help="앞에서 N샷만 재생")        # 🔴 default=0 이면 빈 목록
     p.add_argument("--host", default="localhost", help="브로커 주소 (기본 localhost)")
     p.add_argument("--port", type=int, default=1883, help="브로커 포트 (기본 1883)")
-    return p.parse_args()
+    args = p.parse_args()
+    if args.live and args.speed is not None and args.speed != 1.0:
+        p.error("--live 는 1배속이다 — --speed 와 같이 못 쓴다")   # 🔴 모순을 조용히 밀지 않는다
+    if args.speed is None:                              # 기본값을 여기서 직접 채운다
+        args.speed = 1.0 if args.live else 3600.0       # 🔴 빠르게 하면 measured_at 이 미래로 간다
+    return args
 
 
 def main() -> None:
@@ -147,6 +165,9 @@ def main() -> None:
     if not shots:
         log.error("재생할 샷이 없다 — 조건을 확인하세요")    # 🔴 걸렀으면 0인 경우를 묻는다
         return
+
+    if args.live:                                       # 🔵 거르고 자른 뒤에 옮긴다 · 순서가 중요하다
+        shots = to_live(shots, datetime.now(timezone.utc), args.speed)
 
     status_topic = STATUS_TOPIC.format(equipment_id=args.equipment)
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, userdata=status_topic)

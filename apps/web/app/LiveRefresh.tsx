@@ -1,17 +1,18 @@
 "use client";   // 🔴 반드시 1행. 위에 코드가 있으면 지시어로 안 읽힌다 (주석은 괜찮다)
 
-// 실시간 신호 담당 — 알림을 받아 "서버야 다시 그려줘" 만 한다 (M18)
+// 실시간 신호 담당 — 알림을 받아 "서버야 다시 그려줘" 만 하고, 연결 상태를 보여준다 (M18)
 // 🔵 숫자를 계산하는 코드가 한 줄도 없다. 집계는 계속 DB 가 한다 (ADR 008)
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { supabase } from "@/lib/supabase/client";     // 🔴 server.ts 아니다 — 연결은 브라우저가 든다
 
 export function LiveRefresh() {
   const router = useRouter();
-  const dirty = useRef(false);                        // 🔵 메모지. 바뀌어도 화면을 다시 안 그린다
-                                                      //    useState 였으면 1초에 6번 다시 그려진다
+  const dirty = useRef(false);                        // 🔵 메모지 — 바뀌어도 화면을 다시 안 그린다
+  const [연결, set연결] = useState(false);              // 🔵 이건 화면에 보여야 하니 useState
+
   useEffect(() => {
     const channel = supabase
       .channel("shot_part-changes")                   // 채널 이름은 자유 — 구분용
@@ -23,7 +24,8 @@ export function LiveRefresh() {
         },
       )
       .subscribe((status) => {
-        console.log("[realtime]", status);           // 수요일의 ● 수신 중 표시에 쓸 재료
+        console.log("[realtime]", status);
+        set연결(status === "SUBSCRIBED");             // 화면의 ● 수신 중 / ○ 연결 끊김
         if (status === "SUBSCRIBED") dirty.current = true;
       });   // 🔴 붙는 순간 한 번 받아온다. 끊긴 동안 놓친 알림은 다시 안 온다
             //    첫 연결의 틈 메우기와 재연결 복구를 이 한 줄이 같이 한다
@@ -40,5 +42,9 @@ export function LiveRefresh() {
     };
   }, [router]);
 
-  return null;                                        // 보이는 건 없다 — 신호만 담당하는 부품
+  return (                                            // 🔴 색만으로 구분하지 않는다 (M09)
+    <p className={연결 ? "text-xs text-emerald-600" : "text-xs text-muted-foreground"}>
+      {연결 ? "● 수신 중" : "○ 연결 끊김"}{/* 글자가 뜻을 지고 색은 거든다 */}
+    </p>
+  );
 }
