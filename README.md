@@ -6,7 +6,7 @@
 제조 IT 22년 경력자 인터뷰로 요구사항을 도출했고, KAMP 공개 실데이터(사출성형기 5,232 샷)를 시간축으로 재생해 사용한다. ISA-95 Level 3에 해당한다.
 
 **배포** — https://shot-trace.vercel.app
-**현재 상태** — 🚧 개발 중 · 단계 2 완료 (화면 4개 · 집계 DB 이관 · 인덱스 증거)
+**현재 상태** — 🚧 개발 중 · **MVP 도달 (2026-10-08)** — CSV 가 배포된 화면까지 실시간으로 흐른다
 2026-08 시작, **2026-11 완성 목표**
 
 ---
@@ -44,14 +44,18 @@ ORDER  BY s.measured_at;
 ```
 KAMP 실데이터 (CSV, 부품 5,232 = 샷 2,626 × 24 변수)
       │
-      ▼  시뮬레이터가 시간순 재생 (배속 1x / 60x / 3600x)
-   MQTT 브로커 (Mosquitto)                    ← Level 2
+      ▼  시뮬레이터가 시간순 재생 (1x / 60x / 3600x · `--live` 는 "지금부터" 1배속)
+   MQTT 브로커 (Mosquitto)                    ← Level 2  ┐ docker compose
+      │                                                  │ 한 묶음으로 뜬다
+      ▼  구독 → upsert (멱등 — PK 가 중복을 막는다)        │
+   수집기 (Python · paho-mqtt)                           ┘
       │
-      ▼  수집기 구독 → upsert (멱등)
+      ▼
    Supabase / PostgreSQL                      ← Level 3
-      │
-      ▼  시간 구간 조인
-   Next.js App Router (Vercel)
+      │        └──── 변경 알림 (Realtime · WAL 구독) ────┐
+      ▼  시간 구간 조인                                   │
+   Next.js App Router (Vercel)  ◀───────────────────────┘
+      알림은 "바뀌었다" 는 신호로만 쓰고, 값은 서버가 다시 읽는다 (1초 throttle)
 ```
 
 실제 공장이라면 센서 → PLC → 게이트웨이가 MQTT 앞단에 붙는다. 이 프로젝트는 그 부분만 시뮬레이터로 대체했고, **브로커 이후는 실제 공장과 구조가 같다.**
@@ -83,11 +87,13 @@ KAMP 실데이터 (CSV, 부품 5,232 = 샷 2,626 × 24 변수)
 | DB | Supabase (PostgreSQL) — 스키마는 SQL 마이그레이션으로만 관리 |
 | 웹 | Next.js 16 App Router · React 19 · TypeScript |
 | 스타일 · UI | Tailwind · shadcn/ui · Recharts |
-| 서버 상태 | TanStack Query · Zod |
+| 실시간 | Supabase Realtime (Postgres Changes) — 알림은 신호, 값은 서버가 다시 읽는다 |
 | ETL | Python · pandas (일회성 적재 스크립트) |
-| 파이프라인 | 시뮬레이터 Python(paho-mqtt) · 수집기 TypeScript(mqtt.js) · Mosquitto (Docker) |
-| 테스트 | Vitest · Playwright |
-| 배포 | Vercel (웹) |
+| 파이프라인 | 시뮬레이터 · 수집기 모두 **Python**(paho-mqtt) · Mosquitto · Docker Compose |
+| 배포 | Vercel (웹) · 수집기와 브로커는 로컬 compose ([ADR 011](docs/decisions/011-수집기-구동-위치.md)) |
+
+**아직 안 쓰는 것** — TanStack Query · Zod(S06) · Vitest · Playwright(S08).
+🔴 이 표에는 **지금 돌고 있는 것만** 적는다. 계획은 [`docs/일정.md`](docs/일정.md) 에 있다.
 
 ---
 
@@ -96,10 +102,11 @@ KAMP 실데이터 (CSV, 부품 5,232 = 샷 2,626 × 24 변수)
 ```
 db/migrations/     스키마의 유일한 진실. 대시보드 클릭으로 바꾸지 않는다
 scripts/etl/       CSV → Supabase 적재 (Python, 일회성)
+scripts/demo/      데모용 LOT 열기 · 닫기 · 치우기 SQL
 apps/web/          Next.js
 services/
   simulator/       CSV를 시간순 MQTT 발행 (Python)
-  collector/       MQTT 구독 → DB 적재 (TypeScript)
+  collector/       MQTT 구독 → DB 적재 (Python) · compose 서비스
 docs/
   강의/            학습 커리큘럼과 강의 노트
   decisions/       ADR — 설계 결정 기록
@@ -127,30 +134,23 @@ KAMP(인공지능 중소벤처 제조 플랫폼)에서 공개한 **사출성형�
 
 주 단위·일 단위 계획은 [`docs/일정.md`](docs/일정.md) 에 있다.
 
----|---|
-| 2026-09 | 화면을 완성한다 — 인덱스 · View/RPC · 파레토 · 시계열 |
-| 2026-10 | 데이터를 흐르게 한다 — 시뮬레이터 · MQTT · 수집기 · 실시간 **MVP** |
-| 2026-11 | 기록을 지킨다 — 인증 · 실적 입력 · 트랜잭션 · 마스터 |
-| 2026-12 | 차별화하고 마감한다 — OEE · LLM · 테스트 · CI · 문서 **완성** |
-| 2027-01~02 | 공부하고 개선한다 — 전체 복습 · 성능 심화 · 리팩터링 · 설명 훈련 |
-
-주 단위·일 단위 계획은 [`docs/일정.md`](docs/일정.md) 에 있다.
-
----|---|
-| 2026-08 | 스키마 확정 · 데이터 적재 · 핵심 쿼리 검증 · 배포 파이프라인 |
-| 2026-09 | 현황판 · LOT 추적 · 불량 파레토 (정적 데이터) |
-| 2026-10 | 실시간 파이프라인 — **MVP 완성** |
-| 2026-11 | 인증 · 실적 입력 · 마스터 관리 |
-| 2026-12 | LLM 대응 가이드 · OEE |
-| 2027-01 | 테스트 · 성능 · 관측성 |
-| 2027-02 | 문서화 · 공개 준비 |
-
 ---
 
 ## 시작하기
 
-**개발을 시작한다면 → [`docs/START-HERE.md`](docs/START-HERE.md)**
-9월 1주에 무엇을 어떤 순서로 할지, 각 단계마다 어느 필기를 펴야 하는지 적어뒀다.
+**지금 어디까지 왔나 → [`docs/progress.md`](docs/progress.md)**
+**그날그날의 기록 → [`docs/오늘.md`](docs/오늘.md)** · **왜 그렇게 했나 → [`docs/decisions/`](docs/decisions/)**
+
+### 돌려보기
+
+```
+docker compose up -d                                    브로커 + 수집기
+python services/simulator/replay.py --live --limit 30   "지금부터" 1배속 재생
+cd apps/web && npm run dev                              화면
+```
+
+데모용 LOT 을 열고 닫는 SQL 은 [`scripts/demo/demo_lot.sql`](scripts/demo/demo_lot.sql) 에 있다.
+🔴 `--live` 없이 돌리면 원본 시각 그대로라 **이미 있는 행을 덮어쓴다**(멱등). 숫자가 안 움직인다.
 
 ## 배경 문서
 
