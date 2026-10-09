@@ -138,6 +138,7 @@ KAMP(인공지능 중소벤처 제조 플랫폼)에서 공개한 **사출성형�
 
 ## 시작하기
 
+**새로 합류한다면 → [`docs/인수인계.md`](docs/인수인계.md)** — 일하는 방식 · 환경 · 다음 할 일
 **지금 어디까지 왔나 → [`docs/progress.md`](docs/progress.md)**
 **그날그날의 기록 → [`docs/오늘.md`](docs/오늘.md)** · **왜 그렇게 했나 → [`docs/decisions/`](docs/decisions/)**
 
