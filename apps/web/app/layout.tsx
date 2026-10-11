@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { UserMenu } from "./UserMenu";                 // 헤더 오른쪽 — 누가 로그인했나 (M19)
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,12 +50,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/login"
-              className="ml-auto rounded px-3 py-1.5 text-sm text-black/50 hover:bg-black/5 dark:text-white/50 dark:hover:bg-white/10"
-            >
-              로그인
-            </Link>
+            {/* 서버가 쿠키를 읽어 "누구냐" 를 그린다 — 로그인 전엔 링크, 후엔 이메일 + 로그아웃 */}
+            <UserMenu />
           </nav>
         </header>
 
