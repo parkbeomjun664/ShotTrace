@@ -30,7 +30,16 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  await supabase.auth.getUser();                       // 🔴 이 줄이 일을 한다 — 지우면 아무것도 안 갈아준다
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();                   // 🔴 이 줄이 일을 한다 — 갈아주고, 누구인지 본다
+
+  // 로그인 안 했으면 /login 으로 — 빈 화면을 안 보게 하는 친절. 막는 건 RLS 다
+  if (!user && !request.nextUrl.pathname.startsWith("/login")) {   // 🔴 /login 은 열어둔다 — 안 그러면 끝없이 돈다
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
 
   return response;
 }

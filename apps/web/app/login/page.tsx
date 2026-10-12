@@ -30,6 +30,12 @@ export default async function Page({ searchParams }: PageProps<"/login">) {
         </button>
       </form>
 
+      {/* 데모 계정 — 비밀번호를 일부러 공개한다. 🔴 그래서 끝까지 viewer(읽기만)여야 한다 (10/13) */}
+      <p className="text-xs text-muted-foreground">
+        둘러보기 — <span className="font-mono">viewer@example.com</span> /{" "}
+        <span className="font-mono">parkbeomjun122!!</span> · 읽기 전용
+      </p>
+
       {/* 🔴 required · type="email" 은 편의일 뿐 — 진짜 검사는 서버가 한다 */}
       {error && (
         <p className="text-sm text-red-600">이메일 또는 비밀번호가 맞지 않습니다</p>

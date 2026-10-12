@@ -1,8 +1,10 @@
 // DB 조회를 한곳에 모은다 · M11(집계는 DB에서) · M27(왕복 횟수)
 import type { Database } from "@/types/database";  // DB 스키마 타입
-import { supabase } from "@/lib/supabase/server";      // 화면은 직접 쿼리하지 않는다
+import { createSessionClient } from "@/lib/supabase/session";   // 세션 클라이언트 — RLS 를 진짜로 거친다 (M19)
+    // 화면은 직접 쿼리하지 않는다
 
 export async function getLots() {                      // LOT 25건 + 각 제품명
+  const supabase = await createSessionClient();         // 🔴 함수 안에서 — 요청마다 그 사람으로
   const { data, error } = await supabase               // 성공/실패가 같이 온다
     .from("production_lot")                            // 어느 테이블에서
     .select(                                           // 어떤 컬럼을
@@ -22,6 +24,7 @@ export type Lot =                                      // getLots 가 주는 LOT
                                                        //    select 를 고치면 자동으로 따라온다
 
 export async function getLot(lotId: string) {          // LOT 한 건 — 상세 화면용
+  const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("production_lot")
     .select(                                           // 임베드 2개 — 제품 + 설비
@@ -44,6 +47,7 @@ export type LotShot = Omit<RpcRow, "fail_reason" | "part_id"> & {
 };
 
 export async function getLotShots(lotId: string): Promise<LotShot[]> {
+  const supabase = await createSessionClient();
   const { data, error } = await supabase.rpc("get_lot_shots", {
     p_lot_id: lotId,
   });
@@ -79,6 +83,7 @@ export function pareto(shots: LotShot[]) {             // 불량 사유별 건�
 //    View 컬럼은 전부 number | null 이다. Postgres 가 NOT NULL 을 보장 못 한다
 
 export async function getDefectPareto() {              // 불량 사유별 (3행)
+  const supabase = await createSessionClient();
   const {data, error} = await supabase
     .from("defect_pareto")                             // 테이블처럼 쓴다
     .select("fail_reason, fail_qty, share_pct")        // share_pct 합계 = 100
@@ -89,6 +94,7 @@ export async function getDefectPareto() {              // 불량 사유별 (3행
 }
 
 export async function getDailyYield() {                // 일별 수율 (13행)
+  const supabase = await createSessionClient();
   const {data, error} = await supabase
     .from("daily_yield")
     .select("plan_date, total_qty, pass_qty, fail_qty, yield_pct")
@@ -102,6 +108,7 @@ export type DefectRow = Awaited<ReturnType<typeof getDefectPareto>>[number];
 export type DailyRow = Awaited<ReturnType<typeof getDailyYield>>[number];
 
 export async function getEquipmentSummary() {          // 설비별 (3행) · LEFT JOIN
+  const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("equipment_summary")
     .select("equip_cd, equip_name, tonnage, lot_count, total_qty, pass_qty, fail_qty, yield_pct")
@@ -112,6 +119,7 @@ export async function getEquipmentSummary() {          // 설비별 (3행) · LE
 }
 
 export async function getPlantSummary() {             // 공장 전체 (1행)
+  const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("plant_summary")
     .select("lot_count, total_qty, pass_qty, fail_qty, yield_pct")

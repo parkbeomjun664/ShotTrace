@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import { getLots } from "@/lib/queries";
 
-export const revalidate = 60;                          // 현황판과 같은 캐시
 
 export default async function Page() {
   const lots = await getLots();                        // 제품명은 FK 임베드로 함께

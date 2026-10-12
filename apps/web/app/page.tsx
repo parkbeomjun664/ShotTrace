@@ -35,8 +35,10 @@ export default async function Page() {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {/* 🔴 ?? 0 이면 "0.00%" — 명단에 없는 사람에게 "전부 불량" 이라고 거짓말한다 (10/13)
+              == null 은 null 과 undefined 를 같이 잡는다 (plant?. 가 undefined 를 낼 수 있다) */}
           <p className="text-4xl font-bold tabular-nums">
-            {(plant?.yield_pct ?? 0).toFixed(2)}%
+            {plant?.yield_pct == null ? "—" : `${plant.yield_pct.toFixed(2)}%`}
           </p>
           <p className="mt-2 text-sm tabular-nums text-muted-foreground">
             양품 {(plant?.pass_qty ?? 0).toLocaleString()} / 생산{" "}

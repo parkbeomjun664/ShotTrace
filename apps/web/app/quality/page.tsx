@@ -2,7 +2,6 @@
 import { getDailyYield, getDefectPareto } from "@/lib/queries";
 import { ParetoChart } from "./ParetoChart";
 
-export const revalidate = 60;
 
 export default async function Page() {
   const [pareto, daily] = await Promise.all([   // 왕복 2번을 동시에
