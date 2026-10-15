@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -111,6 +111,41 @@ export type Database = {
           },
         ]
       }
+      production_record: {
+        Row: {
+          fail_qty: number
+          lot_id: string
+          pass_qty: number
+          record_id: number
+          recorded_at: string
+          recorded_by: string
+        }
+        Insert: {
+          fail_qty: number
+          lot_id: string
+          pass_qty: number
+          record_id?: never
+          recorded_at?: string
+          recorded_by?: string
+        }
+        Update: {
+          fail_qty?: number
+          lot_id?: string
+          pass_qty?: number
+          record_id?: never
+          recorded_at?: string
+          recorded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_record_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "production_lot"
+            referencedColumns: ["lot_id"]
+          },
+        ]
+      }
       shot: {
         Row: {
           average_back_pressure: number | null
@@ -139,6 +174,7 @@ export type Database = {
           mold_temperature_4: number | null
           plasticizing_position: number | null
           plasticizing_time: number | null
+          received_at: string | null
         }
         Insert: {
           average_back_pressure?: number | null
@@ -167,6 +203,7 @@ export type Database = {
           mold_temperature_4?: number | null
           plasticizing_position?: number | null
           plasticizing_time?: number | null
+          received_at?: string | null
         }
         Update: {
           average_back_pressure?: number | null
@@ -195,6 +232,7 @@ export type Database = {
           mold_temperature_4?: number | null
           plasticizing_position?: number | null
           plasticizing_time?: number | null
+          received_at?: string | null
         }
         Relationships: [
           {
@@ -218,7 +256,7 @@ export type Database = {
           equipment_id: string
           fail_reason: string | null
           measured_at: string
-          part_id: string
+          part_id: string | null
           part_serial: number | null
           pass_or_fail: string
           product_id: number
@@ -227,7 +265,7 @@ export type Database = {
           equipment_id: string
           fail_reason?: string | null
           measured_at: string
-          part_id: string
+          part_id?: string | null
           part_serial?: number | null
           pass_or_fail: string
           product_id: number
@@ -236,7 +274,7 @@ export type Database = {
           equipment_id?: string
           fail_reason?: string | null
           measured_at?: string
-          part_id?: string
+          part_id?: string | null
           part_serial?: number | null
           pass_or_fail?: string
           product_id?: number
@@ -257,6 +295,21 @@ export type Database = {
             referencedColumns: ["product_id"]
           },
         ]
+      }
+      user_role: {
+        Row: {
+          role: string
+          user_id: string
+        }
+        Insert: {
+          role: string
+          user_id: string
+        }
+        Update: {
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -303,6 +356,7 @@ export type Database = {
       }
     }
     Functions: {
+      app_role: { Args: never; Returns: string }
       get_lot_shots: {
         Args: { p_lot_id: string }
         Returns: {
