@@ -9,7 +9,7 @@ export default function RecordForm({ lotIds }: { lotIds: string[] }) {
 
   return (
     <form action={formAction} className="mt-6 max-w-sm space-y-3"> {/* 🔴 createRecord 를 바로 꽂으면 쪽지가 사라진다 */}
-      <select name="lotId" required defaultValue="" className="w-full rounded border px-3 py-2 text-sm">{/* 🔴 name = 서버의 formData.get() 철자 */}
+      <select key={state?.values?.lotId ?? ""} name="lotId" required defaultValue={state?.values?.lotId ?? ""} className="w-full rounded border px-3 py-2 text-sm">{/* 🔴 select 의 defaultValue 는 mount 때 한 번만 읽힌다 → key 가 바뀌면 새로 그린다 */}
         <option value="" disabled>{/* 빈 값 "" — 안 고르면 Zod 의 min(1) 에 걸린다 */}
           LOT 을 고르세요
         </option>
@@ -20,11 +20,11 @@ export default function RecordForm({ lotIds }: { lotIds: string[] }) {
         ))}
       </select>
       <div className="flex gap-3">
-        <input name="passQty" type="number" min={0} required placeholder="양품" className="w-full rounded border px-3 py-2 text-sm" /> {/* required · min 은 안내문 — 진짜 검사는 Zod */}
-        <input name="failQty" type="number" min={0} placeholder="불량" className="w-full rounded border px-3 py-2 text-sm" /> {/* 비우면 "" → 0 */}
+        <input name="passQty" type="number" min={0} defaultValue={state?.values?.passQty} required placeholder="양품" className="w-full rounded border px-3 py-2 text-sm" /> {/* 반려되면 아까 쓴 값 · 성공하면 undefined → 빈칸 */}
+        <input name="failQty" type="number" min={0} defaultValue={state?.values?.failQty} placeholder="불량" className="w-full rounded border px-3 py-2 text-sm" /> {/* 비우면 "" → 0 */}
       </div>
       <button
-        disabled={pending}                               // 저장 중엔 잠근다 — 🔴 더블클릭을 줄일 뿐, 진짜 방어는 DB (내일)
+        disabled={pending}                               // 저장 중엔 잠근다 — 🔴 더블클릭을 줄일 뿐, 진짜 방어는 DB (S06 +1)
         className="w-full rounded bg-black py-2 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
       >
         {pending ? "저장 중…" : "저장"}

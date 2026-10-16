@@ -13,15 +13,19 @@ const RecordInput = z                                  // 서버의 검문소 �
   })
   .refine((r) => r.passQty + r.failQty > 0, { error: "양품과 불량이 둘 다 0 이에요" });   // 칸끼리의 관계 — DB CHECK 와 짝
 
-export type RecordState = { ok: boolean; message: string } | null;   // 폼에 돌려줄 쪽지 · 타입은 실행 때 사라져서 export 가능
+type RecordValues = { lotId: string; passQty: string; failQty: string };   // 반려할 때 돌려줄 "아까 쓴 서류" — 글자 그대로
+
+export type RecordState = { ok: boolean; message: string; values?: RecordValues } | null;   // 폼에 돌려줄 쪽지 · 타입은 실행 때 사라져서 export 가능
 
 export async function createRecord(_prev: RecordState, formData: FormData): Promise<RecordState> {   // 🔴 _prev 자리를 빼면 formData 가 밀린다
-  const parsed = RecordInput.safeParse({               // safe — 실패해도 던지지 않고 결과를 준다
-    lotId: formData.get("lotId"),                      // 🔴 폼의 name 과 철자가 같아야 한다
-    passQty: formData.get("passQty"),
-    failQty: formData.get("failQty"),
-  });
-  if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message };   // 첫 번째 하나만 보여준다
+  const values = {
+    lotId: String(formData.get("lotId") ?? ""),        // 🔴 ?? "" 먼저 — String(null) 은 "null" 이라는 글자가 된다
+    passQty: String(formData.get("passQty") ?? ""),
+    failQty: String(formData.get("failQty") ?? ""),
+  };
+
+  const parsed = RecordInput.safeParse(values);        // safe — 실패해도 던지지 않고 결과를 준다
+  if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message, values };   // 첫 메시지 하나 + 아까 쓴 값
 
   const supabase = await createSessionClient();        // 쿠키의 신분으로 — RLS 가 "그 사람" 으로 검사한다
   const { error } = await supabase.from("production_record").insert({
@@ -30,12 +34,12 @@ export async function createRecord(_prev: RecordState, formData: FormData): Prom
     fail_qty: parsed.data.failQty,                     // parsed.data = 통과해서 숫자로 바뀐 값
   });                                                  // 🔴 recorded_by 는 안 보낸다 — DB 의 DEFAULT 가 채운다
 
-  if (error?.code === "42501") return { ok: false, message: "실적 입력 권한이 없어요 (worker 만 쓸 수 있어요)" };   // WITH CHECK 에 걸림 — 사람 말로
+  if (error?.code === "42501") return { ok: false, message: "실적 입력 권한이 없어요 (worker 만 쓸 수 있어요)", values };   // WITH CHECK 에 걸림 — 사람 말로
   if (error) {
     console.error(error);                              // 사람에게는 사람 말, 로그에는 진짜 에러
-    return { ok: false, message: "저장하지 못했어요. 잠시 뒤 다시 해보세요" };
+    return { ok: false, message: "저장하지 못했어요. 잠시 뒤 다시 해보세요", values };
   }
 
   revalidatePath("/records");                          // 이 화면을 새로 그려라 — 최근 실적 목록이 바뀐다
-  return { ok: true, message: `저장했어요 — 양품 ${parsed.data.passQty} · 불량 ${parsed.data.failQty}` };
+  return { ok: true, message: `저장했어요 — 양품 ${parsed.data.passQty} · 불량 ${parsed.data.failQty}` };   // 🔵 values 없음 → 빈 양식
 }
