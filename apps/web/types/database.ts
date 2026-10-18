@@ -119,6 +119,7 @@ export type Database = {
           record_id: number
           recorded_at: string
           recorded_by: string
+          request_id: string
         }
         Insert: {
           fail_qty: number
@@ -127,6 +128,7 @@ export type Database = {
           record_id?: never
           recorded_at?: string
           recorded_by?: string
+          request_id: string
         }
         Update: {
           fail_qty?: number
@@ -135,6 +137,7 @@ export type Database = {
           record_id?: never
           recorded_at?: string
           recorded_by?: string
+          request_id?: string
         }
         Relationships: [
           {

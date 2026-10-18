@@ -1,4 +1,4 @@
-"""실적 쓰기 정책 확인 (012) — 역할별로 실제 로그인해서 써본다.
+"""실적 쓰기 정책 확인 (012 · 013) — 역할별로 실제 로그인해서 써본다.
 
     python scripts/verify/rls_write.py                 viewer + worker
     python scripts/verify/rls_write.py --viewer-only   viewer 만 (비밀번호를 안 묻는다)
@@ -9,6 +9,7 @@ viewer 는 공개 데모 계정이라 그대로 쓴다. worker 비밀번호는 �
 import getpass
 import os
 import sys
+import uuid
 
 from dotenv import load_dotenv
 from postgrest.exceptions import APIError
@@ -51,7 +52,7 @@ viewer, viewer_id = login(*VIEWER)
 lot_id = viewer.table("production_lot").select("lot_id").limit(1).execute().data[0]["lot_id"]
 print(f"  (시험용 LOT: {lot_id})")
 
-data, err = try_insert(viewer, {"lot_id": lot_id, "pass_qty": 1, "fail_qty": 0})
+data, err = try_insert(viewer, {"lot_id": lot_id, "pass_qty": 1, "fail_qty": 0, "request_id": str(uuid.uuid4())})
 check(
     "viewer 는 실적을 쓸 수 없다",
     err is not None and err.code == "42501",
@@ -71,7 +72,8 @@ if worker_pw:
     except AuthApiError as e:
         sys.exit(f"  🔴 로그인 실패 — {e.message} (한/영 · Caps Lock 확인)")
 
-    data, err = try_insert(worker, {"lot_id": lot_id, "pass_qty": 10, "fail_qty": 1})
+    rid = str(uuid.uuid4())                         # 송장번호 — 아래에서 같은 번호로 한 번 더 보낸다
+    data, err = try_insert(worker, {"lot_id": lot_id, "pass_qty": 10, "fail_qty": 1, "request_id": rid})
     ok = err is None and bool(data) and data[0]["recorded_by"] == worker_id
     if data:
         created.append(data[0]["record_id"])
@@ -81,8 +83,18 @@ if worker_pw:
         f"record_id={data[0]['record_id']} recorded_by=본인" if ok else f"{err.code} {err.message}" if err else data,
     )
 
+    data, err = try_insert(worker, {"lot_id": lot_id, "pass_qty": 10, "fail_qty": 1, "request_id": rid})
+    if data:
+        created.append(data[0]["record_id"])
+    check(
+        "같은 번호표로 두 번 보내면 한 줄만 (013 · UNIQUE)",
+        err is not None and err.code == "23505",
+        f"{err.code} {err.message}" if err else f"🔴 두 줄이 됐다: {data}",
+    )
+
     data, err = try_insert(
-        worker, {"lot_id": lot_id, "pass_qty": 10, "fail_qty": 1, "recorded_by": viewer_id}
+        worker,
+        {"lot_id": lot_id, "pass_qty": 10, "fail_qty": 1, "recorded_by": viewer_id, "request_id": str(uuid.uuid4())},
     )
     if data:
         created.append(data[0]["record_id"])

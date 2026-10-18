@@ -8,6 +8,7 @@ import { createSessionClient } from "@/lib/supabase/session";
 const RecordInput = z                                  // 서버의 검문소 — required 는 안내문일 뿐 (M20)
   .object({
     lotId: z.string().min(1, { error: "LOT 을 고르세요" }),     // 빈 선택("")을 막는다
+    requestId: z.uuid({ error: "화면을 새로고침한 뒤 다시 저장하세요" }),   // 번호표가 uuid 모양인가 — 지워지거나 바뀌면 여기서
     passQty: z.coerce.number({ error: "양품 수량은 숫자로 넣으세요" }).int({ error: "양품은 정수로 넣으세요" }).min(0, { error: "양품은 0 이상이어야 해요" }),   // 🔴 FormData 는 전부 글자 — coerce 로 숫자로
     failQty: z.coerce.number({ error: "불량 수량은 숫자로 넣으세요" }).int({ error: "불량은 정수로 넣으세요" }).min(0, { error: "불량은 0 이상이어야 해요" }),   // 숫자인가 → 정수인가 → 0 이상인가
   })
@@ -24,7 +25,7 @@ export async function createRecord(_prev: RecordState, formData: FormData): Prom
     failQty: String(formData.get("failQty") ?? ""),
   };
 
-  const parsed = RecordInput.safeParse(values);        // safe — 실패해도 던지지 않고 결과를 준다
+  const parsed = RecordInput.safeParse({ ...values, requestId: formData.get("requestId") });   // 번호표는 검사만 — values(돌려줄 서류)엔 안 넣는다
   if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message, values };   // 첫 메시지 하나 + 아까 쓴 값
 
   const supabase = await createSessionClient();        // 쿠키의 신분으로 — RLS 가 "그 사람" 으로 검사한다
@@ -32,8 +33,13 @@ export async function createRecord(_prev: RecordState, formData: FormData): Prom
     lot_id: parsed.data.lotId,
     pass_qty: parsed.data.passQty,
     fail_qty: parsed.data.failQty,                     // parsed.data = 통과해서 숫자로 바뀐 값
+    request_id: parsed.data.requestId,                 // 🔴 requestId 를 함께 전달
   });                                                  // 🔴 recorded_by 는 안 보낸다 — DB 의 DEFAULT 가 채운다
 
+  if (error?.code === "23505") {                       // UNIQUE 위반 = 같은 번호표가 또 왔다
+    revalidatePath("/records");                        // 새 번호표 · 최근 실적 다시 그리기
+    return { ok: true, message: "이미 저장된 실적이에요 — 같은 제출이 두 번 왔어요" };   // 🔵 실패가 아니라 "이미 됐다" — ok: true
+  }
   if (error?.code === "42501") return { ok: false, message: "실적 입력 권한이 없어요 (worker 만 쓸 수 있어요)", values };   // WITH CHECK 에 걸림 — 사람 말로
   if (error) {
     console.error(error);                              // 사람에게는 사람 말, 로그에는 진짜 에러

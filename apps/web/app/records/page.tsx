@@ -16,7 +16,7 @@ export default async function Page() {               // 서버 컴포넌트 — 
         작업자가 생산·불량 수량을 기록한다. 수정은 불가하고 취소 후 재등록만 가능하다.
       </p>
 
-      <RecordForm lotIds={lots.map((lot) => lot.lot_id)} /> {/* 이름만 건넨다 — 브라우저엔 필요한 것만 */}
+      <RecordForm lotIds={lots.map((lot) => lot.lot_id)} requestId={crypto.randomUUID()} /> {/* 그릴 때마다 새 번호표 — 성공하면 revalidatePath 가 다시 그린다 */}
 
       <h2 className="mt-10 text-lg font-semibold">최근 실적</h2> {/* 저장하면 revalidatePath 가 이 목록을 새로 그린다 */}
       {records.length === 0 ? (
