@@ -129,13 +129,16 @@ export async function getPlantSummary() {             // 공장 전체 (1행)
   return data;                                         // LOT 0건이면 null
 }
 
+export type RecentRecord = { record_id: number; lot_id: string; pass_qty: number; fail_qty: number; recorded_at: string };   // 🔴 View 타입은 전부 | null — 원본이 NOT NULL 이라 덮어쓴다
+
 export async function getRecentRecords() {           // 최근 실적 10건 — 저장하면 바로 아래에
   const supabase = await createSessionClient();
   const { data, error } = await supabase
-    .from("production_record")                         // read_staff 정책 — 명단에 있으면 읽는다 (012)
+    .from("active_record")                             // 살아 있는 실적 — 취소된 줄은 빠진다 (014)
     .select("record_id, lot_id, pass_qty, fail_qty, recorded_at")
     .order("recorded_at", { ascending: false })        // 🔴 번호(record_id)엔 구멍이 있다 — 순서의 뜻은 시각에
-    .limit(10);                                        // 장부는 늘기만 한다 — 처음부터 자른다
+    .limit(10)                                         // 장부는 늘기만 한다 — 처음부터 자른다
+    .overrideTypes<RecentRecord[], { merge: false }>();   // "내 말 믿어" — 섞지 않고 통째로 바꾼다
 
   if (error) throw error;
   return data;

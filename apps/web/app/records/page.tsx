@@ -5,6 +5,7 @@ import { 날짜, 시각 } from "@/lib/format";
 import { getLots, getRecentRecords } from "@/lib/queries";
 
 import RecordForm from "./RecordForm";               // 우체통이 필요한 폼만 클라이언트
+import CorrectForm from "./CorrectForm";             // 정정 폼도 클라이언트
 
 export default async function Page() {               // 서버 컴포넌트 — DB 를 읽어 폼에 건넨다
   const [lots, records] = await Promise.all([getLots(), getRecentRecords()]);   // 두 번 읽기를 동시에
@@ -45,6 +46,10 @@ export default async function Page() {               // 서버 컴포넌트 — 
           </tbody>
         </table>
       )}
+
+      <h2 className="mt-10 text-lg font-semibold">정정</h2> {/* 고치지 않는다 — 빨간 줄 + 새 줄 (M21) */}
+      <p className="mt-1 text-sm text-muted-foreground">고르면 원래 줄은 취소되고, 새 수량으로 다시 적힌다.</p>
+      <CorrectForm records={records} requestId={crypto.randomUUID()} /> {/* 저장과 다른 번호표 — 같으면 정정이 "이미 됐다" 로 막힌다 */}
     </section>
   );
 }

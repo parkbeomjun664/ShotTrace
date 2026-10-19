@@ -434,6 +434,16 @@ export type Database = {
     }
     Functions: {
       app_role: { Args: never; Returns: string }
+      correct_record: {
+        Args: {
+          p_fail_qty: number
+          p_pass_qty: number
+          p_reason: string
+          p_record_id: number
+          p_request_id: string
+        }
+        Returns: number
+      }
       get_lot_shots: {
         Args: { p_lot_id: string }
         Returns: {

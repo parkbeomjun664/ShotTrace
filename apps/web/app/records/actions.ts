@@ -49,3 +49,48 @@ export async function createRecord(_prev: RecordState, formData: FormData): Prom
   revalidatePath("/records");                          // 이 화면을 새로 그려라 — 최근 실적 목록이 바뀐다
   return { ok: true, message: `저장했어요 — 양품 ${parsed.data.passQty} · 불량 ${parsed.data.failQty}` };   // 🔵 values 없음 → 빈 양식
 }
+
+const CorrectInput = z                                 // 정정의 검문소 — 🔴 양품 · 불량 두 줄은 RecordInput 과 중복 (나중에 묶기)
+  .object({
+    recordId: z.coerce.number().int().positive({ error: "정정할 실적을 고르세요" }),   // 안 고르면 "" → 0 — 그래서 양수로 막는다
+    requestId: z.uuid({ error: "화면을 새로고침한 뒤 다시 저장하세요" }),
+    passQty: z.coerce.number({ error: "양품 수량은 숫자로 넣으세요" }).int({ error: "양품은 정수로 넣으세요" }).min(0, { error: "양품은 0 이상이어야 해요" }),
+    failQty: z.coerce.number({ error: "불량 수량은 숫자로 넣으세요" }).int({ error: "불량은 정수로 넣으세요" }).min(0, { error: "불량은 0 이상이어야 해요" }),
+    reason: z.string().trim().min(1, { error: "정정 이유를 적으세요" }),   // DB 의 CHECK (length(trim(reason)) > 0) 와 짝
+  })
+  .refine((r) => r.passQty + r.failQty > 0, { error: "양품과 불량이 둘 다 0 이에요" });
+
+export type CorrectState = { ok: boolean; message: string } | null;   // 정정 폼에 돌려줄 쪽지
+
+export async function correctRecord(_prev: CorrectState, formData: FormData): Promise<CorrectState> {
+  const parsed = CorrectInput.safeParse({
+    recordId: formData.get("recordId"),
+    requestId: formData.get("requestId"),
+    passQty: formData.get("passQty"),
+    failQty: formData.get("failQty"),
+    reason: formData.get("reason"),
+  });
+  if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message };
+
+  const supabase = await createSessionClient();
+  const { error } = await supabase.rpc("correct_record", {   // 🔵 한 번 부른다 = 트랜잭션 하나 — 취소 + 새 줄이 함께
+    p_record_id: parsed.data.recordId,
+    p_pass_qty: parsed.data.passQty,
+    p_fail_qty: parsed.data.failQty,
+    p_reason: parsed.data.reason,
+    p_request_id: parsed.data.requestId,               // p_ 이름은 함수 매개변수와 같아야 — 틀리면 tsc 가 잡는다
+  });
+
+  if (error?.code === "23505") {
+    revalidatePath("/records");
+    return { ok: true, message: "이미 정정된 실적이에요" };   // 먼저 정정됨(record_cancel_pkey) 또는 같은 제출 두 번(request_id) — 둘 다 "이미 됐다"
+  }
+  if (error?.code === "42501") return { ok: false, message: "정정 권한이 없어요 (worker 만 할 수 있어요)" };   // INVOKER 라 RLS 가 막는다
+  if (error) {
+    console.error(error);
+    return { ok: false, message: "정정하지 못했어요. 잠시 뒤 다시 해보세요" };
+  }
+
+  revalidatePath("/records");
+  return { ok: true, message: `정정했어요 — 양품 ${parsed.data.passQty} · 불량 ${parsed.data.failQty}` };
+}
