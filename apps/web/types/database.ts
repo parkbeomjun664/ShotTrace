@@ -149,6 +149,42 @@ export type Database = {
           },
         ]
       }
+      record_cancel: {
+        Row: {
+          canceled_at: string
+          canceled_by: string
+          reason: string
+          record_id: number
+        }
+        Insert: {
+          canceled_at?: string
+          canceled_by?: string
+          reason: string
+          record_id: number
+        }
+        Update: {
+          canceled_at?: string
+          canceled_by?: string
+          reason?: string
+          record_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "record_cancel_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: true
+            referencedRelation: "active_record"
+            referencedColumns: ["record_id"]
+          },
+          {
+            foreignKeyName: "record_cancel_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: true
+            referencedRelation: "production_record"
+            referencedColumns: ["record_id"]
+          },
+        ]
+      }
       shot: {
         Row: {
           average_back_pressure: number | null
@@ -316,6 +352,44 @@ export type Database = {
       }
     }
     Views: {
+      active_record: {
+        Row: {
+          fail_qty: number | null
+          lot_id: string | null
+          pass_qty: number | null
+          record_id: number | null
+          recorded_at: string | null
+          recorded_by: string | null
+          request_id: string | null
+        }
+        Insert: {
+          fail_qty?: number | null
+          lot_id?: string | null
+          pass_qty?: number | null
+          record_id?: number | null
+          recorded_at?: string | null
+          recorded_by?: string | null
+          request_id?: string | null
+        }
+        Update: {
+          fail_qty?: number | null
+          lot_id?: string | null
+          pass_qty?: number | null
+          record_id?: number | null
+          recorded_at?: string | null
+          recorded_by?: string | null
+          request_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_record_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "production_lot"
+            referencedColumns: ["lot_id"]
+          },
+        ]
+      }
       daily_yield: {
         Row: {
           fail_qty: number | null

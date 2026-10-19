@@ -1,4 +1,4 @@
-"""실적 쓰기 정책 확인 (012 · 013) — 역할별로 실제 로그인해서 써본다.
+"""실적 쓰기 정책 확인 (012 · 013 · 014) — 역할별로 실제 로그인해서 써본다.
 
     python scripts/verify/rls_write.py                 viewer + worker
     python scripts/verify/rls_write.py --viewer-only   viewer 만 (비밀번호를 안 묻는다)
@@ -111,8 +111,37 @@ if worker_pw:
         dele = worker.table("production_record").delete().eq("record_id", rid).execute().data
         check("지울 수 없다 (DELETE 정책 없음)", dele == [], f"지워진 행 {len(dele)}개 — 에러 없이 조용히")
 
+    # ── 취소 장부 (014) ─────────────────────────────
+    if created:
+        rid = created[0]
+
+        def try_cancel(client, row):
+            try:
+                return client.table("record_cancel").insert(row).execute().data, None
+            except APIError as e:
+                return None, e
+
+        data, err = try_cancel(viewer, {"record_id": rid, "reason": "시험"})
+        check("viewer 는 취소할 수 없다", err is not None and err.code == "42501",
+              f"{err.code} {err.message}" if err else f"🔴 취소됐다: {data}")
+
+        data, err = try_cancel(worker, {"record_id": rid, "reason": "   "})
+        check("이유가 공백뿐이면 막힌다 (CHECK)", err is not None and err.code == "23514",
+              f"{err.code} {err.message}" if err else f"🔴 들어갔다: {data}")
+
+        data, err = try_cancel(worker, {"record_id": rid, "reason": "시험 — 수량 잘못 입력"})
+        check("worker 는 취소할 수 있다", err is None and bool(data), f"record_id={rid} 취소" if data else f"{err.code} {err.message}")
+
+        data, err = try_cancel(worker, {"record_id": rid, "reason": "한 번 더"})
+        check("같은 줄은 한 번만 취소된다 (PK)", err is not None and err.code == "23505",
+              f"{err.code} {err.message}" if err else f"🔴 두 번 취소됐다: {data}")
+
+        alive = [r["record_id"] for r in worker.table("active_record").select("record_id").eq("record_id", rid).execute().data]
+        check("취소한 줄은 active_record 에서 빠진다", alive == [], "보이지 않음" if alive == [] else f"🔴 보인다: {alive}")
+
     if created:
         admin = create_client(URL, SERVICE)  # RLS 를 건너뛰는 열쇠 — 시험 행 치우기에만
+        admin.table("record_cancel").delete().in_("record_id", created).execute()  # FK — 취소 장부 먼저
         admin.table("production_record").delete().in_("record_id", created).execute()
         print(f"\n  (시험 행 {len(created)}개 치움)")
 else:
