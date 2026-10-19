@@ -28,7 +28,7 @@ URL = os.environ["NEXT_PUBLIC_SUPABASE_URL"]
 ANON = os.environ["NEXT_PUBLIC_SUPABASE_ANON_KEY"]
 SERVICE = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 
-TABLES = ["equipment", "product", "production_lot", "shot", "shot_part", "user_role", "production_record", "record_cancel"]
+TABLES = ["equipment", "product", "production_lot", "shot", "shot_part", "user_role", "production_record", "record_cancel", "downtime_reason", "downtime"]
 VIEWS = ["equipment_summary", "plant_summary", "daily_yield", "defect_pareto", "active_record"]
 UPDATE_KEYS = {  # 테이블: (거를 컬럼들, 같은 값으로 덮을 컬럼)
     "equipment": (["equip_cd"], "equip_name"),
@@ -39,6 +39,8 @@ UPDATE_KEYS = {  # 테이블: (거를 컬럼들, 같은 값으로 덮을 컬럼)
     "user_role": (["user_id"], "role"),
     "production_record": (["record_id"], "lot_id"),
     "record_cancel": (["record_id"], "reason"),
+    "downtime_reason": (["code"], "name"),
+    "downtime": (["downtime_id"], "note"),
 }
 STAFF = {"viewer", "worker", "admin"}
 
@@ -97,7 +99,7 @@ try:
                 ok = got == 0
             elif t == "user_role":
                 ok = got >= 2 if r == "admin" else got == 1  # 본인 한 줄 · admin 은 전부
-            elif t in ("production_record", "record_cancel", "active_record"):
+            elif t in ("production_record", "record_cancel", "active_record", "downtime"):
                 ok = True  # 장부는 비어 있을 수도 있다
             else:
                 ok = got > 0
@@ -127,7 +129,7 @@ try:
                 got = "들어감"
             except APIError as e:
                 got = e.code
-            if t in ("production_record", "record_cancel") and r in ("worker", "admin"):
+            if t in ("production_record", "record_cancel", "downtime") and r in ("worker", "admin"):
                 ok = got == "23502"  # RLS 는 통과 → NOT NULL 이 잡는다
             else:
                 ok = got == "42501"  # RLS(또는 권한)가 막는다

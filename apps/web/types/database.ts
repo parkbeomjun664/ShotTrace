@@ -14,6 +14,85 @@ export type Database = {
   }
   public: {
     Tables: {
+      downtime: {
+        Row: {
+          downtime_id: number
+          ended_at: string
+          equip_cd: string
+          note: string | null
+          reason_code: string
+          recorded_at: string
+          recorded_by: string
+          request_id: string
+          started_at: string
+        }
+        Insert: {
+          downtime_id?: never
+          ended_at: string
+          equip_cd: string
+          note?: string | null
+          reason_code: string
+          recorded_at?: string
+          recorded_by?: string
+          request_id: string
+          started_at: string
+        }
+        Update: {
+          downtime_id?: never
+          ended_at?: string
+          equip_cd?: string
+          note?: string | null
+          reason_code?: string
+          recorded_at?: string
+          recorded_by?: string
+          request_id?: string
+          started_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "downtime_equip_cd_fkey"
+            columns: ["equip_cd"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["equip_cd"]
+          },
+          {
+            foreignKeyName: "downtime_equip_cd_fkey"
+            columns: ["equip_cd"]
+            isOneToOne: false
+            referencedRelation: "equipment_summary"
+            referencedColumns: ["equip_cd"]
+          },
+          {
+            foreignKeyName: "downtime_reason_code_fkey"
+            columns: ["reason_code"]
+            isOneToOne: false
+            referencedRelation: "downtime_reason"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      downtime_reason: {
+        Row: {
+          active: boolean
+          code: string
+          name: string
+          planned: boolean
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          name: string
+          planned: boolean
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          name?: string
+          planned?: boolean
+        }
+        Relationships: []
+      }
       equipment: {
         Row: {
           equip_cd: string

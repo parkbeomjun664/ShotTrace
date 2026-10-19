@@ -37,6 +37,17 @@ def fake_lot(lot_id, **over):
     return row
 
 
+slot = iter(range(1, 100))  # 🔴 실험마다 다른 날 — 같은 시각이면 겹침(23P01)이 먼저 이름을 댄다 (한 번에 규칙 하나만)
+
+
+def fake_downtime(**over):
+    day = f"1999-01-{next(slot):02d}"
+    row = {"equip_cd": equip, "reason_code": "BREAKDOWN", "recorded_by": someone, "request_id": str(uuid.uuid4()),
+           "started_at": f"{day}T00:00:00+00:00", "ended_at": f"{day}T01:00:00+00:00"}
+    row.update(over)
+    return row
+
+
 CASES = [  # (종류, 무엇을 어기나, 테이블, 행, 지울 때 쓸 키, 기대 코드)
     ("p", "있는 설비 코드로 또 넣기", "equipment",
      {"equip_cd": equip, "equip_name": "중복"}, "equip_cd", "23505"),
@@ -56,9 +67,22 @@ CASES = [  # (종류, 무엇을 어기나, 테이블, 행, 지울 때 쓸 키, �
     ("x", "같은 설비 · 제품 · 시간이 겹치는 LOT", "production_lot",
      fake_lot("TEST-OVERLAP", started_at=shifted(lot["started_at"], 1), ended_at=lot["ended_at"]),
      "lot_id", "23P01"),
+    ("f", "명단에 없는 비가동 사유", "downtime",
+     fake_downtime(reason_code="TYPO"), "request_id", "23503"),
+    ("c", "끝이 미래인 비가동", "downtime",
+     fake_downtime(started_at="2098-12-31T23:00:00+00:00", ended_at="2099-01-01T00:00:00+00:00"), "request_id", "23514"),
+    ("x", "같은 설비에서 겹치는 비가동", "downtime",
+     None, "request_id", "23P01"),
     ("n", "번호표(request_id) 없는 실적", "production_record",
      {"lot_id": lot["lot_id"], "pass_qty": 1, "fail_qty": 0, "recorded_by": someone}, "lot_id", "23502"),
 ]
+
+# 겹침 실험의 상대 — 2000-01-01 00:00~01:00 비가동을 하나 진짜로 넣고, 그 30분 뒤부터 겹치는 걸 시도한다
+anchor = fake_downtime(started_at="2000-01-01T00:00:00+00:00", ended_at="2000-01-01T01:00:00+00:00")
+db.table("downtime").insert(anchor).execute()
+CASES = [c if c[3] is not None else c[:3] + (fake_downtime(started_at="2000-01-01T00:30:00+00:00",
+                                                           ended_at="2000-01-01T01:30:00+00:00"),) + c[4:]
+         for c in CASES]
 
 rows, holes = [], 0
 for kind, what, table, row, key, expect in CASES:
@@ -74,6 +98,8 @@ for kind, what, table, row, key, expect in CASES:
     holes += not ok
     rows.append(f"| {kind} | {what} | `{table}` | {expect} | {got} | `{name}` | {'✅' if ok else '🔴'} |")
     print(f"  {'✅' if ok else '🔴'} [{kind}] {what:<28} {got:<6} {name}")
+
+db.table("downtime").delete().eq("request_id", anchor["request_id"]).execute()   # 상대도 치운다
 
 today = dt.date.today().isoformat()
 md = f"""# 제약 거부 실험 — 코드가 실수해도 DB 가 막는다 (M22)
@@ -96,6 +122,8 @@ md = f"""# 제약 거부 실험 — 코드가 실수해도 DB 가 막는다 (M22
 - 없었으면 어땠나 — 모든 칸이 **에러가 아니라 조용히 틀린 숫자**가 된다. 열린 LOT 하나가 미래를 삼켜
   187개가 1,985개로 부푼 것이 10/01 의 실측이다
 - 막힌 요청은 트랜잭션째 없던 일이 된다. 실험 뒤에 남은 행은 없다
+- 🔴 실험은 한 번에 규칙 하나만 어긴다. 둘을 어기면 먼저 검사되는 쪽(CHECK → UNIQUE · EXCLUDE → FK)이
+  이름을 댄다. 처음엔 "명단에 없는 사유" 가 겹침 상대와 같은 시각이라 FK 대신 23P01 이 나왔다
 - 🔵 `lot_qty_sum` · `lot_time_order` 는 016 에서 이름을 붙였다. 그 전에는 `production_lot_check` · `_check1` 로
   찍혀서 에러만 보고는 무엇을 어겼는지 알 수 없었다. **제약에는 이름을 붙인다**
 
