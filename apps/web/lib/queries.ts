@@ -144,5 +144,41 @@ export async function getRecentRecords() {           // 최근 실적 10건 — 
   return data;
 }
 
+export async function getEquipments() {              // 설비 3대 — 비가동 폼의 고르기 목록
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("equipment")
+    .select("equip_cd, equip_name")                    // View 가 아니라 표 — 타입에 | null 이 안 붙는다
+    .order("equip_cd");
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getDowntimeReasons() {         // 고를 수 있는 사유 (017)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("downtime_reason")
+    .select("code, name, planned")
+    .eq("active", true)                                // 🔵 사용 중지된 사유는 새로 못 고른다 — 옛 기록은 계속 가리킨다
+    .order("planned", { ascending: false })            // 계획된 정지 먼저 —
+    .order("name");                                    // 같으면 이름순 (기준 둘을 이어 쓴다)
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getRecentDowntimes() {         // 최근 비가동 10건
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("downtime")
+    .select("downtime_id, equip_cd, started_at, ended_at, note, downtime_reason(name, planned)")   // FK 를 따라 사유 이름까지 한 번에
+    .order("started_at", { ascending: false })
+    .limit(10);
+
+  if (error) throw error;
+  return data;
+}
+
 export type EquipRow = Awaited<ReturnType<typeof getEquipmentSummary>>[number];
 export type PlantRow = Awaited<ReturnType<typeof getPlantSummary>>;
