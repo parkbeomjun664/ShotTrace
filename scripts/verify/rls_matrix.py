@@ -28,7 +28,7 @@ URL = os.environ["NEXT_PUBLIC_SUPABASE_URL"]
 ANON = os.environ["NEXT_PUBLIC_SUPABASE_ANON_KEY"]
 SERVICE = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 
-TABLES = ["equipment", "product", "production_lot", "shot", "shot_part", "user_role", "production_record", "record_cancel", "downtime_reason", "downtime"]
+TABLES = ["equipment", "product", "production_lot", "shot", "shot_part", "user_role", "production_record", "record_cancel", "downtime_reason", "downtime", "defect_code"]
 VIEWS = ["equipment_summary", "plant_summary", "daily_yield", "defect_pareto", "active_record"]
 UPDATE_KEYS = {  # 테이블: (거를 컬럼들, 같은 값으로 덮을 컬럼)
     "equipment": (["equip_cd"], "equip_name"),
@@ -39,10 +39,12 @@ UPDATE_KEYS = {  # 테이블: (거를 컬럼들, 같은 값으로 덮을 컬럼)
     "user_role": (["user_id"], "role"),
     "production_record": (["record_id"], "lot_id"),
     "record_cancel": (["record_id"], "reason"),
-    "downtime_reason": (["code"], "name"),
+    "downtime_reason": (["code"], "active"),
     "downtime": (["downtime_id"], "note"),
+    "defect_code": (["reason"], "active"),
 }
 STAFF = {"viewer", "worker", "admin"}
+ADMIN_UPDATES = {"downtime_reason", "defect_code"}  # UPDATE 정책이 admin 에게 열린 마스터 (019)
 
 admin_db = create_client(URL, SERVICE)  # RLS 를 건너뛰는 열쇠 — 기준값 · 임시 사용자에만
 sample = {t: (admin_db.table(t).select("*").limit(1).execute().data or [None])[0] for t in TABLES}
@@ -154,9 +156,10 @@ try:
                 got = len(q.execute().data)
             except APIError as e:
                 got = e.code
-            cells[r] = cell(r, f"UPDATE {t}", got, got == 0)
+            expect = 1 if (r == "admin" and t in ADMIN_UPDATES) else 0   # 019 — 마스터는 admin 만 고친다
+            cells[r] = cell(r, f"UPDATE {t}", got, got == expect)
         rows.append((t, cells))
-    show("쓰기 — UPDATE (같은 값으로 덮기) 에 바뀐 행 수", rows)
+    show("쓰기 — UPDATE (같은 값으로 덮기) 에 바뀐 행 수  (admin × 사유 명단 둘만 1)", rows)
 
     print(f"\n{'🔴 예상과 다른 칸 ' + str(len(bad)) + '개' if bad else '모든 칸이 예상대로'}")
     for b in bad:

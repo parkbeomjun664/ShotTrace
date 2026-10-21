@@ -179,6 +179,44 @@ export async function getRecentDowntimes() {         // 최근 비가동 10건
   if (error) throw error;
   return data;
 }
+export async function getProducts() {                // 제품 마스터 — 마스터 화면에서 읽기만
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("product")
+    .select("product_id, part_name, car_model, side")
+    .order("product_id");
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getAllDowntimeReasons() {      // 🔵 active 로 거르지 않는다 — 사용 중지된 것도 보여야 다시 켠다
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("downtime_reason")
+    .select("code, name, planned, active")
+    .order("planned", { ascending: false })
+    .order("name");
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getDefectCodes() {             // 불량 사유 명단 (018)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase.from("defect_code").select("reason, active").order("reason");
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getMyRole() {                  // 함수도 문 — admin 에게만 버튼을 보여주는 데 쓴다 (막는 건 RLS)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase.rpc("app_role");
+
+  if (error) throw error;
+  return data;
+}
 
 export type EquipRow = Awaited<ReturnType<typeof getEquipmentSummary>>[number];
 export type PlantRow = Awaited<ReturnType<typeof getPlantSummary>>;
