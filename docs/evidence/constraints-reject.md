@@ -1,9 +1,9 @@
 # 제약 거부 실험 — 코드가 실수해도 DB 가 막는다 (M22)
 
-- **날짜**: 2026-10-20
+- **날짜**: 2026-10-21
 - **방법**: `scripts/verify/constraints.py` — service_role 로 종류마다 하나씩 일부러 어긴다
   (RLS 를 건너뛰어 제약만 본다 · 요청 하나 = 트랜잭션 하나라 막히면 아무것도 안 남는다)
-- **결과**: 12 / 12 막힘 — 구멍 없음
+- **결과**: 13 / 13 막힘 — 구멍 없음
 
 | 종류 | 어긴 것 | 테이블 | 기대 | 실제 | 막은 제약 | |
 |---|---|---|---|---|---|---|
@@ -18,6 +18,7 @@
 | f | 명단에 없는 비가동 사유 | `downtime` | 23503 | 23503 | `downtime_reason_code_fkey` | ✅ |
 | c | 끝이 미래인 비가동 | `downtime` | 23514 | 23514 | `downtime_not_future` | ✅ |
 | x | 같은 설비에서 겹치는 비가동 | `downtime` | 23P01 | 23P01 | `downtime_no_overlap` | ✅ |
+| f | 명단에 없는 불량 사유 ('GAS') | `shot_part` | 23503 | 23503 | `part_fail_reason_known` | ✅ |
 | n | 번호표(request_id) 없는 실적 | `production_record` | 23502 | 23502 | `request_id NOT NULL` | ✅ |
 
 종류 — p PRIMARY KEY · u UNIQUE · f FOREIGN KEY · c CHECK · x EXCLUDE · n NOT NULL

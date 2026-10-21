@@ -36,6 +36,11 @@ def load_products(db) -> dict[str, int]:
     return {r["part_name"]: r["product_id"] for r in rows}
 
 
+def load_defects(db) -> set[str]:                      # 불량 사유 명단 (018) — 있나 없나만 보면 돼서 set
+    rows = db.table("defect_code").select("reason").execute().data   # active 로 거르지 않는다 — DB 의 FK 와 같은 기준
+    return {r["reason"] for r in rows}
+
+
 def to_part_rows(msg: dict, product_id: dict[str, int]) -> list[dict]:
     return [
         {
@@ -71,6 +76,13 @@ def on_message(client, userdata, msg):
     if unknown:
         userdata["bad"] += 1
         log.error("모르는 제품 %s — product 테이블에 없다", unknown)
+        return
+
+    odd = [p.get("fail_reason") for p in payload["parts"]   # 🔴 쓰기 전에 거절 — shot 만 들어가는 반쪽을 막는다 (M21)
+           if p.get("fail_reason") is not None and p.get("fail_reason") not in userdata["defects"]]   # 양품(None)은 안 본다 — FK 와 같다
+    if odd:
+        userdata["bad"] += 1
+        log.error("모르는 불량 사유 %s — defect_code 에 없다", odd)
         return
 
     part_rows = to_part_rows(payload, userdata["products"])
@@ -110,8 +122,10 @@ def main() -> None:
     if not products:
         sys.exit("🔴 product 테이블이 비어 있다 — ETL 을 먼저 돌린다")
     log.info("제품 %d개 읽음", len(products))
+    defects = load_defects(db)                          # 🔴 시작할 때 한 번 — 명단에 사유를 새로 넣으면 수집기를 다시 켠다
+    log.info("불량 사유 %d개 읽음", len(defects))
 
-    state = {"db": db, "products": products, "ok": 0, "bad": 0}
+    state = {"db": db, "products": products, "defects": defects, "ok": 0, "bad": 0}
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, userdata=state)
     client.on_connect = on_connect
     client.on_message = on_message

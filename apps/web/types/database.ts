@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      defect_code: {
+        Row: {
+          active: boolean
+          reason: string
+        }
+        Insert: {
+          active?: boolean
+          reason: string
+        }
+        Update: {
+          active?: boolean
+          reason?: string
+        }
+        Relationships: []
+      }
       downtime: {
         Row: {
           downtime_id: number
@@ -399,6 +414,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "part_fail_reason_known"
+            columns: ["fail_reason"]
+            isOneToOne: false
+            referencedRelation: "defect_code"
+            referencedColumns: ["reason"]
+          },
+          {
             foreignKeyName: "shot_part_equipment_id_measured_at_fkey"
             columns: ["equipment_id", "measured_at"]
             isOneToOne: false
@@ -485,7 +507,15 @@ export type Database = {
           fail_reason: string | null
           share_pct: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "part_fail_reason_known"
+            columns: ["fail_reason"]
+            isOneToOne: false
+            referencedRelation: "defect_code"
+            referencedColumns: ["reason"]
+          },
+        ]
       }
       equipment_summary: {
         Row: {

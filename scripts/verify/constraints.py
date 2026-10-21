@@ -22,6 +22,11 @@ product = db.table("product").select("product_id, part_name").limit(1).execute()
 lot = (db.table("production_lot").select("*").neq("ended_at", "infinity")
        .order("started_at").limit(1).execute().data[0])          # 끝난 LOT 하나 — 겹침 실험의 상대
 someone = db.table("user_role").select("user_id").limit(1).execute().data[0]["user_id"]
+a_shot = db.table("shot").select("equipment_id, measured_at").limit(1).execute().data[0]
+in_shot = {p["product_id"] for p in db.table("shot_part").select("product_id")
+           .eq("equipment_id", a_shot["equipment_id"]).eq("measured_at", a_shot["measured_at"]).execute().data}
+other_product = next(p["product_id"] for p in db.table("product").select("product_id").execute().data
+                     if p["product_id"] not in in_shot)   # 그 샷에 없는 제품 — 같으면 PK(23505)가 먼저 이름을 댄다
 far = "2099-01-01T00:00:00+00:00"                                 # 실제 LOT 과 안 겹치는 먼 미래
 
 
@@ -73,6 +78,9 @@ CASES = [  # (종류, 무엇을 어기나, 테이블, 행, 지울 때 쓸 키, �
      fake_downtime(started_at="2098-12-31T23:00:00+00:00", ended_at="2099-01-01T00:00:00+00:00"), "request_id", "23514"),
     ("x", "같은 설비에서 겹치는 비가동", "downtime",
      None, "request_id", "23P01"),
+    ("f", "명단에 없는 불량 사유 ('GAS')", "shot_part",
+     {**a_shot, "product_id": other_product, "pass_or_fail": "N", "fail_reason": "GAS"},
+     "product_id", "23503"),
     ("n", "번호표(request_id) 없는 실적", "production_record",
      {"lot_id": lot["lot_id"], "pass_qty": 1, "fail_qty": 0, "recorded_by": someone}, "lot_id", "23502"),
 ]
@@ -84,11 +92,18 @@ CASES = [c if c[3] is not None else c[:3] + (fake_downtime(started_at="2000-01-0
                                                            ended_at="2000-01-01T01:30:00+00:00"),) + c[4:]
          for c in CASES]
 
+PK = {"equipment": ["equip_cd"], "product": ["product_id"], "production_lot": ["lot_id"],
+      "production_record": ["record_id"], "record_cancel": ["record_id"], "downtime": ["downtime_id"],
+      "shot_part": ["equipment_id", "measured_at", "product_id"]}
+
 rows, holes = [], 0
 for kind, what, table, row, key, expect in CASES:
     try:
-        db.table(table).insert(row).execute()
-        db.table(table).delete().eq(key, row[key]).execute()     # 🔴 구멍 — 들어갔으니 바로 지운다
+        got_row = db.table(table).insert(row).execute().data[0]
+        q = db.table(table).delete()                             # 🔴 구멍 — 들어갔으니 바로 지운다
+        for k in PK[table]:                                      # 🔴 들어간 줄이 돌려준 PK 로 그 한 줄만
+            q = q.eq(k, got_row[k])                              #    (lot_id · product_id 같은 칸으로 지우면 진짜 데이터가 같이 지워진다)
+        q.execute()
         got, name, ok = "들어감", "—", False
     except APIError as e:
         msg = e.message or ""
