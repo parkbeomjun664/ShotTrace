@@ -2,6 +2,7 @@
 import type { Database } from "@/types/database";  // DB 스키마 타입
 import { createSessionClient } from "@/lib/supabase/session";   // 세션 클라이언트 — RLS 를 진짜로 거친다 (M19)
     // 화면은 직접 쿼리하지 않는다
+import { computeOee } from "@/lib/oee";               // 계산기 — DB 는 재료만, 계산은 순수함수가 (M24)
 
 export async function getLots() {                      // LOT 25건 + 각 제품명
   const supabase = await createSessionClient();         // 🔴 함수 안에서 — 요청마다 그 사람으로
@@ -216,6 +217,40 @@ export async function getMyRole() {                  // 함수도 문 — admin 
 
   if (error) throw error;
   return data;
+}
+
+export type LotOeeRow = {                              // lot_oee_input 한 줄 — 🔴 View 타입은 전부 | null 이라 덮어쓴다
+  lot_id: string;
+  equip_cd: string;
+  product_id: number;
+  std_cycle_sec: number | null;                        // 이것만은 진짜로 비어 있을 수 있다 (새 제품)
+  load_minutes: number;
+  planned_minutes: number;
+  loss_minutes: number;
+  shots: number;
+  good_qty: number;
+};
+
+export async function getLotOee() {                  // LOT 별 OEE — 재료(021 · 022) + computeOee
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("lot_oee_input")
+    .select("lot_id, equip_cd, product_id, std_cycle_sec, load_minutes, planned_minutes, loss_minutes, shots, good_qty")
+    .order("lot_id")
+    .overrideTypes<LotOeeRow[], { merge: false }>();
+
+  if (error) throw error;
+  return data.map((r) => ({
+    ...r,
+    oee: computeOee({
+      runMinutes: r.load_minutes - r.planned_minutes - r.loss_minutes,   // 가동 = 부하 − 계획 정지 − 손실
+      lossMinutes: r.loss_minutes,                     // 손실은 따로 — 가동률 분모에 들어간다 (계획 정지는 안 들어간다)
+      shots: r.shots,
+      stdCycleSec: r.std_cycle_sec ?? 0,               // 없으면 0 → computeOee 가 null 로
+      goodQty: r.good_qty,
+      totalQty: r.shots,                               // LOT 은 제품 하나 — 부품 수 = 샷 수
+    }),
+  }));
 }
 
 export type EquipRow = Awaited<ReturnType<typeof getEquipmentSummary>>[number];

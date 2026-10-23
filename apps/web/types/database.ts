@@ -132,18 +132,21 @@ export type Database = {
           part_name: string
           product_id: number
           side: string | null
+          std_cycle_sec: number | null
         }
         Insert: {
           car_model?: string | null
           part_name: string
           product_id?: never
           side?: string | null
+          std_cycle_sec?: number | null
         }
         Update: {
           car_model?: string | null
           part_name?: string
           product_id?: never
           side?: string | null
+          std_cycle_sec?: number | null
         }
         Relationships: []
       }
@@ -234,6 +237,13 @@ export type Database = {
           request_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "production_record_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "lot_oee_input"
+            referencedColumns: ["lot_id"]
+          },
           {
             foreignKeyName: "production_record_lot_id_fkey"
             columns: ["lot_id"]
@@ -486,6 +496,13 @@ export type Database = {
             foreignKeyName: "production_record_lot_id_fkey"
             columns: ["lot_id"]
             isOneToOne: false
+            referencedRelation: "lot_oee_input"
+            referencedColumns: ["lot_id"]
+          },
+          {
+            foreignKeyName: "production_record_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
             referencedRelation: "production_lot"
             referencedColumns: ["lot_id"]
           },
@@ -529,6 +546,42 @@ export type Database = {
           yield_pct: number | null
         }
         Relationships: []
+      }
+      lot_oee_input: {
+        Row: {
+          equip_cd: string | null
+          good_qty: number | null
+          load_minutes: number | null
+          loss_minutes: number | null
+          lot_id: string | null
+          planned_minutes: number | null
+          product_id: number | null
+          shots: number | null
+          std_cycle_sec: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_lot_equip_cd_fkey"
+            columns: ["equip_cd"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["equip_cd"]
+          },
+          {
+            foreignKeyName: "production_lot_equip_cd_fkey"
+            columns: ["equip_cd"]
+            isOneToOne: false
+            referencedRelation: "equipment_summary"
+            referencedColumns: ["equip_cd"]
+          },
+          {
+            foreignKeyName: "production_lot_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product"
+            referencedColumns: ["product_id"]
+          },
+        ]
       }
       plant_summary: {
         Row: {

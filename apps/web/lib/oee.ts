@@ -20,7 +20,7 @@ const ratio = (a: number, b: number) => (b > 0 ? a / b : null);   // 분모 0 �
 
 export function computeOee(i: OeeInput): Oee {
   const availability = ratio(i.runMinutes, i.runMinutes + i.lossMinutes);   // 가동률
-  const performanceRaw = ratio((i.shots * i.stdCycleSec) / 60, i.runMinutes);   // 🔴 초 → 분 (/ 60) — 단위가 다르면 60배 틀린다
+  const performanceRaw = i.stdCycleSec > 0 ? ratio((i.shots * i.stdCycleSec) / 60, i.runMinutes) : null;   // 표준이 없으면 null — 0% 가 아니라 "잴 기준이 없다" · 🔴 초 → 분 (/ 60)
   const performance = performanceRaw === null ? null : Math.min(performanceRaw, 1);   // 🔴 100% 상한 — 버그를 숨길 수 있다
   const quality = ratio(i.goodQty, i.totalQty);        // 품질
   const oee =                                          // 셋 중 하나라도 계산 못 하면 OEE 도 null

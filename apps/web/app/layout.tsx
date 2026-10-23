@@ -25,6 +25,7 @@ const NAV = [
   { href: "/", label: "현황판" },
   { href: "/lots", label: "LOT 추적" },
   { href: "/quality", label: "품질" },
+  { href: "/oee", label: "OEE" },                         // M24
   { href: "/records", label: "실적 입력" },
   { href: "/downtime", label: "비가동" },                 // M23 · 017
   { href: "/master", label: "마스터" },
