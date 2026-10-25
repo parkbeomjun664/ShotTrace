@@ -20,6 +20,7 @@ jobs:
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
       - run: npm ci                                     # package-lock 그대로 설치 — 내 PC 와 같은 버전
+      - run: npx next typegen                           # 🔴 PageProps · LayoutProps 는 Next 가 만드는 타입 — 깨끗한 컴퓨터엔 .next/ 가 없다
       - run: npx tsc --noEmit
       - run: npm test
 
