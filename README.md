@@ -1,5 +1,7 @@
 # ShotTrace
 
+[![CI](https://github.com/parkbeomjun664/ShotTrace/actions/workflows/ci.yml/badge.svg)](https://github.com/parkbeomjun664/ShotTrace/actions/workflows/ci.yml)
+
 > 사출성형 공장의 생산 실적과 품질 이력을 관리하는 MES.
 > **LOT과 설비 상태를 시간 구간으로 잇는 것**이 이 시스템의 핵심이다.
 
