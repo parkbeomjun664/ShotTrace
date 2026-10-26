@@ -30,7 +30,7 @@ export async function getLot(lotId: string) {          // LOT 한 건 — 상세
   const { data, error } = await supabase
     .from("production_lot")
     .select(                                           // 임베드 2개 — 제품 + 설비
-      "lot_id, plan_date, equip_cd, product_id, total_qty, pass_qty, fail_qty, started_at, ended_at, product(part_name, car_model, side), equipment(equip_name, tonnage)",
+      "lot_id, plan_date, equip_cd, product_id, total_qty, pass_qty, fail_qty, started_at, ended_at, product(part_name, car_model, side, std_cycle_sec), equipment(equip_name, tonnage)",
     )                                                  // product_id 도 같이 — D에서 쓴다
     .eq("lot_id", lotId)                               // WHERE lot_id = ?
     .maybeSingle();                                    // 배열 대신 객체 1개
@@ -220,6 +220,14 @@ export async function getMyRole() {                  // 함수도 문 — admin 
   return data;
 }
 
+export async function getLotBaseline(lotId: string) {   // 차트 기준 범위의 재료 — 이전 정상 LOT 들 (없으면 설비 전체) 양품의 평균 · σ (025 · 10/26)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase.rpc("lot_baseline", { p_lot_id: lotId });
+
+  if (error) throw error;
+  return data;                                         // 변수마다 한 줄 — 양품이 하나도 없으면 빈 배열
+}
+
 export async function getPartsWithoutLot() {          // 어느 LOT 에도 안 든 부품 수 (024) — 현황판 vs 품질 합계 차이의 정체 (10/26)
   const supabase = await createSessionClient();
   const { data, error } = await supabase.from("part_without_lot").select("part_count").maybeSingle();
@@ -263,17 +271,17 @@ export async function getLotOee() {                  // LOT 별 OEE — 재료(0
     .overrideTypes<LotOeeRow[], { merge: false }>();
 
   if (error) throw error;
-  return data.map((r) => ({
-    ...r,
-    oee: computeOee({
+  return data.map((r) => {
+    const input = {
       runMinutes: r.load_minutes - r.planned_minutes - r.loss_minutes,   // 가동 = 부하 − 계획 정지 − 손실
       lossMinutes: r.loss_minutes,                     // 손실은 따로 — 가동률 분모에 들어간다 (계획 정지는 안 들어간다)
       shots: r.shots,
       stdCycleSec: r.std_cycle_sec ?? 0,               // 없으면 0 → computeOee 가 null 로
       goodQty: r.good_qty,
       totalQty: r.shots,                               // LOT 은 제품 하나 — 부품 수 = 샷 수
-    }),
-  }));
+    };
+    return { ...r, input, oee: computeOee(input) };    // input 도 돌려준다 — 전체 합산(aggregateOee)의 재료 (10/26)
+  });
 }
 
 export async function getLotDowntimes(equipCd: string, startedAt: string, endedAt: string) {   // LOT 시간과 겹친 비가동 — 가이드의 재료 (M25)

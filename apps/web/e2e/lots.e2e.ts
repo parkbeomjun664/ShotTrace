@@ -35,5 +35,5 @@ test("줄을 누르면 그 LOT 상세로", async ({ page }) => {
   // 제품 칸 자리를 마우스로 — 줄을 덮은 링크가 받는다 (locator.click 은 "가로챈다" 며 기다린다 · 그게 바로 의도한 동작)
   const box = (await first.locator("td:nth-child(2)").boundingBox())!;
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  await expect(page).toHaveURL(`/lots/${id}`);
+  await expect(page).toHaveURL(`/lots/${id}`, { timeout: 30_000 });   // LOT 상세는 무겁다 — 처음 컴파일할 때 15초를 넘긴 적이 있다 (10/26)
 });

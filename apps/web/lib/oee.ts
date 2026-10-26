@@ -30,3 +30,41 @@ export function computeOee(i: OeeInput): Oee {
 
   return { availability, performance, performanceRaw, quality, oee };
 }
+
+// ── 여러 LOT 을 하나로 (10/26) — 비율을 평균하지 않는다. 분 · 개수를 더해 다시 나눈다 (생산량 가중) ──
+// 🔴 LOT 별 OEE 를 평균하면 1개짜리 LOT 과 463개짜리 LOT 이 같은 무게가 된다
+export function aggregateOee(rows: OeeInput[]): Oee {
+  const ok = rows.filter((r) => r.stdCycleSec > 0);   // 표준이 없는 LOT 은 성능을 잴 수 없다 — 통째로 뺀다
+  const run = ok.reduce((a, r) => a + r.runMinutes, 0);
+  const loss = ok.reduce((a, r) => a + r.lossMinutes, 0);
+  const ideal = ok.reduce((a, r) => a + (r.shots * r.stdCycleSec) / 60, 0);   // 표준대로면 걸렸을 분 — 제품마다 표준이 달라 여기서 곱한다
+  const good = ok.reduce((a, r) => a + r.goodQty, 0);
+  const total = ok.reduce((a, r) => a + r.totalQty, 0);
+
+  const availability = ratio(run, run + loss);
+  const performanceRaw = ratio(ideal, run);
+  const performance = performanceRaw === null ? null : Math.min(performanceRaw, 1);
+  const quality = ratio(good, total);
+  const oee = availability === null || performance === null || quality === null ? null : availability * performance * quality;
+  return { availability, performance, performanceRaw, quality, oee };
+}
+
+// OEE 상태 — 85 이상 기본(흔히 쓰는 세계 수준) · 60 이상 주의 · 그 아래 나쁨
+export type OeeLevel = "ok" | "warn" | "bad";
+export function oeeLevel(v: number | null): OeeLevel | null {
+  if (v === null) return null;
+  if (v >= 0.85) return "ok";
+  if (v >= 0.6) return "warn";
+  return "bad";
+}
+
+// 손실 워터폴 — 계획 시간 100% 가 어디서 깎여 OEE 가 되나. 네 조각의 합 = 100
+export function waterfall(o: Oee) {
+  const a = o.availability ?? 0, p = o.performance ?? 0, q = o.quality ?? 0;
+  return {
+    availabilityLoss: 1 - a,                           // 멈춰서 잃은 몫
+    performanceLoss: a * (1 - p),                      // 돌았지만 느려서 잃은 몫
+    qualityLoss: a * p * (1 - q),                      // 만들었지만 불량이라 잃은 몫
+    oee: a * p * q,
+  };
+}

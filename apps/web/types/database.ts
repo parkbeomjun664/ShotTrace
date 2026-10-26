@@ -675,6 +675,16 @@ export type Database = {
           pass_or_fail: string
         }[]
       }
+      lot_baseline: {
+        Args: { p_lot_id: string }
+        Returns: {
+          lot_count: number
+          mean: number
+          metric: string
+          source: string
+          std: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
