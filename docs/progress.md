@@ -119,6 +119,7 @@ S01 ✅  S02 ✅  S03 ✅  S04 ✅  S05 ✅  S06 ✅  S07 ✅  S08 ⬜  S09 ⬜ 
 | 10-26 | S08 | **ETL 테스트** — 경계값 7개 · 자동 테스트 합 18 | `76ff1fb` |
 | 10-26 | S08 | **E2E** — Playwright 2 (막히는 흐름만 · DB 안 씀) · **M26 끝** · 합 20 | `2e852e5` |
 | 10-26 | S09↑ | 원칙 변경(시간이 남으면 당긴다) · **CI** — GitHub Actions 세 칸 ✅ · 첫 실행 typegen 함정 · README 배지 | `df63cbc` `95520ea` |
+| 10-26 | S09↑ | **M27 성능** — perf 스키마 10배 · 인덱스 차이 4.5배 → 30배 · evidence/perf-10x | |
 
 > 🔑 **입구는 친절, 문지기는 RLS.** 명단에서 뺀 사용자는 proxy 를 통과해도 빈 화면을 봤다.
 > anon 키로 API 를 직접 불러도 `[]` — `plant_summary` 의 0 이 `security_invoker` 가 일한 증거였다.
