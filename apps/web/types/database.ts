@@ -126,6 +126,51 @@ export type Database = {
         }
         Relationships: []
       }
+      lot_guide: {
+        Row: {
+          content: Json
+          created_at: string
+          created_by: string
+          input_tokens: number
+          lot_id: string
+          model: string
+          output_tokens: number
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          created_by?: string
+          input_tokens: number
+          lot_id: string
+          model: string
+          output_tokens: number
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          created_by?: string
+          input_tokens?: number
+          lot_id?: string
+          model?: string
+          output_tokens?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lot_guide_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: true
+            referencedRelation: "lot_oee_input"
+            referencedColumns: ["lot_id"]
+          },
+          {
+            foreignKeyName: "lot_guide_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: true
+            referencedRelation: "production_lot"
+            referencedColumns: ["lot_id"]
+          },
+        ]
+      }
       product: {
         Row: {
           car_model: string | null

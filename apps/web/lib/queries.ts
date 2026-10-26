@@ -3,6 +3,7 @@ import type { Database } from "@/types/database";  // DB 스키마 타입
 import { createSessionClient } from "@/lib/supabase/session";   // 세션 클라이언트 — RLS 를 진짜로 거친다 (M19)
     // 화면은 직접 쿼리하지 않는다
 import { computeOee } from "@/lib/oee";               // 계산기 — DB 는 재료만, 계산은 순수함수가 (M24)
+import { GuideSchema } from "@/lib/evidence";         // 가이드 상자 — 저장된 jsonb 를 꺼낼 때 다시 검사 (M25)
 
 export async function getLots() {                      // LOT 25건 + 각 제품명
   const supabase = await createSessionClient();         // 🔴 함수 안에서 — 요청마다 그 사람으로
@@ -266,6 +267,42 @@ export async function getLotOee() {                  // LOT 별 OEE — 재료(0
     }),
   }));
 }
+
+export async function getLotDowntimes(equipCd: string, startedAt: string, endedAt: string) {   // LOT 시간과 겹친 비가동 — 가이드의 재료 (M25)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("downtime")
+    .select("started_at, ended_at, note, downtime_reason(name)")
+    .eq("equip_cd", equipCd)
+    .lt("started_at", endedAt)                         // 🔵 겹침 = 내 시작 < 남의 끝 AND 내 끝 > 남의 시작 ([시작, 끝) · ADR 006)
+    .gt("ended_at", startedAt)
+    .order("started_at");
+
+  if (error) throw error;
+  const lo = Date.parse(startedAt);
+  const hi = Date.parse(endedAt);
+  return data.map((d) => ({
+    reason: d.downtime_reason?.name ?? "사유 없음",
+    minutes: Math.round((Math.min(Date.parse(d.ended_at), hi) - Math.max(Date.parse(d.started_at), lo)) / 60000),   // LOT 안에 든 부분만 (021 의 * 와 같다)
+    note: d.note,
+  }));
+}
+
+export async function getLotGuide(lotId: string) {    // 저장된 가이드 — 있으면 Claude 를 다시 안 부른다 (영수증)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("lot_guide")
+    .select("content, model, input_tokens, output_tokens, created_at")
+    .eq("lot_id", lotId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+  const parsed = GuideSchema.safeParse(data.content);  // 🔴 jsonb 는 무엇이든 담긴다 — 꺼낼 때도 상자를 확인한다
+  if (!parsed.success) return null;
+  return { ...data, content: parsed.data };
+}
+export type LotGuide = NonNullable<Awaited<ReturnType<typeof getLotGuide>>>;
 
 export type EquipRow = Awaited<ReturnType<typeof getEquipmentSummary>>[number];
 export type PlantRow = Awaited<ReturnType<typeof getPlantSummary>>;

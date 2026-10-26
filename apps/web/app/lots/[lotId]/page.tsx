@@ -11,16 +11,19 @@ import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getLot, getLotShots, pareto, tally } from "@/lib/queries";
+import { getLot, getLotGuide, getLotShots, getMyRole, pareto, tally } from "@/lib/queries";
+import { metricStats } from "@/lib/evidence";
 
 
 // 시각 포맷은 lib/format.ts 한 곳에서만 만든다 (ADR 002)
 import { 같은날, 날짜, 분길이, 소수, 시각, 진행중 } from "@/lib/format";
 import { ShotChart } from "./ShotChart";
 import { LiveRefresh } from "@/app/LiveRefresh";   // 어제 만든 부품을 그대로 (M18)
+import { GuidePanel } from "./GuidePanel";
 
 
 export const revalidate = 0;   // 🔴 캐시를 끈다. 실시간 화면에 캐시를 켜두면 실시간이 아니다
+export const maxDuration = 60; // 가이드 버튼(Server Action)이 Claude 를 기다리는 시간 — 초 (M25)
 
 export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
   const { lotId } = await params;                      // 주소의 [lotId] · await 필요
@@ -29,12 +32,20 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
   if (!lot) notFound();                                // 없는 LOT은 404 (M04 ⑧)
                                                        // 이 아래로 lot 은 null 아님
 
-  const shots = await getLotShots(lot.lot_id);         // ★ RPC — 조인은 DB 안에
+  const [shots, guide, role] = await Promise.all([     // 서로 기다릴 필요 없는 셋 — 한 번에 (M27)
+    getLotShots(lot.lot_id),                           // ★ RPC — 조인은 DB 안에
+    getLotGuide(lot.lot_id),                           // 저장된 가이드 (M25)
+    getMyRole(),
+  ]);
   const defects = pareto(shots);                       // 불량 사유별, 많은 순
   const 집계 = tally(shots);                            // 🔴 저장값(lot.*_qty) 은 진행 중이면 낡는다
   const 진행 = 진행중(lot.ended_at);                    // 아직 안 끝난 LOT (009)
   const 분 = 진행 ? null : 분길이(lot.started_at, lot.ended_at);
   const 넘김 = !진행 && !같은날(lot.started_at, lot.ended_at);   // 🔴 순서 — 단축 평가
+  const 막힘 =                                          // 가이드 버튼을 못 누르는 이유 — 막는 건 actions.ts · RLS, 여기는 안내
+    role !== "worker" && role !== "admin" ? "가이드는 worker 계정만 만들 수 있어요 (비용이 드는 버튼)"
+    : 진행 ? "진행 중인 LOT 이에요 — 끝난 뒤에 만들 수 있어요"
+    : null;
 
   return (
     <section className="space-y-8">
@@ -117,6 +128,11 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
           </CardContent>
         </Card>
       </div>
+
+      {/* 1.5층 — 불량이 있으면 대응 가이드 (M25) · 숫자는 Claude 가 아니라 이 샷들에서 */}
+      {집계.fail > 0 && (
+        <GuidePanel lotId={lot.lot_id} guide={guide} stats={metricStats(shots)} blocked={막힘} />
+      )}
 
       {/* 2층 — 시간 구간 조인의 결과. 불량이 언제 났고 그때 설비가 어땠나 */}
       <div>

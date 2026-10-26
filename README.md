@@ -13,10 +13,10 @@
 
 | | |
 |---|---|
-| 화면 | 현황판(실시간) · LOT 추적 · 품질 · **OEE** · 실적 입력/정정 · 비가동 · 마스터 |
-| 데이터베이스 | PostgreSQL 마이그레이션 22개 · 표 11 · View 6 · RPC 2 · RLS 역할 3 |
-| 검증 | 자동 테스트 20 (Vitest 6 · pytest 12 · Playwright 2) · CI · 제약 실험 13/13 · RLS 전수 점검 |
-| 설계 기록 | [ADR 16개](docs/decisions/) — 결정마다 **버린 대안** 포함 |
+| 화면 | 현황판(실시간) · LOT 추적(+ **LLM 대응 가이드**) · 품질 · **OEE** · 실적 입력/정정 · 비가동 · 마스터 |
+| 데이터베이스 | PostgreSQL 마이그레이션 23개 · 표 12 · View 6 · RPC 2 · RLS 역할 3 |
+| 검증 | 자동 테스트 25 (Vitest 11 · pytest 12 · Playwright 2) · CI · 제약 실험 13/13 · RLS 전수 점검 |
+| 설계 기록 | [ADR 17개](docs/decisions/) — 결정마다 **버린 대안** 포함 |
 
 **한 문장 · 30초 · 5분 설명** — [`docs/설명.md`](docs/설명.md)
 
@@ -87,6 +87,7 @@ flowchart LR
 | 정정은 한 번에 · 한 번만 | 취소 + 새 줄을 함수 하나(트랜잭션)로 · 동시 정정은 취소 장부의 PK 가 거절 | ADR 014 |
 | 마스터는 지우지 않는다 | 사유 명단은 사용 중지 · admin 만 · 가리키는 기록이 있으면 FK 가 막는다 | ADR 015 |
 | OEE | 가동률 × 성능 × 품질 · 셋업은 손실 · 성능은 샷 수 · 100% 상한과 자르기 전 값 | ADR 016 |
+| LLM 대응 가이드 | 그 LOT 의 숫자만 보내고 근거는 변수 이름만 받는다 — 화면의 숫자는 DB 에서 · worker 만 · 저장해서 다시 쓴다 | ADR 017 |
 
 전체 표와 관계는 [`docs/schema.md`](docs/schema.md) (ERD) 에 있다.
 
@@ -96,7 +97,7 @@ flowchart LR
 
 | 무엇 | 결과 | 어디 |
 |---|---|---|
-| 단위 테스트 | `computeOee` 6 · 수집기 5 (가짜 DB) · ETL 7 (경계값) | `apps/web/lib/oee.test.ts` · `services/collector/` · `scripts/etl/` |
+| 단위 테스트 | `computeOee` 6 · 가이드 근거 5 · 수집기 5 (가짜 DB) · ETL 7 (경계값) | `apps/web/lib/*.test.ts` · `services/collector/` · `scripts/etl/` |
 | E2E | 비로그인은 못 들어간다 · viewer 는 저장 못 하고 쓴 값은 남는다 — DB 에 아무것도 안 쓰는 흐름만 | `apps/web/e2e/` |
 | CI | 푸시마다 web(tsc · Vitest) · python(pytest) · e2e(Playwright) | `.github/workflows/ci.yml` |
 | 제약 실험 | 종류별로 일부러 어겨 13/13 막힘 (PK · UNIQUE · FK · CHECK · EXCLUDE · NOT NULL) | [evidence/constraints-reject](docs/evidence/constraints-reject.md) |
@@ -116,6 +117,7 @@ flowchart LR
 | 실시간 | Supabase Realtime (Postgres Changes) — 알림은 신호, 값은 서버가 다시 읽는다 |
 | 파이프라인 | 시뮬레이터 · 수집기 **Python**(paho-mqtt) · Mosquitto · Docker Compose |
 | ETL | Python · pandas |
+| LLM | Claude API (Anthropic SDK · 구조화 출력) — 서버에서만 |
 | 테스트 · CI | Vitest · pytest · Playwright · GitHub Actions |
 | 배포 | Vercel (웹) · 수집기와 브로커는 로컬 compose ([ADR 011](docs/decisions/011-수집기-구동-위치.md)) |
 

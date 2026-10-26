@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# supabase CLI 임시 파일 (gen types 가 만든다)
+supabase/.temp/
