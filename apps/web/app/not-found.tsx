@@ -1,18 +1,9 @@
-import Link from "next/link";
+import { HomeLink, Notice } from "./Notice";
 
 export default function NotFound() {
   return (
-    <section>
-      <h1 className="text-2xl font-bold tracking-tight">404</h1>
-      <p className="mt-2 text-sm text-black/60 dark:text-white/60">
-        없는 경로입니다.
-      </p>
-      <Link
-        href="/"
-        className="mt-6 inline-block text-sm underline underline-offset-4"
-      >
-        현황판으로
-      </Link>
-    </section>
+    <Notice tag="404" title="없는 페이지예요" actions={<HomeLink primary />}>
+      주소가 바뀌었거나 잘못 입력됐어요. 위 메뉴에서 가려던 화면을 골라 주세요.
+    </Notice>
   );
 }

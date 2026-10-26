@@ -1,12 +1,12 @@
 // OEE — LOT 별 가동률 × 성능 × 품질 · 화면은 계산하지 않는다 (재료 = View · 계산 = computeOee) (M24)
-// 10/26 — 전체 KPI(생산량 가중) · 손실 워터폴 · 최신순 · OEE 상태 색 · 가장 약한 칸 강조 · 줄 클릭
+// 10/26 — 전체 KPI(생산량 가중) · 손실 워터폴(10/27 가로 막대 단계로) · 최신순 · OEE 상태 색 · 가장 약한 칸 강조 · 줄 클릭
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import { isDemo } from "@/lib/lots";
 import { aggregateOee, oeeLevel, waterfall, type Oee } from "@/lib/oee";
 import { getLotOee, getLots } from "@/lib/queries";
-import { LossWaterfall } from "./LossWaterfall";
+import { LossSteps } from "./LossSteps";
 
 const pct = (v: number | null) => (v === null ? "—" : `${(v * 100).toFixed(1)}%`);   // null = 계산 안 함 → "—"
 const LEVEL_TEXT = { ok: "", warn: "text-status-warn", bad: "text-status-bad" } as const;
@@ -50,7 +50,7 @@ export default async function Page({ searchParams }: PageProps<"/oee">) {
   ];
 
   return (
-    <section className="space-y-10">
+    <section className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">OEE</h1>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -84,36 +84,40 @@ export default async function Page({ searchParams }: PageProps<"/oee">) {
         </p>
       </div>
 
-      <div>
-        <h2 className="font-semibold">손실 워터폴</h2>
-        <p className="mt-1 text-sm text-muted-foreground">계획 시간 100%가 어디서 깎여 OEE가 되나</p>
-        <div className="mt-3">
-          <LossWaterfall a={(1 - w.availabilityLoss) * 100} p={(1 - w.availabilityLoss - w.performanceLoss) * 100} q={w.oee * 100} />
+      {/* 영역마다 카드 — 품질 화면과 같다 (10/27) */}
+      <div className="rounded-xl border bg-card p-6">
+        <h2 className="font-semibold">OEE가 되기까지</h2>
+        <p className="mt-1 text-sm text-muted-foreground">계획 시간 100%에서 손실을 하나씩 빼요 · 빗금이 그 단계에서 빠진 몫</p>
+        <div className="mt-4">
+          <LossSteps a={(1 - w.availabilityLoss) * 100} p={(1 - w.availabilityLoss - w.performanceLoss) * 100} q={w.oee * 100} />
         </div>
       </div>
 
-      <div>
-        <h2 className="font-semibold">LOT 별</h2>
-        <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground">OEE 85% 미만은 호박색, 60% 미만은 빨강 · 회색 칸은 그 LOT 에서 가장 약한 지표</p>
-          {demoCount > 0 && (
-            <Link
-              href={showDemo ? "/oee" : "/oee?demo=1"}
-              aria-pressed={showDemo}
-              className={`rounded-full border px-3 py-1 text-sm transition-colors ${
-                showDemo ? "border-foreground bg-foreground text-background" : "hover:bg-muted"
-              }`}
-            >
-              {showDemo ? "✓ " : ""}시연 LOT 포함 ({demoCount})
-            </Link>
-          )}
+      {/* 표는 카드 가장자리까지 — 표 테두리를 따로 두면 카드 안에 테두리가 겹친다 */}
+      <div className="overflow-hidden rounded-xl border bg-card">
+        <div className="p-6 pb-4">
+          <h2 className="font-semibold">LOT 별</h2>
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm text-muted-foreground">OEE 85% 미만은 호박색, 60% 미만은 빨강 · 회색 칸은 그 LOT 에서 가장 약한 지표</p>
+            {demoCount > 0 && (
+              <Link
+                href={showDemo ? "/oee" : "/oee?demo=1"}
+                aria-pressed={showDemo}
+                className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                  showDemo ? "border-foreground bg-foreground text-background" : "hover:bg-muted"
+                }`}
+              >
+                {showDemo ? "✓ " : ""}시연 LOT 포함 ({demoCount})
+              </Link>
+            )}
+          </div>
         </div>
-        <div className="mt-3 overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto border-t">
           {/* 🔴 주석을 <table> 뒤에 두면 공백이 "글자" 로 들어간다 — 그래서 여기 */}
           <table className="w-full whitespace-nowrap text-sm">
             <thead className="border-b text-left text-muted-foreground">
               <tr>
-                <th className="px-4 py-2 font-medium">LOT</th>
+                <th className="px-6 py-2 font-medium">LOT</th>
                 <th className="px-4 py-2 text-right font-medium">가동률</th>
                 <th className="px-4 py-2 text-right font-medium">성능</th>
                 <th className="px-4 py-2 text-right font-medium">품질</th>
@@ -129,7 +133,7 @@ export default async function Page({ searchParams }: PageProps<"/oee">) {
                 return (
                   // 줄 전체가 링크 — 진짜 링크는 LOT 칸 하나, after:inset-0 으로 줄 전체를 덮는다 (LOT 목록과 같다)
                   <tr key={l.lot_id} className="relative border-b last:border-0 hover:bg-muted/50">
-                    <td className="px-4 py-2.5 font-mono">
+                    <td className="px-6 py-2.5 font-mono">
                       <Link href={`/lots/${l.lot_id}`} className="after:absolute after:inset-0">
                         {l.lot_id}
                       </Link>
@@ -151,7 +155,7 @@ export default async function Page({ searchParams }: PageProps<"/oee">) {
                       {olv && olv !== "ok" && <span aria-hidden className={`mr-1.5 inline-block size-1.5 rounded-full align-middle ${LEVEL_DOT[olv]}`} />}
                       {pct(l.oee.oee)}
                     </td>
-                    <td className="pr-3 text-muted-foreground">
+                    <td className="pr-5 text-muted-foreground">
                       <ChevronRight aria-hidden className="size-4" />
                     </td>
                   </tr>

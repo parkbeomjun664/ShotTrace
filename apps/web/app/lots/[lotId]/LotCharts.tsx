@@ -69,7 +69,7 @@ export function LotCharts({
                   tickFormatter={(n) => xLabel.get(Number(n)) ?? ""}
                   tick={AXIS}
                   stroke="currentColor"
-                  opacity={0.6}
+                  opacity={0.8}
                   allowDecimals={false}
                 />
                 <YAxis
@@ -78,7 +78,7 @@ export function LotCharts({
                   tickFormatter={(v) => Number(v).toFixed(decimals)}
                   tick={AXIS}
                   stroke="currentColor"
-                  opacity={0.6}
+                  opacity={0.8}
                   width={48}
                 />
                 {b && <ReferenceArea y1={b.lo} y2={b.hi} fill="#d1fae5" fillOpacity={0.35} />}

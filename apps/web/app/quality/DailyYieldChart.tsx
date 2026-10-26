@@ -42,7 +42,7 @@ export function DailyYieldChart({ data }: { data: DayPoint[] }) {
           tickFormatter={(t) => 날짜(new Date(t).toISOString())}   // 10. 16. — 표시 형식은 한 곳에서 (ADR 002)
           tick={AXIS}
           stroke="currentColor"
-          opacity={0.6}
+          opacity={0.8}
         />
         <YAxis
           domain={[85, 100]}                           // 🔴 0 부터 그리면 90 ~ 100 의 차이가 납작해진다
@@ -51,7 +51,7 @@ export function DailyYieldChart({ data }: { data: DayPoint[] }) {
           tickFormatter={(v) => `${v}%`}
           tick={AXIS}
           stroke="currentColor"
-          opacity={0.6}
+          opacity={0.8}
         />
         {gaps(data).map((g) => (
           <ReferenceArea

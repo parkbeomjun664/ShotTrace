@@ -25,8 +25,8 @@ export function ParetoChart({ data }: { data: ParetoRow[] }) {   // 데이터는
     <ResponsiveContainer width="100%" height={260}>
       <ComposedChart data={data} margin={{ top: 20, right: 0, bottom: 0, left: -20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.15} vertical={false} />
-        <XAxis dataKey="reason" tick={AXIS} stroke="currentColor" opacity={0.6} />
-        <YAxis yAxisId="count" tick={AXIS} stroke="currentColor" opacity={0.6} allowDecimals={false} />
+        <XAxis dataKey="reason" tick={AXIS} stroke="currentColor" opacity={0.8} />
+        <YAxis yAxisId="count" tick={AXIS} stroke="currentColor" opacity={0.8} allowDecimals={false} />
         <YAxis
           yAxisId="cum"
           orientation="right"
@@ -35,7 +35,7 @@ export function ParetoChart({ data }: { data: ParetoRow[] }) {   // 데이터는
           tickFormatter={(v) => `${v}%`}
           tick={AXIS}
           stroke="currentColor"
-          opacity={0.6}
+          opacity={0.8}
         />
         {/* 80% 선 — 이 선을 처음 넘는 데까지가 "먼저 손볼 유형" (파레토 법칙) */}
         <ReferenceLine yAxisId="cum" y={80} stroke="currentColor" strokeDasharray="4 4" opacity={0.5} />

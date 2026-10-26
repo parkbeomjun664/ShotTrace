@@ -5,15 +5,17 @@ import { redirect } from "next/navigation";
 
 import { createSessionClient } from "@/lib/supabase/session";
 
-export async function login(formData: FormData) {     // 폼의 name 이 그대로 들어온다
+// useActionState 가 부른다 — 첫 칸은 이전 결과. 실패하면 쪽지로 이메일을 돌려줘 폼이 다시 채운다 (10/27)
+export async function login(_prev: { email: string } | null, formData: FormData) {
   const supabase = await createSessionClient();        // 🔵 Server Action 은 쿠키를 쓸 수 있다
+  const email = String(formData.get("email") ?? "");   // get 은 null 일 수 있다 → 문자열로
 
   const { error } = await supabase.auth.signInWithPassword({
-    email: String(formData.get("email")),              // get 은 null 일 수 있다 → 문자열로
-    password: String(formData.get("password")),
+    email,
+    password: String(formData.get("password") ?? ""),
   });                                                  // 성공하면 setAll 이 손목밴드를 채운다
 
-  if (error) redirect("/login?error=1");               // 🔴 이유를 안 나눈다 — 계정 존재 여부가 샌다
+  if (error) return { email };                         // 🔴 이유를 안 나눈다 — 계정 존재 여부가 샌다 · 비밀번호는 돌려주지 않는다
   redirect("/");                                       // 🔴 redirect 는 던진다 · try 안에서 쓰지 않는다
 }
 

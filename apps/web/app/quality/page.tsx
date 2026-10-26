@@ -28,8 +28,8 @@ export default async function Page() {
   const points = dailySeries(kamp.map((d) => ({ plan_date: d.plan_date!, yield_pct: d.yield_pct })));
 
   return (
-    <section className="space-y-10">
-      <div>
+    <section className="space-y-6">
+      <div className="pb-2">
         <h1 className="text-2xl font-bold tracking-tight">품질</h1>
         <p className="mt-1 text-sm tabular-nums text-muted-foreground">
           불량 {fail}건 / 전체 {total.toLocaleString()}개
@@ -40,11 +40,12 @@ export default async function Page() {
         </p>
       </div>
 
-      <div>
+      {/* 영역마다 카드 — 차트 둘이 한 흰 바탕에 이어져 경계가 흐렸다 (10/27) */}
+      <div className="rounded-xl border bg-card p-6">
         <h2 className="font-semibold">불량 파레토</h2>
         <p className="mt-1 text-sm text-muted-foreground">점선(80%)을 처음 넘는 데까지가 먼저 손볼 유형이에요</p>
         {/* 차트 옆에 작은 표 — 같은 내용을 막대로 두 번 보여주던 진행 막대 목록을 대신한다 */}
-        <div className="mt-3 grid gap-6 lg:grid-cols-3">
+        <div className="mt-4 grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <ParetoChart data={rows} />
           </div>
@@ -71,17 +72,17 @@ export default async function Page() {
         </div>
       </div>
 
-      <div>
+      <div className="rounded-xl border bg-card p-6">
         <h2 className="font-semibold">일별 수율</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           점선은 목표 95% · 호박색은 95% 미만, 빨강은 90% 미만 (LOT 목록과 같은 기준) · 회색 띠는 생산 없는 날
         </p>
-        <div className="mt-3">
+        <div className="mt-4">
           <DailyYieldChart data={points} />
         </div>
 
         {/* 표는 접어 둔다 — 그래프가 먼저, 숫자가 필요할 때만 펼친다 */}
-        <details className="mt-4">
+        <details className="mt-4 border-t pt-4">
           <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">일별 상세 보기</summary>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-sm">
