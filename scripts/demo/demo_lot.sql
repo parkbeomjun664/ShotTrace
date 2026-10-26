@@ -34,9 +34,14 @@ VALUES
 --   🔴 끝난 LOT 을 "진행 중" 으로 두지 않는다. 조용히 틀린 값을 DB 에 남기는 일이다
 --      (10/1 에 같은 이유로 열어둔 LOT 을 닫았다).
 --   🔴 저장 수량도 같이 채운다. 0 으로 두면 LOT 목록 화면이 0 개로 보인다.
+--   🔴 끝은 now() 가 아니라 마지막 샷 + 1초 (10/26 결정). now() 면 닫는 걸 깜빡한 시간이 생산 시간으로
+--      둔갑한다 — 10/07 데모 LOT 이 3주 열려 OEE 1.3% 로 보였다
 
 UPDATE production_lot l
-SET ended_at  = now(),
+SET ended_at  = coalesce((SELECT max(sp.measured_at) FROM shot_part sp
+                          WHERE sp.equipment_id = l.equip_cd
+                            AND sp.product_id   = l.product_id
+                            AND sp.measured_at >= l.started_at), l.started_at) + interval '1 second',   -- 🔴 닫은 시각이 아니라 마지막 샷 + 1초 (ADR 006 · 10/26)
     total_qty = (SELECT count(*) FROM shot_part sp               -- 상관 서브쿼리 —
                  WHERE sp.equipment_id = l.equip_cd              -- 바깥 행(l)을 보고 센다
                    AND sp.product_id   = l.product_id
