@@ -10,7 +10,7 @@ export default function RecordForm({ lotIds, requestId }: { lotIds: string[]; re
   return (
     <form action={formAction} className="mt-6 max-w-sm space-y-3"> {/* 🔴 createRecord 를 바로 꽂으면 쪽지가 사라진다 */}
       <input type="hidden" name="requestId" value={requestId} /> {/* 송장 — 안 보여도 같이 제출된다 · 성공해야 새 번호 */}
-      <select key={state?.values?.lotId ?? ""} name="lotId" required defaultValue={state?.values?.lotId ?? ""} className="w-full rounded border px-3 py-2 text-sm">{/* 🔴 select 의 defaultValue 는 mount 때 한 번만 읽힌다 → key 가 바뀌면 새로 그린다 */}
+      <select aria-label="LOT" key={state?.values?.lotId ?? ""} name="lotId" required defaultValue={state?.values?.lotId ?? ""} className="w-full rounded border px-3 py-2 text-sm">{/* 🔴 select 의 defaultValue 는 mount 때 한 번만 읽힌다 → key 가 바뀌면 새로 그린다 */}
         <option value="" disabled>{/* 빈 값 "" — 안 고르면 Zod 의 min(1) 에 걸린다 */}
           LOT 을 고르세요
         </option>

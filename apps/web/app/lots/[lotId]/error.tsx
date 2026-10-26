@@ -12,7 +12,7 @@ export default function Error({
   return (
     <section>
       <h1 className="text-lg font-semibold">LOT을 불러오지 못했습니다</h1>
-      <p className="mt-2 font-mono text-sm text-black/50 dark:text-white/50">
+      <p className="mt-2 font-mono text-sm text-black/60 dark:text-white/60">
         {error.message}
       </p>
       <button

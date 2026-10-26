@@ -45,5 +45,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {                                // 이미지·JS 까지 매번 물으면 느리다
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt).*)"],   // 🔴 robots.txt 는 건너뛴다 — 로봇은 로그인을 안 한다 (M29)
 };

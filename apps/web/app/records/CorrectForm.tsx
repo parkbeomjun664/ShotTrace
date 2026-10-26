@@ -12,7 +12,7 @@ export default function CorrectForm({ records, requestId }: { records: RecentRec
   return (
     <form action={formAction} className="mt-4 max-w-sm space-y-3">
       <input type="hidden" name="requestId" value={requestId} /> {/* 정정에도 번호표 — 같은 정정이 두 번 와도 한 줄 */}
-      <select name="recordId" required defaultValue="" className="w-full rounded border px-3 py-2 text-sm">{/* 살아 있는 줄만 — 이미 정정된 줄은 목록에 없다 */}
+      <select aria-label="정정할 실적" name="recordId" required defaultValue="" className="w-full rounded border px-3 py-2 text-sm">{/* 살아 있는 줄만 — 이미 정정된 줄은 목록에 없다 */}
         <option value="" disabled>
           정정할 실적을 고르세요
         </option>

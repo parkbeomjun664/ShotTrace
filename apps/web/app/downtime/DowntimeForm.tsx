@@ -22,7 +22,7 @@ export default function DowntimeForm({
   return (
     <form action={formAction} className="mt-6 max-w-sm space-y-3">
       <input type="hidden" name="requestId" value={requestId} /> {/* 번호표 — 성공해야 새 번호 */}
-      <select key={`e-${v?.equipCd ?? ""}`} name="equipCd" required defaultValue={v?.equipCd ?? ""} className="w-full rounded border px-3 py-2 text-sm">{/* 🔴 key 앞의 e- · r- — 둘 다 "" 이면 형제끼리 key 가 같아진다 */}
+      <select aria-label="설비" key={`e-${v?.equipCd ?? ""}`} name="equipCd" required defaultValue={v?.equipCd ?? ""} className="w-full rounded border px-3 py-2 text-sm">{/* 🔴 key 앞의 e- · r- — 둘 다 "" 이면 형제끼리 key 가 같아진다 */}
         <option value="" disabled>
           설비를 고르세요
         </option>
@@ -32,7 +32,7 @@ export default function DowntimeForm({
           </option>
         ))}
       </select>
-      <select key={`r-${v?.reasonCode ?? ""}`} name="reasonCode" required defaultValue={v?.reasonCode ?? ""} className="w-full rounded border px-3 py-2 text-sm">
+      <select aria-label="비가동 사유" key={`r-${v?.reasonCode ?? ""}`} name="reasonCode" required defaultValue={v?.reasonCode ?? ""} className="w-full rounded border px-3 py-2 text-sm">
         <option value="" disabled>
           사유를 고르세요
         </option>

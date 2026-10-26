@@ -8,7 +8,7 @@ export function UserMenu({ email }: { email?: string }) {   // 기다릴 게 없
     return (
       <Link
         href="/login"
-        className="ml-auto rounded px-3 py-1.5 text-sm text-black/50 hover:bg-black/5 dark:text-white/50 dark:hover:bg-white/10"
+        className="ml-auto rounded px-3 py-1.5 text-sm text-black/70 hover:bg-black/5 dark:text-white/70 dark:hover:bg-white/10"
       >
         로그인
       </Link>
@@ -19,7 +19,7 @@ export function UserMenu({ email }: { email?: string }) {   // 기다릴 게 없
   return (
     <form action={logout} className="ml-auto flex items-center gap-3 text-sm">
       <span className="text-black/60 dark:text-white/60">{email}</span>
-      <button className="rounded px-3 py-1.5 text-black/50 hover:bg-black/5 dark:text-white/50 dark:hover:bg-white/10">
+      <button className="rounded px-3 py-1.5 text-black/70 hover:bg-black/5 dark:text-white/70 dark:hover:bg-white/10">
         로그아웃
       </button>
     </form>
