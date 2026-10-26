@@ -101,7 +101,7 @@ flowchart LR
 | E2E | 비로그인은 못 들어간다 · viewer 는 저장 못 하고 쓴 값은 남는다 — DB 에 아무것도 안 쓰는 흐름만 | `apps/web/e2e/` |
 | CI | 푸시마다 web(tsc · Vitest) · python(pytest) · e2e(Playwright) | `.github/workflows/ci.yml` |
 | 제약 실험 | 종류별로 일부러 어겨 13/13 막힘 (PK · UNIQUE · FK · CHECK · EXCLUDE · NOT NULL) | [evidence/constraints-reject](docs/evidence/constraints-reject.md) |
-| RLS 전수 점검 | 역할 5 × 테이블 · View · 함수 17 — 모든 칸이 예상대로 | `scripts/verify/rls_matrix.py` |
+| RLS 전수 점검 | 역할 5 × 테이블 · View · 함수 20 — 모든 칸이 예상대로 | `scripts/verify/rls_matrix.py` |
 | 성능 | 10배 데이터 · 인덱스 차이 30배 | [evidence/perf-10x](docs/evidence/perf-10x.md) |
 | 프론트 품질 | Lighthouse 접근성 6화면 100 · SEO 63 은 일부러(사내 시스템) | [evidence/lighthouse](docs/evidence/lighthouse.md) |
 
