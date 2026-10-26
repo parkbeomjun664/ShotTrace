@@ -219,6 +219,20 @@ export async function getMyRole() {                  // 함수도 문 — admin 
   return data;
 }
 
+export async function getLastReceived() {            // 수집기가 마지막으로 일한 때 — 관측성의 경고등 (M28)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("shot")
+    .select("received_at")
+    .not("received_at", "is", null)                    // 9월 ETL 적재분은 처리 시각이 없다 — 수집기를 안 거쳤다
+    .order("received_at", { ascending: false })        // 🔵 측정 시각이 아니라 처리 시각 (ADR 010) — 재생이 아니면 측정 시각은 2020년
+    .limit(1)
+    .maybeSingle();                                    // 한 줄이거나 없다
+
+  if (error) throw error;
+  return data?.received_at ?? null;
+}
+
 export type LotOeeRow = {                              // lot_oee_input 한 줄 — 🔴 View 타입은 전부 | null 이라 덮어쓴다
   lot_id: string;
   equip_cd: string;

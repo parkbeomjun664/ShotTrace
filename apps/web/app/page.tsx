@@ -5,15 +5,17 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getEquipmentSummary, getPlantSummary } from "@/lib/queries";
+import { getEquipmentSummary, getLastReceived, getPlantSummary } from "@/lib/queries";
 import { LiveRefresh } from "./LiveRefresh";       // 알림을 듣고 이 화면을 다시 그리게 한다
+import { ReceiveStatus } from "./ReceiveStatus";   // 경고등 — 수집기가 마지막으로 일한 때 (M28)
 
 export const revalidate = 0;   // 🔴 캐시를 끈다. 60 이면 refresh 해도 묵은 화면이 온다 (M18)
 
 export default async function Page() {
-  const [plant, equipment] = await Promise.all([
+  const [plant, equipment, lastReceived] = await Promise.all([
     getPlantSummary(),
     getEquipmentSummary(),
+    getLastReceived(),
   ]);
 
   return (
@@ -25,6 +27,7 @@ export default async function Page() {
         <p className="mt-1 text-sm text-muted-foreground">
           2020-10-16 ~ 11-06 · KAMP 사출성형기 실데이터
         </p>
+        <ReceiveStatus at={lastReceived} />
       </div>
 
       {/* 1층 — 숫자 하나. 3초 안에 판단 (M09 정보 위계) */}
