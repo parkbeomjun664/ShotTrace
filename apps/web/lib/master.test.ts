@@ -1,7 +1,8 @@
 // 마스터 — 사용 중지 항목 · 표준 CT 와 OEE (10/26)
 import { describe, expect, it } from "vitest";
 
-import { parseTab, selectable } from "./master";
+import { auditChanges, parseTab, selectable } from "./master";
+import { getSpecBand, MIN_TOLERANCE, toleranceFrom } from "./spec";
 import { computeOee } from "./oee";
 
 describe("selectable", () => {
@@ -30,5 +31,28 @@ describe("표준 CT 를 바꾸면 OEE 가 다시 계산된다", () => {
     const after = computeOee({ ...base, stdCycleSec: 48 }).performance!;    // 50 × 48s = 40분 / 60분
     expect(before).toBeCloseTo(50 / 60);
     expect(after).toBeCloseTo(40 / 60);
+  });
+});
+
+describe("auditChanges", () => {
+  it("바뀐 칸만 — 같은 값은 빼고", () => {
+    expect(auditChanges({ code: "PM", name: "점검", active: true }, { code: "PM", name: "정기 점검", active: true }))
+      .toEqual([{ field: "name", from: "점검", to: "정기 점검" }]);
+  });
+
+  it("추가(INSERT)면 모든 칸이 새 값", () => {
+    expect(auditChanges(null, { reason: "버", active: true })).toHaveLength(2);
+  });
+});
+
+describe("toleranceFrom", () => {
+  it("DB 값이 상수를 덮는다 — admin 이 금형 폭을 ±2℃ 로 바꾸면 띠도 넓어진다", () => {
+    const tol = toleranceFrom([{ metric: "mold_temperature_3", kind: "abs", value: 2 }]);
+    expect(getSpecBand("mold_temperature_3", 22, 0, tol)).toEqual({ lo: 20, hi: 24 });
+  });
+
+  it("모르는 변수 · 0 이하 값은 버리고, 빠진 변수는 기본값", () => {
+    const tol = toleranceFrom([{ metric: "humidity", kind: "abs", value: 9 }, { metric: "cycle_time", kind: "pct", value: 0 }]);
+    expect(tol).toEqual(MIN_TOLERANCE);
   });
 });

@@ -38,7 +38,7 @@ export function CorrectDialog({
       >
         정정
       </button>
-      <dialog ref={ref} className="m-auto w-full max-w-sm rounded-xl border p-6 text-left backdrop:bg-black/30">
+      <dialog ref={ref} className="m-auto whitespace-normal w-full max-w-sm rounded-xl border p-6 text-left backdrop:bg-black/30">
         <h2 className="font-semibold">실적 정정</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           <span className="font-mono">{lotId}</span> · 원래 줄은 취소선으로 남고 새 줄이 생겨요

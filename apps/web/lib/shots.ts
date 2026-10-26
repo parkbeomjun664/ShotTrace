@@ -2,7 +2,7 @@
 // 순수함수 — DB 를 안 부른다. 차트(LotCharts)와 표(page)가 같은 판정을 쓴다
 import { metricStats, type MetricKey } from "./evidence";   // 상대 경로 — Vitest 는 @/ 별칭을 모른다
 import type { LotShot } from "./queries";
-import { getSpecBand } from "./spec";                 // 범위는 한 곳에서 — 띠와 판정이 같은 값 (10/26)
+import { getSpecBand, MIN_TOLERANCE, type Tolerance } from "./spec";   // 범위는 한 곳에서 — 띠와 판정이 같은 값 (10/26)
 
 export const GAP_FACTOR = 5;                           // 샷 간격이 표준 CT × 5 를 "넘으면" 빈 구간 — 숫자에 이름을 붙인다
 
@@ -32,10 +32,10 @@ export function findGaps(times: number[], stdCycleSec: number): Gap[] {
 export type Band = { lo: number; hi: number } | null;
 
 // 기준 범위(대체) — 이 LOT 양품의 평균 ± max(3σ, 최소 허용 폭). 이전 정상 LOT · 설비 전체 기준(025)이 없을 때만 쓴다
-export function bands(shots: LotShot[]): Record<ChartMetric, Band> {
+export function bands(shots: LotShot[], tol: Tolerance = MIN_TOLERANCE): Record<ChartMetric, Band> {
   const stats = new Map(metricStats(shots).map((m) => [m.key, m]));
   return Object.fromEntries(
-    CHART_METRICS.map((k) => [k, getSpecBand(k, stats.get(k)?.goodMean ?? null, stats.get(k)?.goodStd ?? null)]),
+    CHART_METRICS.map((k) => [k, getSpecBand(k, stats.get(k)?.goodMean ?? null, stats.get(k)?.goodStd ?? null, tol)]),
   ) as Record<ChartMetric, Band>;
 }
 

@@ -32,7 +32,7 @@ export function AddDowntime({
       >
         직접 추가
       </button>
-      <dialog ref={ref} className="m-auto w-full max-w-sm rounded-xl border p-6 backdrop:bg-black/30">
+      <dialog ref={ref} className="m-auto whitespace-normal w-full max-w-sm rounded-xl border p-6 backdrop:bg-black/30">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold">비가동 직접 추가</h2>
           <button onClick={() => ref.current?.close()} aria-label="닫기" className="text-muted-foreground hover:text-foreground">

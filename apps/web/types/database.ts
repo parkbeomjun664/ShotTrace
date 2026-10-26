@@ -113,16 +113,19 @@ export type Database = {
       }
       equipment: {
         Row: {
+          active: boolean
           equip_cd: string
           equip_name: string
           tonnage: number | null
         }
         Insert: {
+          active?: boolean
           equip_cd: string
           equip_name: string
           tonnage?: number | null
         }
         Update: {
+          active?: boolean
           equip_cd?: string
           equip_name?: string
           tonnage?: number | null
@@ -181,8 +184,63 @@ export type Database = {
           },
         ]
       }
+      master_audit: {
+        Row: {
+          action: string
+          after: Json
+          audit_id: number
+          before: Json | null
+          changed_at: string
+          changed_by: string | null
+          record_key: string
+          table_name: string
+        }
+        Insert: {
+          action: string
+          after: Json
+          audit_id?: never
+          before?: Json | null
+          changed_at?: string
+          changed_by?: string | null
+          record_key: string
+          table_name: string
+        }
+        Update: {
+          action?: string
+          after?: Json
+          audit_id?: never
+          before?: Json | null
+          changed_at?: string
+          changed_by?: string | null
+          record_key?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
+      parameter_spec: {
+        Row: {
+          kind: string
+          metric: string
+          unit: string
+          value: number
+        }
+        Insert: {
+          kind: string
+          metric: string
+          unit: string
+          value: number
+        }
+        Update: {
+          kind?: string
+          metric?: string
+          unit?: string
+          value?: number
+        }
+        Relationships: []
+      }
       product: {
         Row: {
+          active: boolean
           car_model: string | null
           part_name: string
           product_id: number
@@ -190,6 +248,7 @@ export type Database = {
           std_cycle_sec: number | null
         }
         Insert: {
+          active?: boolean
           car_model?: string | null
           part_name: string
           product_id?: never
@@ -197,6 +256,7 @@ export type Database = {
           std_cycle_sec?: number | null
         }
         Update: {
+          active?: boolean
           car_model?: string | null
           part_name?: string
           product_id?: never

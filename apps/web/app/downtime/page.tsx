@@ -7,6 +7,7 @@ import Link from "next/link";
 import { PLANNED_CANDIDATE_MIN, dayWindow, hourTicks, isPlannedCandidate, segment, withStops } from "@/lib/downtime";
 import { 날짜, 분길이, 시분, 시각 } from "@/lib/format";
 import { isDemo } from "@/lib/lots";
+import { selectable } from "@/lib/master";
 import { aggregateOee } from "@/lib/oee";
 import { getDowntimeReasons, getEquipments, getLotOee, getLots, getMyRole, getRecentDowntimes, getUnrecordedStops } from "@/lib/queries";
 
@@ -113,7 +114,7 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
               {showDemo ? "✓ " : ""}시연 포함
             </Link>
           ) : null}
-          <AddDowntime equipments={equipments} reasons={reasons} requestId={crypto.randomUUID()} readOnly={readOnly} />
+          <AddDowntime equipments={selectable(equipments)} reasons={reasons} requestId={crypto.randomUUID()} readOnly={readOnly} />
         </div>
       </div>
 

@@ -180,7 +180,7 @@ export async function getEquipments() {              // 설비 3대 — 비가�
   const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("equipment")
-    .select("equip_cd, equip_name, tonnage")                    // View 가 아니라 표 — 타입에 | null 이 안 붙는다
+    .select("equip_cd, equip_name, tonnage, active")                    // View 가 아니라 표 — 타입에 | null 이 안 붙는다
     .order("equip_cd");
 
   if (error) throw error;
@@ -221,11 +221,30 @@ export async function getUnrecordedStops() {         // 사유 미입력 정지 
   return data;
 }
 
+export async function getParameterSpec() {          // 판정 기준 — LOT 상세의 최소 허용 폭 (028 · admin 이 바꾼다)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase.from("parameter_spec").select("metric, kind, value, unit").order("metric");
+  if (error) throw error;
+  return data;
+}
+
+export async function getMasterAudit(table: string) { // 변경 이력 — 그 표의 최근 300건 (트리거가 쓴다 · 028)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("master_audit")
+    .select("audit_id, record_key, action, before, after, changed_by, changed_at")
+    .eq("table_name", table)
+    .order("changed_at", { ascending: false })
+    .limit(300);
+  if (error) throw error;
+  return data;
+}
+
 export async function getProducts() {                // 제품 마스터 — 마스터 화면에서 읽기만
   const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("product")
-    .select("product_id, part_name, car_model, side, std_cycle_sec")
+    .select("product_id, part_name, car_model, side, std_cycle_sec, active")
     .order("product_id");
 
   if (error) throw error;

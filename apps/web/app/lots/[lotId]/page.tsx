@@ -11,7 +11,7 @@ import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getLot, getLotBaseline, getLotGuide, getLotShots, getMyRole, pareto, tally } from "@/lib/queries";
+import { getLot, getLotBaseline, getLotGuide, getLotShots, getMyRole, getParameterSpec, pareto, tally } from "@/lib/queries";
 import { metricStats } from "@/lib/evidence";
 
 
@@ -19,7 +19,7 @@ import { metricStats } from "@/lib/evidence";
 import { 같은날, 날짜, 분길이, 소수, 시각, 시분, 진행중 } from "@/lib/format";
 import { isDemo } from "@/lib/lots";
 import { CHART_METRICS, bands, indexGaps, isAnomaly, outOfBand, type Band, type ChartMetric } from "@/lib/shots";
-import { getSpecBand } from "@/lib/spec";             // 범위는 한 곳에서 — 차트 띠 · 점 · 표가 같은 값 (10/26)   // 빈 구간 · 기준 범위 · 이상 샷 — 차트와 표가 같은 판정 (10/26)
+import { getSpecBand, toleranceFrom } from "@/lib/spec";             // 범위는 한 곳에서 — 차트 띠 · 점 · 표가 같은 값 (10/26)   // 빈 구간 · 기준 범위 · 이상 샷 — 차트와 표가 같은 판정 (10/26)
 import { LotCharts } from "./LotCharts";
 import { LiveRefresh } from "@/app/LiveRefresh";   // 어제 만든 부품을 그대로 (M18)
 import { GuidePanel } from "./GuidePanel";
@@ -40,12 +40,14 @@ export default async function Page({ params, searchParams }: PageProps<"/lots/[l
   if (!lot) notFound();                                // 없는 LOT은 404 (M04 ⑧)
                                                        // 이 아래로 lot 은 null 아님
 
-  const [shots, guide, role, baseline] = await Promise.all([   // 서로 기다릴 필요 없는 넷 — 한 번에 (M27)
+  const [shots, guide, role, baseline, specRows] = await Promise.all([   // 서로 기다릴 필요 없는 다섯 — 한 번에 (M27)
     getLotShots(lot.lot_id),                           // ★ RPC — 조인은 DB 안에
     getLotGuide(lot.lot_id),                           // 저장된 가이드 (M25)
     getMyRole(),
     getLotBaseline(lot.lot_id),                        // 기준 범위 재료 — 이전 정상 LOT (025)
+    getParameterSpec(),                                // 최소 허용 폭 — admin 이 마스터에서 바꾼다 (028)
   ]);
+  const tol = toleranceFrom(specRows);                 // 빠진 변수는 코드의 기본값으로
   const defects = pareto(shots);                       // 불량 사유별, 많은 순
   const 집계 = tally(shots);                            // 🔴 저장값(lot.*_qty) 은 진행 중이면 낡는다
   const 진행 = 진행중(lot.ended_at);                    // 아직 안 끝난 LOT (009)
@@ -58,10 +60,10 @@ export default async function Page({ params, searchParams }: PageProps<"/lots/[l
     ? (Object.fromEntries(
         CHART_METRICS.map((k) => {
           const r = fromDb.get(k);
-          return [k, getSpecBand(k, r?.mean ?? null, r?.std ?? null)];
+          return [k, getSpecBand(k, r?.mean ?? null, r?.std ?? null, tol)];
         }),
       ) as Record<ChartMetric, Band>)
-    : bands(shots);
+    : bands(shots, tol);
   const 기준 =
     baseline[0]?.source === "lots" ? `기준: 과거 정상 LOT ${baseline[0].lot_count}개`
     : baseline[0]?.source === "all" ? "기준: 설비 전체 (과거 정상 LOT 없음)"

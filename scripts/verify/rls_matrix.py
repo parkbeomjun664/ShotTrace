@@ -29,7 +29,7 @@ URL =os.environ["NEXT_PUBLIC_SUPABASE_URL"]
 ANON = os.environ["NEXT_PUBLIC_SUPABASE_ANON_KEY"]
 SERVICE = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 
-TABLES = ["equipment", "product", "production_lot", "shot", "shot_part", "user_role", "production_record", "record_cancel", "downtime_reason", "downtime", "defect_code", "lot_guide"]
+TABLES = ["equipment", "product", "production_lot", "shot", "shot_part", "user_role", "production_record", "record_cancel", "downtime_reason", "downtime", "defect_code", "lot_guide", "parameter_spec", "master_audit"]
 VIEWS = ["equipment_summary", "plant_summary", "daily_yield", "defect_pareto", "active_record", "lot_oee_input"]
 UPDATE_KEYS = {  # 테이블: (거를 컬럼들, 같은 값으로 덮을 컬럼)
     "equipment": (["equip_cd"], "equip_name"),
@@ -44,9 +44,12 @@ UPDATE_KEYS = {  # 테이블: (거를 컬럼들, 같은 값으로 덮을 컬럼)
     "downtime": (["downtime_id"], "note"),
     "defect_code": (["reason"], "active"),
     "lot_guide": (["lot_id"], "model"),  # 023 — 가이드도 고치지 않는다
+    "parameter_spec": (["metric"], "value"),  # 028 — admin 만 값을 고친다
+    "master_audit": (["audit_id"], "action"),  # 028 — 아무도 못 고친다 (트리거만 쓴다)
 }
 STAFF = {"viewer", "worker", "admin"}
-ADMIN_UPDATES = {"downtime_reason", "defect_code"}  # UPDATE 정책이 admin 에게 열린 마스터 (019)
+ADMIN_UPDATES = {"downtime_reason", "defect_code", "equipment", "product", "parameter_spec"}  # UPDATE 정책이 admin 에게 열린 마스터 (019 · 028)
+ADMIN_INSERTS = {"equipment", "product", "downtime_reason", "defect_code"}  # INSERT 정책이 admin 에게 열린 마스터 (028) — 빈 행이라 NOT NULL · CHECK 에 걸린다
 
 admin_db = create_client(URL, SERVICE)  # RLS 를 건너뛰는 열쇠 — 기준값 · 임시 사용자에만
 sample = {t: (admin_db.table(t).select("*").limit(1).execute().data or [None])[0] for t in TABLES}
@@ -103,8 +106,8 @@ try:
                 ok = got == 0
             elif t == "user_role":
                 ok = got >= 2 if r == "admin" else got == 1  # 본인 한 줄 · admin 은 전부
-            elif t in ("production_record", "record_cancel", "active_record", "downtime", "lot_guide"):
-                ok = True  # 장부 · 가이드는 비어 있을 수도 있다
+            elif t in ("production_record", "record_cancel", "active_record", "downtime", "lot_guide", "master_audit"):
+                ok = True  # 장부 · 가이드 · 이력은 비어 있을 수도 있다
             else:
                 ok = got > 0
             cells[r] = cell(r, t, got, ok)
@@ -135,6 +138,8 @@ try:
                 got = e.code
             if t in ("production_record", "record_cancel", "downtime", "lot_guide") and r in ("worker", "admin"):
                 ok = got == "23502"  # RLS 는 통과 → NOT NULL 이 잡는다
+            elif t in ADMIN_INSERTS and r == "admin":
+                ok = got in ("23502", "23514")  # RLS 는 통과 → 빈 행이라 NOT NULL(23502) · CHECK(23514) 가 잡는다 (028)
             else:
                 ok = got == "42501"  # RLS(또는 권한)가 막는다
             cells[r] = cell(r, f"INSERT {t}", got, ok)
