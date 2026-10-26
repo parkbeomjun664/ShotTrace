@@ -1,8 +1,8 @@
 // 품질 — 불량이 어디에 몰려 있나 · M11(View) → M12(차트)
 // 10/26 — 파레토(막대 + 누적 % + 80% 선) · 작은 표 · 일별 수율 선 그래프(95% 목표) · 시연 날짜는 그래프에서 뺀다
 import { isDemo, yieldLevel } from "@/lib/lots";
-import { pareto } from "@/lib/quality";
-import { getDailyYield, getDefectPareto } from "@/lib/queries";
+import { dailySeries, pareto } from "@/lib/quality";
+import { getDailyYield, getDefectPareto, getPartsWithoutLot } from "@/lib/queries";
 import { DailyYieldChart } from "./DailyYieldChart";
 import { ParetoChart } from "./ParetoChart";
 
@@ -10,29 +10,33 @@ const LEVEL_TEXT = { ok: "", warn: "text-status-warn", bad: "text-status-bad" } 
 const LEVEL_DOT = { ok: "", warn: "bg-status-warn", bad: "bg-status-bad" } as const;
 
 export default async function Page() {
-  const [defects, daily] = await Promise.all([   // 왕복 2번을 동시에
+  const [defects, daily, orphan] = await Promise.all([   // 왕복 3번을 동시에
     getDefectPareto(),                          // View 3행
     getDailyYield(),                            // View 14행 (오름차순)
+    getPartsWithoutLot(),                       // LOT 에 안 묶인 부품 — 현황판 합계와의 차이 (024)
   ]);
 
   const rows = pareto(defects);                 // 많은 순 + 비율 + 누적 % — 순수함수 (lib/quality.ts)
   const total = daily.reduce((a, d) => a + (d.total_qty ?? 0), 0);
   const fail = daily.reduce((a, d) => a + (d.fail_qty ?? 0), 0);
-  const clean = daily.filter((d) => (d.fail_qty ?? 0) === 0).length;  // 무결점 일수
+  // 🔴 일수는 그래프와 같은 기준 — KAMP 날만. 시연 날짜(2026)는 그래프에서 빼니 여기서도 따로 센다 (10/26 · "14일" vs 점 13개)
+  const kamp = daily.filter((d) => d.plan_date && !isDemo(d.plan_date));
+  const clean = kamp.filter((d) => (d.fail_qty ?? 0) === 0).length;  // 무결점 일수
+  const demoDays = daily.length - kamp.length;
                                                        // ?? 0 — View 컬럼은 전부 null 허용
-
-  // 🔴 그래프에는 KAMP 기간만 — 시연 날짜(2026)를 넣으면 x 축이 2020 → 2026 으로 6년을 건너뛴다 (LOT 목록과 같은 규칙)
-  const points = daily
-    .filter((d) => d.plan_date && d.yield_pct !== null && !isDemo(d.plan_date))
-    .map((d) => ({ date: d.plan_date!, label: `${d.plan_date!.slice(5, 7)}. ${d.plan_date!.slice(8, 10)}.`, yield: d.yield_pct! }));   // plan_date 는 date — 시각이 아니라 잘라도 된다 (ADR 002 는 timestamp 얘기)
+  // 그래프 — KAMP 날을 달력 하루하루로 펼친다. 생산 없는 날은 null 이라 선이 끊긴다 (lib/quality.ts)
+  const points = dailySeries(kamp.map((d) => ({ plan_date: d.plan_date!, yield_pct: d.yield_pct })));
 
   return (
     <section className="space-y-10">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">품질</h1>
         <p className="mt-1 text-sm tabular-nums text-muted-foreground">
-          불량 {fail}건 / 전체 {total.toLocaleString()}개 ·{" "}
-          {daily.length}일 중 {clean}일은 무결점
+          불량 {fail}건 / 전체 {total.toLocaleString()}개
+        </p>
+        <p className="mt-0.5 text-sm tabular-nums text-muted-foreground">
+          KAMP {kamp.length}일 중 {clean}일 무결점
+          {demoDays > 0 && ` · 시연 ${demoDays}일은 아래 표에만`}
         </p>
       </div>
 
@@ -70,7 +74,7 @@ export default async function Page() {
       <div>
         <h2 className="font-semibold">일별 수율</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          점선은 목표 95% · 주황은 95% 미만, 빨강은 90% 미만 (LOT 목록과 같은 기준)
+          점선은 목표 95% · 호박색은 95% 미만, 빨강은 90% 미만 (LOT 목록과 같은 기준) · 회색 띠는 생산 없는 날
         </p>
         <div className="mt-3">
           <DailyYieldChart data={points} />
@@ -116,6 +120,13 @@ export default async function Page() {
           </div>
         </details>
       </div>
+
+      {/* 하단 주석 — 현황판(부품을 직접 셈)과 이만큼 다르다. 숨기지 않되 부제는 가볍게 (024 · 10/26) */}
+      {orphan > 0 && (
+        <p className="text-xs text-muted-foreground">
+          ⓘ 이 화면의 합계는 LOT에 묶인 부품만 셉니다. LOT에 안 묶인 부품 {orphan.toLocaleString()}개는 현황판에만 들어가요.
+        </p>
+      )}
     </section>
   );
 }

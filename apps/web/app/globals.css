@@ -76,7 +76,7 @@
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
   /* 상태 색 — 글자로도 쓰니 흰 바탕 대비 4.5:1 이상 (10/26 · LOT 목록의 수율부터) */
-  --status-warn: #c2410c;         /* 주황 orange-700 · 5.2:1 (600 은 3.6 이라 미달) */
+  --status-warn: #b45309;         /* 호박 amber-700 · 5.0:1 — orange-700 은 빨강과 너무 닮았다 · amber-500 은 2.15 라 미달 (10/26) */
   --status-bad: #dc2626;          /* 빨강 red-600 · 4.8:1 */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);

@@ -60,9 +60,9 @@ export function ParetoChart({ data }: { data: ParetoRow[] }) {   // 데이터는
           yAxisId="cum"
           dataKey="cum"
           type="linear"
-          stroke="var(--status-warn)"
+          stroke="#6b7280"                             // 중립 회색(gray-500) — 상태 색(주의 · 나쁨)은 수율 경고에만 쓴다 (10/26)
           strokeWidth={2}
-          dot={{ r: 3, fill: "var(--status-warn)" }}
+          dot={{ r: 3, fill: "#6b7280" }}
           isAnimationActive={false}
         />
       </ComposedChart>

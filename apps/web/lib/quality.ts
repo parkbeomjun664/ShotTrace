@@ -20,3 +20,22 @@ export function pareto(rows: { fail_reason: string | null; fail_qty: number | nu
     };
   });
 }
+
+// 일별 수율 — 달력의 하루하루로 펼친다 (10/26). 생산 없는 날은 null → 선이 끊긴다
+// 🔴 있는 날만 이으면 10/16 → 10/20 이 바로 붙어 나흘 쉰 게 안 보인다
+export type DayPoint = { date: string; ts: number; yield: number | null };
+
+const DAY = 24 * 60 * 60 * 1000;
+const tsOf = (date: string) => Date.parse(`${date}T00:00:00+09:00`);   // 날짜(KST 자정) → 숫자 축
+
+export function dailySeries(rows: { plan_date: string; yield_pct: number | null }[]): DayPoint[] {
+  if (rows.length === 0) return [];
+  const byTs = new Map(rows.map((r) => [tsOf(r.plan_date), r]));
+  const ts = [...byTs.keys()].sort((a, b) => a - b);
+  const out: DayPoint[] = [];
+  for (let t = ts[0]; t <= ts[ts.length - 1]; t += DAY) {
+    const r = byTs.get(t);
+    out.push({ date: r?.plan_date ?? "", ts: t, yield: r?.yield_pct ?? null });
+  }
+  return out;
+}

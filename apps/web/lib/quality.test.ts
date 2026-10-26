@@ -1,7 +1,7 @@
 // 파레토 누적 비율 — 마지막이 정확히 100 이어야 80% 선이 거짓말을 안 한다 (10/26)
 import { describe, expect, it } from "vitest";
 
-import { pareto } from "./quality";
+import { dailySeries, pareto } from "./quality";
 
 describe("pareto", () => {
   const rows = [
@@ -23,5 +23,24 @@ describe("pareto", () => {
 
   it("건수 0 · null 은 빼고, 불량이 없으면 빈 배열", () => {
     expect(pareto([{ fail_reason: null, fail_qty: 0 }])).toEqual([]);
+  });
+});
+
+describe("dailySeries", () => {
+  const rows = [
+    { plan_date: "2020-10-16", yield_pct: 95.47 },
+    { plan_date: "2020-10-20", yield_pct: 100 },     // 17 · 18 · 19 일은 생산이 없었다
+  ];
+
+  it("빈 날도 하루씩 채운다 — 축이 실제 날짜 간격이 된다", () => {
+    expect(dailySeries(rows)).toHaveLength(5);
+  });
+
+  it("생산 없는 날은 null — 선이 끊긴다", () => {
+    expect(dailySeries(rows).map((d) => d.yield)).toEqual([95.47, null, null, null, 100]);
+  });
+
+  it("데이터가 없으면 빈 배열", () => {
+    expect(dailySeries([])).toEqual([]);
   });
 });
