@@ -2,13 +2,14 @@
 // 수정 불가. 취소 후 재등록만 가능하다 (제조 기록은 감사 대상)
 // 담당: M19(쓰기 정책 · 012) · M20(폼 · 검증) → M21(취소 · 트랜잭션)
 import { 날짜, 시각 } from "@/lib/format";
-import { getLots, getRecentRecords } from "@/lib/queries";
+import { getLots, getMyRole, getRecentRecords } from "@/lib/queries";
 
 import RecordForm from "./RecordForm";               // 우체통이 필요한 폼만 클라이언트
 import CorrectForm from "./CorrectForm";             // 정정 폼도 클라이언트
 
 export default async function Page() {               // 서버 컴포넌트 — DB 를 읽어 폼에 건넨다
-  const [lots, records] = await Promise.all([getLots(), getRecentRecords()]);   // 두 번 읽기를 동시에
+  const [lots, records, role] = await Promise.all([getLots(), getRecentRecords(), getMyRole()]);   // 세 번 읽기를 동시에
+  const readOnly = role === "viewer";                  // 둘러보기 계정 — 쓰기 버튼을 잠근다 (10/26) · 🔴 친절일 뿐, 막는 건 RLS (ADR 013)
 
   return (
     <section>
@@ -17,7 +18,13 @@ export default async function Page() {               // 서버 컴포넌트 — 
         작업자가 생산·불량 수량을 기록한다. 수정은 불가하고 취소 후 재등록만 가능하다.
       </p>
 
-      <RecordForm lotIds={lots.map((lot) => lot.lot_id)} requestId={crypto.randomUUID()} /> {/* 그릴 때마다 새 번호표 — 성공하면 revalidatePath 가 다시 그린다 */}
+      {readOnly && (
+        <p className="mt-4 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+          둘러보기 계정은 읽기 전용이에요. 저장 · 정정 버튼이 잠겨 있어요.
+        </p>
+      )}
+
+      <RecordForm lotIds={lots.map((lot) => lot.lot_id)} requestId={crypto.randomUUID()} readOnly={readOnly} /> {/* 그릴 때마다 새 번호표 — 성공하면 revalidatePath 가 다시 그린다 */}
 
       <h2 className="mt-10 text-lg font-semibold">최근 실적</h2> {/* 저장하면 revalidatePath 가 이 목록을 새로 그린다 */}
       {records.length === 0 ? (
@@ -49,7 +56,7 @@ export default async function Page() {               // 서버 컴포넌트 — 
 
       <h2 className="mt-10 text-lg font-semibold">정정</h2> {/* 고치지 않는다 — 빨간 줄 + 새 줄 (M21) */}
       <p className="mt-1 text-sm text-muted-foreground">고르면 원래 줄은 취소되고, 새 수량으로 다시 적힌다.</p>
-      <CorrectForm records={records} requestId={crypto.randomUUID()} /> {/* 저장과 다른 번호표 — 같으면 정정이 "이미 됐다" 로 막힌다 */}
+      <CorrectForm records={records} requestId={crypto.randomUUID()} readOnly={readOnly} /> {/* 저장과 다른 번호표 — 같으면 정정이 "이미 됐다" 로 막힌다 */}
     </section>
   );
 }

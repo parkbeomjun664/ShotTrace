@@ -19,13 +19,20 @@
 --   🔵 EXCLUDE 제약이 같은 설비·제품의 구간 겹침을 막는다 (009). 통과하면
 --      "열려 있는 LOT 이 또 있지는 않다" 는 뜻이기도 하다.
 
+--   🔴 LH · RH 두 개를 같이 연다 (10/26). S14 는 패밀리 금형 — 한 샷에 LH 와 RH 가 같이 나온다 (ADR 005).
+--      LH 하나만 열었더니 10/07 시연의 RH 부품 42개가 갈 LOT 이 없어 품질 화면 합계에서 빠졌다
+--      (현황판 5,314 vs 품질 5,271).
+
 INSERT INTO production_lot
   (lot_id, equip_cd, product_id, plan_date,
    total_qty, pass_qty, fail_qty, started_at, ended_at)
 VALUES
   ('S14-' || to_char(CURRENT_DATE, 'YYYYMMDD') || '-CN7LH',
    'S14', 1, CURRENT_DATE,
-   0, 0, 0, now(), 'infinity');          -- 수량 0 — 아직 아무것도 안 만들었다
+   0, 0, 0, now(), 'infinity'),          -- 수량 0 — 아직 아무것도 안 만들었다
+  ('S14-' || to_char(CURRENT_DATE, 'YYYYMMDD') || '-CN7RH',
+   'S14', 2, CURRENT_DATE,
+   0, 0, 0, now(), 'infinity');          -- 같은 샷의 다른 한 짝 — 구간도 같다
 
 
 -- ───────────────────────────────────────────────────────────

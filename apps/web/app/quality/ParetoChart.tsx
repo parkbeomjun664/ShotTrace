@@ -1,42 +1,71 @@
 "use client";                                          // 🔴 맨 첫 줄 · 브라우저로 간다
 
+// 파레토 (10/26) — 막대(건수, 많은 순) + 누적 % 선(오른쪽 축) + 80% 점선. 품질관리 7가지 도구의 그 모양
+// 계산은 lib/quality.ts 의 pareto() 가 — 여기는 그리기만
+
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  LabelList,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
-import type { DefectRow} from "@/lib/queries";         // 서버가 주는 모양 그대로
+import type { ParetoRow } from "@/lib/quality";
 
-export function ParetoChart({ data }: { data: DefectRow[] }) {   // 데이터는 props 로
-    return(
-        <ResponsiveContainer width="100%" height={200}>     {/* 브라우저가 크기를 잰다 */}
-            <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>  {/* left 음수 = Y축 여백 당김 */}
-                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.15} />
-                <XAxis 
-                    dataKey="fail_reason"                     // 🔴 오타를 타입이 안 잡는다
-                    tick={{ fontSize: 12, fill: "currentColor" }}
-                    stroke="currentColor"
-                    opacity={0.6}
-                    />
-                 <YAxis
-                    tick={{ fontSize: 12, fill: "currentColor" }}
-                    stroke="currentColor"
-                    opacity={0.6}
-                    />
-                <Tooltip
-                    cursor={{ fill: "currentColor", opacity: 0.06 }}
-                    contentStyle={{ fontSize: 12, borderRadius: 6 }}
-                    formatter={(v) => [`${v}건`, "불량"]}
-                />
-                <Bar dataKey="fail_qty" fill="currentColor" radius={[4, 4, 0, 0]} />
-                {/* currentColor = 글자색 물려받음 → 다크모드 자동 대응 */}
+const AXIS = { fontSize: 12, fill: "currentColor" };
 
-            </BarChart>
-        </ResponsiveContainer>
-    )
+export function ParetoChart({ data }: { data: ParetoRow[] }) {   // 데이터는 props 로
+  return (
+    <ResponsiveContainer width="100%" height={260}>
+      <ComposedChart data={data} margin={{ top: 20, right: 0, bottom: 0, left: -20 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.15} vertical={false} />
+        <XAxis dataKey="reason" tick={AXIS} stroke="currentColor" opacity={0.6} />
+        <YAxis yAxisId="count" tick={AXIS} stroke="currentColor" opacity={0.6} allowDecimals={false} />
+        <YAxis
+          yAxisId="cum"
+          orientation="right"
+          domain={[0, 100]}
+          ticks={[0, 20, 40, 60, 80, 100]}
+          tickFormatter={(v) => `${v}%`}
+          tick={AXIS}
+          stroke="currentColor"
+          opacity={0.6}
+        />
+        {/* 80% 선 — 이 선을 처음 넘는 데까지가 "먼저 손볼 유형" (파레토 법칙) */}
+        <ReferenceLine yAxisId="cum" y={80} stroke="currentColor" strokeDasharray="4 4" opacity={0.5} />
+        <Tooltip
+          cursor={{ fill: "currentColor", opacity: 0.06 }}
+          contentStyle={{ fontSize: 12, borderRadius: 6 }}
+          content={({ active, payload }) => {        // 건수 · 비율 · 누적 % 를 한 상자에
+            if (!active || !payload?.length) return null;
+            const r = payload[0].payload as ParetoRow;
+            return (
+              <div className="rounded-md border bg-background px-3 py-2 text-xs shadow-sm">
+                <p className="font-medium">{r.reason}</p>
+                <p className="tabular-nums">{r.count}건 · {r.share.toFixed(1)}% · 누적 {r.cum.toFixed(1)}%</p>
+              </div>
+            );
+          }}
+        />
+        <Bar yAxisId="count" dataKey="count" fill="var(--primary)" maxBarSize={72} radius={[4, 4, 0, 0]}>
+          <LabelList dataKey="count" position="top" fontSize={12} fill="currentColor" />
+        </Bar>
+        <Line
+          yAxisId="cum"
+          dataKey="cum"
+          type="linear"
+          stroke="var(--status-warn)"
+          strokeWidth={2}
+          dot={{ r: 3, fill: "var(--status-warn)" }}
+          isAnimationActive={false}
+        />
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
 }

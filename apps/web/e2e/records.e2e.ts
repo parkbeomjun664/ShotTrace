@@ -14,15 +14,14 @@ test("로그인하지 않으면 실적 입력에 못 들어간다", async ({ pag
   await expect(page).toHaveURL(/\/login/);            // proxy 가 돌려보낸다 (M19)
 });
 
-test("viewer 는 실적을 저장할 수 없다 — 그리고 쓴 값은 남는다", async ({ page }) => {
+// 10/26 — viewer 에겐 쓰기 버튼이 처음부터 잠긴다. 예전엔 저장을 눌러 RLS 의 42501 을 봤다
+// 🔴 버튼 잠금은 친절일 뿐 — DB 가 막는 증거는 scripts/verify/rls_matrix.py (5역할 × 20칸) 가 맡는다
+test("viewer 는 실적 입력이 잠겨 있다 — 저장 · 정정 버튼이 눌리지 않는다", async ({ page }) => {
   await login(page, "viewer@example.com", "parkbeomjun122!!");
   await page.goto("/records");
 
-  const form = page.locator("form", { has: page.getByRole("button", { name: "저장" }) });   // 폼이 둘(저장 · 정정) — 저장 버튼이 있는 쪽으로 좁힌다
-  await form.locator('select[name="lotId"]').selectOption({ index: 1 });
-  await form.getByPlaceholder("양품").fill("1");
-  await form.getByRole("button", { name: "저장" }).click();
-
-  await expect(page.getByText("실적 입력 권한이 없어요")).toBeVisible();   // 42501 → 사람 말 · 보일 때까지 잠깐 기다린다
-  await expect(form.getByPlaceholder("양품")).toHaveValue("1");   // 실패해도 쓴 값은 남는다 (10/16)
+  await expect(page.getByText("둘러보기 계정은 읽기 전용이에요")).toBeVisible();
+  await expect(page.getByRole("button", { name: "저장" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "정정" })).toBeDisabled();
+  await expect(page.getByRole("link", { name: /실적 입력.*읽기 전용/ })).toBeVisible();   // 탭의 자물쇠 — 화면 읽기용 글자로 찾는다
 });

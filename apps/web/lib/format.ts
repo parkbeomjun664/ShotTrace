@@ -10,9 +10,11 @@ const fmt = (o: Intl.DateTimeFormatOptions) =>         // 포맷터 만드는 �
   });
 
 const 시분초 = fmt({ hour: "2-digit", minute: "2-digit", second: "2-digit" });
+const 시분포맷 = fmt({ hour: "2-digit", minute: "2-digit" });   // 초가 필요 없는 곳 — "18일 전" 옆 (10/26)
 const 월일 = fmt({ month: "2-digit", day: "2-digit" }); // 모듈 로드 때 한 번만 만든다
 
 export const 시각 = (iso: string) => 시분초.format(new Date(iso));   // 14:05:25
+export const 시분 = (iso: string) => 시분포맷.format(new Date(iso)); // 14:05
 export const 날짜 = (iso: string) => 월일.format(new Date(iso));     // 11. 04.
 // 🔴 iso.slice(11,19) 로 자르지 않는다 — UTC 가 그대로 나온다
 //    한 번 어겼다: 주간(08:25~16:36)이 야간(23:25~07:36)처럼 보였다

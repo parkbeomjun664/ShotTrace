@@ -27,6 +27,8 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-status-warn: var(--status-warn);
+  --color-status-bad: var(--status-bad);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -73,6 +75,9 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
+  /* 상태 색 — 글자로도 쓰니 흰 바탕 대비 4.5:1 이상 (10/26 · LOT 목록의 수율부터) */
+  --status-warn: #c2410c;         /* 주황 orange-700 · 5.2:1 (600 은 3.6 이라 미달) */
+  --status-bad: #dc2626;          /* 빨강 red-600 · 4.8:1 */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);

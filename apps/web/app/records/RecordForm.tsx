@@ -4,7 +4,7 @@ import { useActionState } from "react";
 
 import { createRecord } from "./actions";            // 서버 함수를 그대로 import — fetch 를 안 쓴다
 
-export default function RecordForm({ lotIds, requestId }: { lotIds: string[]; requestId: string }) {   // requestId = 서버가 뽑아 준 번호표
+export default function RecordForm({ lotIds, requestId, readOnly = false }: { lotIds: string[]; requestId: string; readOnly?: boolean }) {   // requestId = 서버가 뽑아 준 번호표
   const [state, formAction, pending] = useActionState(createRecord, null);   // [쪽지, 꽂을 action, 가는 중?] · 처음 쪽지는 null
 
   return (
@@ -25,7 +25,7 @@ export default function RecordForm({ lotIds, requestId }: { lotIds: string[]; re
         <input name="failQty" type="number" min={0} defaultValue={state?.values?.failQty} placeholder="불량" className="w-full rounded border px-3 py-2 text-sm" /> {/* 비우면 "" → 0 */}
       </div>
       <button
-        disabled={pending}                               // 저장 중엔 잠근다 — 🔴 더블클릭을 줄일 뿐, 진짜 방어는 DB (S06 +1)
+        disabled={pending || readOnly}                   // 저장 중 · 읽기 전용(10/26)엔 잠근다 — 🔴 더블클릭을 줄일 뿐, 진짜 방어는 DB (S06 +1)
         className="w-full rounded bg-black py-2 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
       >
         {pending ? "저장 중…" : "저장"}

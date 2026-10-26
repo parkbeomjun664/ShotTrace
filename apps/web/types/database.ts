@@ -628,6 +628,12 @@ export type Database = {
           },
         ]
       }
+      part_without_lot: {
+        Row: {
+          part_count: number | null
+        }
+        Relationships: []
+      }
       plant_summary: {
         Row: {
           fail_qty: number | null

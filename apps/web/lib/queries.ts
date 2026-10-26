@@ -220,6 +220,14 @@ export async function getMyRole() {                  // 함수도 문 — admin 
   return data;
 }
 
+export async function getPartsWithoutLot() {          // 어느 LOT 에도 안 든 부품 수 (024) — 현황판 vs 품질 합계 차이의 정체 (10/26)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase.from("part_without_lot").select("part_count").maybeSingle();
+
+  if (error) throw error;
+  return data?.part_count ?? 0;                        // 집계 1행은 늘 나온다 — 그래도 View 타입은 null 허용
+}
+
 export async function getLastReceived() {            // 수집기가 마지막으로 일한 때 — 관측성의 경고등 (M28)
   const supabase = await createSessionClient();
   const { data, error } = await supabase

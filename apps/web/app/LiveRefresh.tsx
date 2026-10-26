@@ -6,9 +6,11 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { 날짜, 시분 } from "@/lib/format";
+import { receiveState, 전 } from "@/lib/receive";      // 무엇을 보여줄지는 순수함수가 정한다 (테스트 · 10/26)
 import { supabase } from "@/lib/supabase/client";     // 🔴 server.ts 아니다 — 연결은 브라우저가 든다
 
-export function LiveRefresh() {
+export function LiveRefresh({ lastAt }: { lastAt?: string | null }) {   // lastAt — 마지막 수신 (현황판만 넘긴다 · M28)
   const router = useRouter();
   const dirty = useRef(false);                        // 🔵 메모지 — 바뀌어도 화면을 다시 안 그린다
   const [연결, set연결] = useState(false);              // 🔵 이건 화면에 보여야 하니 useState
@@ -42,9 +44,20 @@ export function LiveRefresh() {
     };
   }, [router]);
 
-  return (                                            // 🔴 색만으로 구분하지 않는다 (M09)
-    <p className={연결 ? "text-xs text-emerald-700 dark:text-emerald-400" : "text-xs text-muted-foreground"}>
-      {연결 ? "● 수신 중" : "○ 연결 끊김"}{/* 글자가 뜻을 지고 색은 거든다 */}
+  // 🔴 색만으로 구분하지 않는다 (M09) — 글자가 뜻을 지고 색은 거든다
+  // 🔵 한 줄 · 한 상태 (10/26) — 연결은 살아 있어도 데이터는 끊길 수 있다. 끊기면 "연결됨" 은 지우고 끊김만
+  const { kind, minutes } = receiveState({ connected: 연결, lastAt, now: Date.now() });
+
+  if (kind === "stale" && lastAt && minutes !== null) {
+    return (
+      <p className="text-xs text-orange-700 dark:text-orange-400">
+        ● 수신 끊김 · 마지막 수신 {날짜(lastAt)} {시분(lastAt)} ({전(minutes)}) — 수집기나 설비를 확인하세요
+      </p>
+    );
+  }
+  return (
+    <p className={kind === "live" ? "text-xs text-emerald-700 dark:text-emerald-400" : "text-xs text-muted-foreground"}>
+      {kind === "live" ? "● 실시간 연결됨" : "○ 연결 끊김"}
     </p>
   );
 }
