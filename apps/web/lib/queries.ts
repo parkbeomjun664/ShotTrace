@@ -3,7 +3,8 @@ import type { Database } from "@/types/database";  // DB 스키마 타입
 import { createSessionClient } from "@/lib/supabase/session";   // 세션 클라이언트 — RLS 를 진짜로 거친다 (M19)
     // 화면은 직접 쿼리하지 않는다
 import { computeOee } from "@/lib/oee";               // 계산기 — DB 는 재료만, 계산은 순수함수가 (M24)
-import { GuideSchema } from "@/lib/evidence";         // 가이드 상자 — 저장된 jsonb 를 꺼낼 때 다시 검사 (M25)
+import { GuideSchema } from "@/lib/evidence";
+import { selectable } from "@/lib/master";            // 고를 수 있는 항목 — 사용 중지 제외 (10/26)         // 가이드 상자 — 저장된 jsonb 를 꺼낼 때 다시 검사 (M25)
 
 export async function getLots() {                      // LOT 25건 + 각 제품명
   const supabase = await createSessionClient();         // 🔴 함수 안에서 — 요청마다 그 사람으로
@@ -133,6 +134,35 @@ export async function getPlantSummary() {             // 공장 전체 (1행)
 
 export type RecentRecord = { record_id: number; lot_id: string; pass_qty: number; fail_qty: number; recorded_at: string };   // 🔴 View 타입은 전부 | null — 원본이 NOT NULL 이라 덮어쓴다
 
+export async function getLedger() {                  // 원장 — 취소된 줄까지 (10/26 · 취소선 · 정정 잇기는 lib/records.ts)
+  const supabase = await createSessionClient();
+  const { data: records, error } = await supabase
+    .from("production_record")                         // 🔴 active_record 가 아니다 — 취소된 줄도 보여야 이력이 된다
+    .select("record_id, lot_id, pass_qty, fail_qty, recorded_at, recorded_by, note")
+    .order("recorded_at", { ascending: false })
+    .limit(50);
+  if (error) throw error;
+
+  const { data: cancels, error: cErr } = await supabase
+    .from("record_cancel")
+    .select("record_id, reason, canceled_at")
+    .in("record_id", records.map((r) => r.record_id));
+  if (cErr) throw cErr;
+  return { records, cancels };
+}
+
+export async function getActiveSums() {               // LOT 별 살아 있는 실적 합계 — 입력 카드의 "기존 기록"
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase.from("active_record").select("lot_id, pass_qty, fail_qty");
+  if (error) throw error;
+  const out = new Map<string, { pass: number; fail: number }>();
+  for (const r of data) {
+    const s = out.get(r.lot_id!) ?? { pass: 0, fail: 0 };
+    out.set(r.lot_id!, { pass: s.pass + (r.pass_qty ?? 0), fail: s.fail + (r.fail_qty ?? 0) });
+  }
+  return out;
+}
+
 export async function getRecentRecords() {           // 최근 실적 10건 — 저장하면 바로 아래에
   const supabase = await createSessionClient();
   const { data, error } = await supabase
@@ -150,7 +180,7 @@ export async function getEquipments() {              // 설비 3대 — 비가�
   const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("equipment")
-    .select("equip_cd, equip_name")                    // View 가 아니라 표 — 타입에 | null 이 안 붙는다
+    .select("equip_cd, equip_name, tonnage")                    // View 가 아니라 표 — 타입에 | null 이 안 붙는다
     .order("equip_cd");
 
   if (error) throw error;
@@ -161,31 +191,41 @@ export async function getDowntimeReasons() {         // 고를 수 있는 사유
   const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("downtime_reason")
-    .select("code, name, planned")
-    .eq("active", true)                                // 🔵 사용 중지된 사유는 새로 못 고른다 — 옛 기록은 계속 가리킨다
+    .select("code, name, planned, active")
     .order("planned", { ascending: false })            // 계획된 정지 먼저 —
     .order("name");                                    // 같으면 이름순 (기준 둘을 이어 쓴다)
 
   if (error) throw error;
-  return data;
+  return selectable(data);                             // 🔵 사용 중지된 사유는 새로 못 고른다 — 옛 기록은 계속 가리킨다 (규칙은 lib/master.ts · 테스트)
 }
 
 export async function getRecentDowntimes() {         // 최근 비가동 10건
   const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("downtime")
-    .select("downtime_id, equip_cd, started_at, ended_at, note, downtime_reason(name, planned)")   // FK 를 따라 사유 이름까지 한 번에
+    .select("downtime_id, equip_cd, reason_code, source, started_at, ended_at, note, downtime_reason(name, planned)")   // FK 를 따라 사유 이름까지 한 번에 · source — 직접 입력 / 빈 곳 확정 (026)
     .order("started_at", { ascending: false })
-    .limit(10);
+    .limit(50);                                        // 타임라인도 이걸로 그린다 — 10 → 50 (10/26)
 
   if (error) throw error;
   return data;
 }
+export async function getUnrecordedStops() {         // 사유 미입력 정지 — LOT 안 샷 간격 > 표준 CT × 5 · 기록된 비가동과 안 겹치는 것 (026 · 10/26)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("unrecorded_stop")
+    .select("equip_cd, lot_id, started_at, ended_at, minutes")
+    .order("started_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getProducts() {                // 제품 마스터 — 마스터 화면에서 읽기만
   const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("product")
-    .select("product_id, part_name, car_model, side")
+    .select("product_id, part_name, car_model, side, std_cycle_sec")
     .order("product_id");
 
   if (error) throw error;

@@ -15,19 +15,20 @@ const GROUPS = [
     { href: "/downtime", label: "비가동" },            // M23 · 017
   ],
   [
-    { href: "/records", label: "실적 입력", write: true },   // 쓰기 화면 — 읽기 전용 계정엔 자물쇠
-    { href: "/master", label: "마스터", write: true },
+    { href: "/records", label: "실적 입력", write: "worker" },   // 쓰기 화면 — 쓸 수 있는 역할이 아니면 자물쇠
+    { href: "/master", label: "마스터", write: "admin" },       // 마스터는 admin 만 고친다 (019) — worker 에게도 자물쇠 (10/26)
   ],
 ] as const;
 
-export function NavLinks({ readOnly }: { readOnly: boolean }) {
+export function NavLinks({ role }: { role: string | null }) {
+  const canWrite = (need: "worker" | "admin") => (need === "admin" ? role === "admin" : role === "worker" || role === "admin");
   const path = usePathname();
   return GROUPS.map((group, i) => (
     <Fragment key={i}>
       {i > 0 && <span aria-hidden className="mx-2 h-4 w-px shrink-0 self-center bg-border" />}
       {group.map((item) => {
         const here = item.href === "/" ? path === "/" : path.startsWith(item.href);   // /lots/S14-… 도 "LOT 추적"
-        const locked = readOnly && "write" in item;
+        const locked = "write" in item && !canWrite(item.write);
         return (
           <Link
             key={item.href}

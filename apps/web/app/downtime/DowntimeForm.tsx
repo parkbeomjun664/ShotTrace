@@ -20,9 +20,11 @@ export default function DowntimeForm({
   const v = state?.values;                             // 반려된 서류 — 한 번 꺼내 짧게 쓴다
 
   return (
-    <form action={formAction} className="mt-6 max-w-sm space-y-3">
+    // 모든 칸에 보이는 라벨 (10/26) — 고르기 상자도 placeholder 대신 이름이 위에
+    <form action={formAction} className="mt-4 space-y-3">
       <input type="hidden" name="requestId" value={requestId} /> {/* 번호표 — 성공해야 새 번호 */}
-      <select aria-label="설비" key={`e-${v?.equipCd ?? ""}`} name="equipCd" required defaultValue={v?.equipCd ?? ""} className="w-full rounded border px-3 py-2 text-sm">{/* 🔴 key 앞의 e- · r- — 둘 다 "" 이면 형제끼리 key 가 같아진다 */}
+      <label className="block text-xs text-muted-foreground" htmlFor="dt-equip">설비</label>
+      <select id="dt-equip" key={`e-${v?.equipCd ?? ""}`} name="equipCd" required defaultValue={v?.equipCd ?? ""} className="w-full rounded border px-3 py-2 text-sm">{/* 🔴 key 앞의 e- · r- — 둘 다 "" 이면 형제끼리 key 가 같아진다 */}
         <option value="" disabled>
           설비를 고르세요
         </option>
@@ -32,7 +34,8 @@ export default function DowntimeForm({
           </option>
         ))}
       </select>
-      <select aria-label="비가동 사유" key={`r-${v?.reasonCode ?? ""}`} name="reasonCode" required defaultValue={v?.reasonCode ?? ""} className="w-full rounded border px-3 py-2 text-sm">
+      <label className="block text-xs text-muted-foreground" htmlFor="dt-reason">사유</label>
+      <select id="dt-reason" key={`r-${v?.reasonCode ?? ""}`} name="reasonCode" required defaultValue={v?.reasonCode ?? ""} className="w-full rounded border px-3 py-2 text-sm">
         <option value="" disabled>
           사유를 고르세요
         </option>
@@ -49,10 +52,13 @@ export default function DowntimeForm({
         <input name="startedAt" type="datetime-local" required defaultValue={v?.startedAt} className="mt-1 w-full rounded border px-3 py-2 text-sm" /> {/* 🔴 타임존 없음 — 서버가 +09:00 */}
       </label>
       <label className="block text-xs text-muted-foreground">
-        끝
+        종료
         <input name="endedAt" type="datetime-local" required defaultValue={v?.endedAt} className="mt-1 w-full rounded border px-3 py-2 text-sm" />
       </label>
-      <input name="note" defaultValue={v?.note} placeholder="메모 (선택)" className="w-full rounded border px-3 py-2 text-sm" />
+      <label className="block text-xs text-muted-foreground">
+        메모 (선택)
+        <input name="note" defaultValue={v?.note} className="mt-1 w-full rounded border px-3 py-2 text-sm" />
+      </label>
       <button
         disabled={pending}
         className="w-full rounded bg-black py-2 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"

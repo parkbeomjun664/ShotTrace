@@ -133,3 +133,10 @@
     @apply font-sans;
   }
 }
+/* 타임라인 빗금을 누르면 목록의 그 줄로 — 2초 강조 (비가동 · 10/26). scroll-margin 은 고정된 머리 띠만큼 */
+@keyframes target-flash {
+  from { background-color: #fef3c7; }
+  to { background-color: transparent; }
+}
+.target-flash { scroll-margin-top: 6rem; }
+.target-flash:target { animation: target-flash 2s ease-out; }

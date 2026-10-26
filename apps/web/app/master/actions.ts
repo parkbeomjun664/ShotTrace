@@ -3,11 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { getMyRole } from "@/lib/queries";
 import { createSessionClient } from "@/lib/supabase/session";
 
 export async function setActive(formData: FormData) {
   const key = String(formData.get("key") ?? "");
   const active = formData.get("active") === "true";   // 폼 값은 글자 — "true" 와 비교해 boolean 으로
+  if ((await getMyRole()) !== "admin") redirect("/master?denied=1");   // 🔵 보내기 전에 막는다 — RLS(update_admin)는 마지막 문 (10/26)
+
   const supabase = await createSessionClient();
 
   const { data, error } =                              // 🔴 표 이름은 폼에서 받지 않는다 — 비교만 하고 코드에 직접 적는다

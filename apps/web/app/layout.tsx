@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {   // async — 쿠키를 읽어 "누구냐" 를 한 번 묻는다
   const supabase = await createSessionClient();
   const { data: { user } } = await supabase.auth.getUser();   // 🔴 한 번만 — getUser 는 매번 Supabase 에 물으러 간다
-  const readOnly = user ? (await getMyRole()) === "viewer" : false;   // 둘러보기(viewer) 계정 — 탭 자물쇠 (10/26) · 막는 건 RLS
+  const role = user ? await getMyRole() : null;       // 역할 — 탭 자물쇠 (10/26) · 막는 건 RLS
 
   return (
     <html
@@ -46,7 +46,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {   // 
               {/* 1024px 미만 — 탭 줄만 옆으로 민다 · 스크롤바는 숨긴다 (글자는 쪼개지 않는다) */}
               {/* 🔴 640px 미만은 탭을 아랫줄로 (order-last · w-full) — 한 줄이면 로고 · 배지 · 로그아웃이 자리를 다 먹어 탭 폭이 0 이었다 */}
               <nav className="order-last flex w-full min-w-0 overflow-x-auto [scrollbar-width:none] sm:order-none sm:w-auto sm:flex-1 [&::-webkit-scrollbar]:hidden">
-                <NavLinks readOnly={readOnly} />
+                <NavLinks role={role} />
               </nav>
               {/* 레이아웃이 읽은 "누구냐" 를 받아 그린다 — 동그라미 + 이메일 */}
               <div className="ml-auto sm:ml-0">

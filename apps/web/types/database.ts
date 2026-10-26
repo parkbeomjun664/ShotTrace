@@ -39,6 +39,7 @@ export type Database = {
           recorded_at: string
           recorded_by: string
           request_id: string
+          source: string
           started_at: string
         }
         Insert: {
@@ -50,6 +51,7 @@ export type Database = {
           recorded_at?: string
           recorded_by?: string
           request_id: string
+          source?: string
           started_at: string
         }
         Update: {
@@ -61,6 +63,7 @@ export type Database = {
           recorded_at?: string
           recorded_by?: string
           request_id?: string
+          source?: string
           started_at?: string
         }
         Relationships: [
@@ -169,6 +172,13 @@ export type Database = {
             referencedRelation: "production_lot"
             referencedColumns: ["lot_id"]
           },
+          {
+            foreignKeyName: "lot_guide_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: true
+            referencedRelation: "unrecorded_stop"
+            referencedColumns: ["lot_id"]
+          },
         ]
       }
       product: {
@@ -257,6 +267,7 @@ export type Database = {
         Row: {
           fail_qty: number
           lot_id: string
+          note: string | null
           pass_qty: number
           record_id: number
           recorded_at: string
@@ -266,6 +277,7 @@ export type Database = {
         Insert: {
           fail_qty: number
           lot_id: string
+          note?: string | null
           pass_qty: number
           record_id?: never
           recorded_at?: string
@@ -275,6 +287,7 @@ export type Database = {
         Update: {
           fail_qty?: number
           lot_id?: string
+          note?: string | null
           pass_qty?: number
           record_id?: never
           recorded_at?: string
@@ -294,6 +307,13 @@ export type Database = {
             columns: ["lot_id"]
             isOneToOne: false
             referencedRelation: "production_lot"
+            referencedColumns: ["lot_id"]
+          },
+          {
+            foreignKeyName: "production_record_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "unrecorded_stop"
             referencedColumns: ["lot_id"]
           },
         ]
@@ -551,6 +571,13 @@ export type Database = {
             referencedRelation: "production_lot"
             referencedColumns: ["lot_id"]
           },
+          {
+            foreignKeyName: "production_record_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "unrecorded_stop"
+            referencedColumns: ["lot_id"]
+          },
         ]
       }
       daily_yield: {
@@ -643,6 +670,31 @@ export type Database = {
           yield_pct: number | null
         }
         Relationships: []
+      }
+      unrecorded_stop: {
+        Row: {
+          ended_at: string | null
+          equip_cd: string | null
+          lot_id: string | null
+          minutes: number | null
+          started_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_lot_equip_cd_fkey"
+            columns: ["equip_cd"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["equip_cd"]
+          },
+          {
+            foreignKeyName: "production_lot_equip_cd_fkey"
+            columns: ["equip_cd"]
+            isOneToOne: false
+            referencedRelation: "equipment_summary"
+            referencedColumns: ["equip_cd"]
+          },
+        ]
       }
     }
     Functions: {

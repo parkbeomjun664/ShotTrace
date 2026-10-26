@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { shotDiffWarn } from "@/lib/records";
+import { getMyRole } from "@/lib/queries";
 import { createSessionClient } from "@/lib/supabase/session";
 
 const RecordInput = z                                  // 서버의 검문소 — required 는 안내문일 뿐 (M20)
@@ -14,7 +16,7 @@ const RecordInput = z                                  // 서버의 검문소 �
   })
   .refine((r) => r.passQty + r.failQty > 0, { error: "양품과 불량이 둘 다 0 이에요" });   // 칸끼리의 관계 — DB CHECK 와 짝
 
-type RecordValues = { lotId: string; passQty: string; failQty: string };   // 반려할 때 돌려줄 "아까 쓴 서류" — 글자 그대로
+type RecordValues = { lotId: string; passQty: string; failQty: string; note: string };   // 반려할 때 돌려줄 "아까 쓴 서류" — 글자 그대로
 
 export type RecordState = { ok: boolean; message: string; values?: RecordValues } | null;   // 폼에 돌려줄 쪽지 · 타입은 실행 때 사라져서 export 가능
 
@@ -23,17 +25,27 @@ export async function createRecord(_prev: RecordState, formData: FormData): Prom
     lotId: String(formData.get("lotId") ?? ""),        // 🔴 ?? "" 먼저 — String(null) 은 "null" 이라는 글자가 된다
     passQty: String(formData.get("passQty") ?? ""),
     failQty: String(formData.get("failQty") ?? ""),
+    note: String(formData.get("note") ?? "").trim(),
   };
 
   const parsed = RecordInput.safeParse({ ...values, requestId: formData.get("requestId") });   // 번호표는 검사만 — values(돌려줄 서류)엔 안 넣는다
   if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message, values };   // 첫 메시지 하나 + 아까 쓴 값
 
+  const role = await getMyRole();                      // 쓰기 전에 역할 — 화면의 잠금은 친절, RLS 는 마지막 문 (10/26)
+  if (role !== "worker" && role !== "admin") return { ok: false, message: "둘러보기 계정은 조회만 가능해요", values };
+
   const supabase = await createSessionClient();        // 쿠키의 신분으로 — RLS 가 "그 사람" 으로 검사한다
+
+  // 샷 수 차이 — 설비가 센 수량과 10% 넘게 다르면 메모가 있어야 한다. 🔴 화면의 경고를 믿지 않고 서버가 다시 센다 (lib/records.ts)
+  const { data: lot } = await supabase.from("production_lot").select("total_qty").eq("lot_id", parsed.data.lotId).maybeSingle();
+  if (lot && shotDiffWarn(parsed.data.passQty + parsed.data.failQty, lot.total_qty) && !values.note)
+    return { ok: false, message: `설비가 센 ${lot.total_qty}개와 10% 넘게 달라요 — 이유를 메모에 적어 주세요`, values };
   const { error } = await supabase.from("production_record").insert({
     lot_id: parsed.data.lotId,
     pass_qty: parsed.data.passQty,
     fail_qty: parsed.data.failQty,                     // parsed.data = 통과해서 숫자로 바뀐 값
     request_id: parsed.data.requestId,                 // 🔴 requestId 를 함께 전달
+    note: values.note || null,                         // 적은 게 없으면 "" 가 아니라 NULL (027 CHECK)
   });                                                  // 🔴 recorded_by 는 안 보낸다 — DB 의 DEFAULT 가 채운다
 
   if (error?.code === "23505") {                       // UNIQUE 위반 = 같은 번호표가 또 왔다
@@ -71,6 +83,9 @@ export async function correctRecord(_prev: CorrectState, formData: FormData): Pr
     reason: formData.get("reason"),
   });
   if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message };
+
+  const role = await getMyRole();                      // 쓰기 전에 역할 (10/26)
+  if (role !== "worker" && role !== "admin") return { ok: false, message: "둘러보기 계정은 조회만 가능해요" };
 
   const supabase = await createSessionClient();
   const { error } = await supabase.rpc("correct_record", {   // 🔵 한 번 부른다 = 트랜잭션 하나 — 취소 + 새 줄이 함께
