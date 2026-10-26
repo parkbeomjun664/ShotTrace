@@ -43,7 +43,7 @@ export function LiveRefresh() {
   }, [router]);
 
   return (                                            // 🔴 색만으로 구분하지 않는다 (M09)
-    <p className={연결 ? "text-xs text-emerald-600" : "text-xs text-muted-foreground"}>
+    <p className={연결 ? "text-xs text-emerald-700 dark:text-emerald-400" : "text-xs text-muted-foreground"}>
       {연결 ? "● 수신 중" : "○ 연결 끊김"}{/* 글자가 뜻을 지고 색은 거든다 */}
     </p>
   );

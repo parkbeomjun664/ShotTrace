@@ -103,7 +103,7 @@ export default async function Page({ params }: PageProps<"/lots/[lotId]">) {
               {넘김 ? `${날짜(lot.started_at)} ` : ""}
               {시각(lot.started_at)} –{" "}
               {진행 ? (
-                <span className="text-emerald-600 dark:text-emerald-400">진행 중</span>
+                <span className="text-emerald-700 dark:text-emerald-400">진행 중</span>
               ) : (
                 <>
                   {넘김 ? `${날짜(lot.ended_at)} ` : ""}
