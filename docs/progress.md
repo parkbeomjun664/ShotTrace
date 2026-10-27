@@ -181,7 +181,7 @@ CSV ──▶ replay.py ──▶ Mosquitto ──▶ collector.py ──▶ Sup
 ### 기록
 
 ```
-ADR        17개   decisions/
+ADR        19개   decisions/
 증거       7건    evidence/  (인덱스 EXPLAIN · 사이클-불량 가설 기각 · 배포 차단 · MVP 점검 · 제약 거절 · 10배 성능 · Lighthouse)
 테스트     113    Vitest 80 · pytest 12 · Playwright 21 · CI 세 칸
 작업 일지   25일   오늘.md
@@ -215,7 +215,7 @@ LOT           25 · 설비 3 · 제품 6
                 ③ 시연 리허설 (시연.md) → 아버지께 시연 → 피드백 반영 — ⏸ 보류 (10/27 사용자)
                 ④ 완성 선언 — README 상태 · v1.0 태그
 미룬 것          파레토 막대 → 그 불량 유형의 LOT (새 View 필요)
-                ADR — "합계를 합치지 않고 차이를 드러낸다" · "미입력 정지"
+                ✅ ADR 018 합계는 합치지 않는다 · 019 미입력 정지 (10/27)
 ```
 
 ---
