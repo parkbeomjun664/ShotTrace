@@ -99,7 +99,7 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
   const totalMin = unrecorded.reduce((a, s) => a + s.minutes, 0);
 
   return (
-    <section className="space-y-10">
+    <section className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">비가동</h1>
@@ -119,8 +119,8 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
         </div>
       </div>
 
-      {/* 1 — 하루 타임라인. 3주를 한 줄에 그리면 10분짜리 멈춤이 1px 도 안 된다 */}
-      <div>
+      {/* 1 — 하루 타임라인. 3주를 한 줄에 그리면 10분짜리 멈춤이 1px 도 안 된다 · 영역마다 카드 (10/27 품질 · OEE 와 같다) */}
+      <div className="rounded-xl border bg-card p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-semibold">타임라인</h2>
           {/* 날짜 고르기 — 링크라 주소에 남는다 (?day=) */}
@@ -153,7 +153,7 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
         />
 
         {win ? (
-          <div className="mt-3 space-y-3 rounded-xl border p-4">
+          <div className="mt-4 space-y-3">
             {equipments.map((e) => {
               const prod = dayLots.filter((l) => l.equip_cd === e.equip_cd);
               const down = downtimes.filter((d) => d.equip_cd === e.equip_cd && kstDay(d.started_at) === day);
@@ -221,12 +221,12 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
             </div>
           </div>
         ) : (
-          <p className="mt-3 rounded-xl border p-8 text-center text-sm text-muted-foreground">이 날은 생산 기록이 없어요</p>
+          <p className="mt-4 rounded-lg bg-muted/40 p-8 text-center text-sm text-muted-foreground">이 날은 생산 기록이 없어요</p>
         )}
       </div>
 
       {/* 2 — 사유 미입력 정지. LOT 안에서 샷 사이가 표준 CT × 5 를 넘은 곳 · 기록된 비가동과 안 겹치는 것만 */}
-      <div>
+      <div className="rounded-xl border bg-card p-6">
         <h2 className="font-semibold">사유 미입력 정지</h2>
         <p className="mt-1 text-sm tabular-nums text-muted-foreground">
           미입력 {unrecorded.length}건 · 총 {길이(totalMin)}
@@ -240,7 +240,7 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
           </Info>
         </div>
         {unrecorded.length === 0 ? (
-          <p className="mt-3 rounded-xl border p-8 text-center text-sm text-muted-foreground">사유를 기다리는 정지가 없어요</p>
+          <p className="mt-4 rounded-lg bg-muted/40 p-8 text-center text-sm text-muted-foreground">사유를 기다리는 정지가 없어요</p>
         ) : (
           <StopList items={unrecorded} reasons={reasons} readOnly={readOnly} />
         )}
@@ -248,7 +248,7 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
 
       {/* 2' — 계획 정지 후보. 이만큼 길면 교대 · 휴식 · 점검일 가능성이 크다 — 계획 사유로 고르면 OEE 계획 시간에서 빠진다 */}
       {candidates.length > 0 && (
-        <div>
+        <div className="rounded-xl border bg-card p-6">
           <h2 className="font-semibold">
             계획 정지 후보 <span className="font-normal text-muted-foreground">({PLANNED_CANDIDATE_MIN}분 이상)</span>
           </h2>
@@ -258,37 +258,40 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
       )}
 
       {/* 3 — 기록된 비가동 (직접 입력 · 샷 간격에 사유를 고른 것) */}
-      <div>
+      <div className="rounded-xl border bg-card p-6">
         <h2 className="font-semibold">기록된 비가동</h2>
         {downtimes.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">아직 기록이 없어요</p>
+          <p className="mt-4 rounded-lg bg-muted/40 p-8 text-center text-sm text-muted-foreground">아직 기록이 없어요</p>
         ) : (
-          <table className="mt-2 w-full text-sm">
-            <thead className="border-b text-muted-foreground">
-              <tr>
-                <th className="px-4 py-2 font-medium">설비</th>
-                <th className="px-4 py-2 font-medium">사유</th>
-                <th className="px-4 py-2 font-medium">시작</th>
-                <th className="px-4 py-2 font-medium">분</th>
-                <th className="px-4 py-2 font-medium">출처</th>
-                <th className="px-4 py-2 font-medium">메모</th>
-              </tr>
-            </thead>
-            <tbody>
-              {downtimes.map((d) => (
-                <tr key={d.downtime_id} className="border-b last:border-0">
-                  <td className="px-4 py-2 font-mono">{d.equip_cd}</td>
-                  <td className="px-4 py-2">{d.downtime_reason?.name}</td>{/* FK 를 따라 온 이름 — 표에는 코드뿐 */}
-                  <td className="px-4 py-2 tabular-nums text-muted-foreground">
-                    {날짜(d.started_at)} {시각(d.started_at)}
-                  </td>
-                  <td className="px-4 py-2 tabular-nums">{분길이(d.started_at, d.ended_at)}</td>
-                  <td className="px-4 py-2 text-muted-foreground">{d.source === "inferred" ? "샷 간격" : "직접 입력"}</td>
-                  <td className="px-4 py-2 text-muted-foreground">{d.note}</td>
+          // 위 미입력 정지 표와 같은 틀 — 둥근 테두리 · 좁으면 안에서 가로 스크롤 (10/27)
+          <div className="mt-3 overflow-x-auto rounded-xl border">
+            <table className="w-full whitespace-nowrap text-sm">
+              <thead className="border-b text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-2 font-medium">설비</th>
+                  <th className="px-4 py-2 font-medium">사유</th>
+                  <th className="px-4 py-2 font-medium">시작</th>
+                  <th className="px-4 py-2 font-medium">분</th>
+                  <th className="px-4 py-2 font-medium">출처</th>
+                  <th className="px-4 py-2 font-medium">메모</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {downtimes.map((d) => (
+                  <tr key={d.downtime_id} className="border-b last:border-0">
+                    <td className="px-4 py-2 font-mono">{d.equip_cd}</td>
+                    <td className="px-4 py-2">{d.downtime_reason?.name}</td>{/* FK 를 따라 온 이름 — 표에는 코드뿐 */}
+                    <td className="px-4 py-2 tabular-nums text-muted-foreground">
+                      {날짜(d.started_at)} {시각(d.started_at)}
+                    </td>
+                    <td className="px-4 py-2 tabular-nums">{분길이(d.started_at, d.ended_at)}</td>
+                    <td className="px-4 py-2 text-muted-foreground">{d.source === "inferred" ? "샷 간격" : "직접 입력"}</td>
+                    <td className="px-4 py-2 text-muted-foreground">{d.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </section>
