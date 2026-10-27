@@ -1,5 +1,7 @@
 // 품질 — 불량이 어디에 몰려 있나 · M11(View) → M12(차트)
 // 10/26 — 파레토(막대 + 누적 % + 80% 선) · 작은 표 · 일별 수율 선 그래프(95% 목표) · 시연 날짜는 그래프에서 뺀다
+import Link from "next/link";
+
 import { isDemo, yieldLevel } from "@/lib/lots";
 import { dailySeries, pareto } from "@/lib/quality";
 import { getDailyYield, getDefectPareto, getPartsWithoutLot } from "@/lib/queries";
@@ -57,6 +59,7 @@ export default async function Page() {
             { mark: <Dash />, label: "80% — 여기까지 먼저 손볼 유형" },
           ]}
         />
+        <p className="mt-1 text-sm text-muted-foreground">막대나 유형을 누르면 그 불량이 난 LOT 목록으로</p>
         {/* 차트 옆에 작은 표 — 같은 내용을 막대로 두 번 보여주던 진행 막대 목록을 대신한다 */}
         <div className="mt-4 grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
@@ -74,7 +77,14 @@ export default async function Page() {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.reason} className="border-b last:border-0">
-                  <td className="px-4 py-2">{r.reason}</td>
+                  <td className="px-4 py-2">
+                    {/* 유형 → 그 유형이 난 LOT 목록 (10/27 · 막대를 눌러도 같다) */}
+                    {r.reason === "사유 없음" ? r.reason : (
+                      <Link href={`/lots?reason=${encodeURIComponent(r.reason)}`} className="underline decoration-muted-foreground/50 underline-offset-4 hover:decoration-foreground">
+                        {r.reason}
+                      </Link>
+                    )}
+                  </td>
                   <td className="px-4 py-2 tabular-nums">{r.count}</td>
                   <td className="px-4 py-2 tabular-nums">{r.share.toFixed(1)}%</td>
                   <td className="px-4 py-2 tabular-nums">{r.cum.toFixed(1)}%</td>

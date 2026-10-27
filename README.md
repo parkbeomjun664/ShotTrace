@@ -14,8 +14,8 @@
 | | |
 |---|---|
 | 화면 | 현황판(실시간) · LOT 추적(+ **LLM 대응 가이드**) · 품질 · **OEE** · 실적 입력/정정 · 비가동 · 마스터 |
-| 데이터베이스 | PostgreSQL 마이그레이션 28개 · 표 15 · View 8 · RPC 4 · RLS 역할 3 · 마스터 변경 이력(트리거) |
-| 검증 | 자동 테스트 113 (Vitest 80 · pytest 12 · Playwright 21) · CI · 제약 실험 13/13 · RLS 전수 점검 |
+| 데이터베이스 | PostgreSQL 마이그레이션 29개 · 표 15 · View 9 · RPC 4 · RLS 역할 3 · 마스터 변경 이력(트리거) |
+| 검증 | 자동 테스트 118 (Vitest 84 · pytest 12 · Playwright 22) · CI · 제약 실험 13/13 · RLS 전수 점검 |
 | 설계 기록 | [ADR 19개](docs/decisions/) — 결정마다 **버린 대안** 포함 |
 
 **한 문장 · 30초 · 5분 설명** — [`docs/설명.md`](docs/설명.md)
@@ -113,10 +113,10 @@ flowchart LR
 | 무엇 | 결과 | 어디 |
 |---|---|---|
 | 단위 테스트 | 화면 규칙을 순수함수로 — OEE · 파레토 · 기준 범위 · 비가동 구간 · 원장 잇기 · 가이드 근거 등 80 · 수집기 5 (가짜 DB) · ETL 7 (경계값) | `apps/web/lib/*.test.ts` · `services/collector/` · `scripts/etl/` |
-| E2E | 21 — 비로그인 차단 · viewer 잠금 · 정렬 · 시연 토글 · 차트 툴팁 · 현황판 합계 = 품질 + LOT 밖 부품 — DB 에 아무것도 안 쓰는 흐름만 | `apps/web/e2e/` |
+| E2E | 22 — 품질 파레토 → 그 유형의 LOT · 비로그인 차단 · viewer 잠금 · 정렬 · 시연 토글 · 차트 툴팁 · 현황판 합계 = 품질 + LOT 밖 부품 — DB 에 아무것도 안 쓰는 흐름만 | `apps/web/e2e/` |
 | CI | 푸시마다 web(tsc · Vitest) · python(pytest) · e2e(Playwright) | `.github/workflows/ci.yml` |
 | 제약 실험 | 종류별로 일부러 어겨 13/13 막힘 (PK · UNIQUE · FK · CHECK · EXCLUDE · NOT NULL) | [evidence/constraints-reject](docs/evidence/constraints-reject.md) |
-| RLS 전수 점검 | 역할 5 × 테이블 · View · 함수 22 — 모든 칸이 예상대로 | `scripts/verify/rls_matrix.py` |
+| RLS 전수 점검 | 역할 5 × 테이블 · View · 함수 23 — 모든 칸이 예상대로 | `scripts/verify/rls_matrix.py` |
 | 성능 | 10배 데이터 · 인덱스 차이 30배 | [evidence/perf-10x](docs/evidence/perf-10x.md) |
 | 프론트 품질 | Lighthouse 접근성 6화면 100 · SEO 63 은 일부러(사내 시스템) | [evidence/lighthouse](docs/evidence/lighthouse.md) |
 

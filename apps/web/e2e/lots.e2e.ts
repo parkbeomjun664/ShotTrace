@@ -39,3 +39,18 @@ test("줄을 누르면 그 LOT 상세로", async ({ page }) => {
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await expect(page).toHaveURL(`/lots/${id}`, { timeout: 30_000 });   // LOT 상세는 무겁다 — 처음 컴파일할 때 15초를 넘긴 적이 있다 (10/26)
 });
+
+test("품질 파레토의 유형을 누르면 그 유형이 난 LOT 만 · 많은 순 (10/27)", async ({ page }) => {
+  await page.goto("/quality");
+  await page.getByRole("link", { name: "가스", exact: true }).click();
+  await expect(page).toHaveURL(/\/lots\?reason=/);
+  await expect(page.getByRole("link", { name: /불량 유형 가스 거르기 풀기/ })).toBeVisible();
+  const counts = (await rows(page).locator("td:nth-child(6)").allInnerTexts()).map(Number);   // 6번째 = 가스 열 (불량 다음)
+  expect(counts.length).toBeGreaterThan(0);
+  expect(counts.every((n) => n > 0)).toBe(true);                        // 가스가 한 건도 없는 LOT 은 안 보인다
+  expect(counts).toEqual([...counts].sort((a, b) => b - a));           // 많은 순
+  const total = counts.reduce((a, b) => a + b, 0);
+  await page.getByRole("link", { name: /불량 유형 가스 거르기 풀기/ }).click();
+  await expect(page).toHaveURL("/lots");
+  expect(total).toBeGreaterThan(0);
+});

@@ -165,6 +165,13 @@ export type Database = {
             foreignKeyName: "lot_guide_lot_id_fkey"
             columns: ["lot_id"]
             isOneToOne: true
+            referencedRelation: "lot_defect"
+            referencedColumns: ["lot_id"]
+          },
+          {
+            foreignKeyName: "lot_guide_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: true
             referencedRelation: "lot_oee_input"
             referencedColumns: ["lot_id"]
           },
@@ -355,6 +362,13 @@ export type Database = {
           request_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "production_record_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "lot_defect"
+            referencedColumns: ["lot_id"]
+          },
           {
             foreignKeyName: "production_record_lot_id_fkey"
             columns: ["lot_id"]
@@ -621,6 +635,13 @@ export type Database = {
             foreignKeyName: "production_record_lot_id_fkey"
             columns: ["lot_id"]
             isOneToOne: false
+            referencedRelation: "lot_defect"
+            referencedColumns: ["lot_id"]
+          },
+          {
+            foreignKeyName: "production_record_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
             referencedRelation: "lot_oee_input"
             referencedColumns: ["lot_id"]
           },
@@ -678,6 +699,22 @@ export type Database = {
           yield_pct: number | null
         }
         Relationships: []
+      }
+      lot_defect: {
+        Row: {
+          fail_qty: number | null
+          fail_reason: string | null
+          lot_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "part_fail_reason_known"
+            columns: ["fail_reason"]
+            isOneToOne: false
+            referencedRelation: "defect_code"
+            referencedColumns: ["reason"]
+          },
+        ]
       }
       lot_oee_input: {
         Row: {

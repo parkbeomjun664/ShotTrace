@@ -30,7 +30,7 @@ ANON = os.environ["NEXT_PUBLIC_SUPABASE_ANON_KEY"]
 SERVICE = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 
 TABLES = ["equipment", "product", "production_lot", "shot", "shot_part", "user_role", "production_record", "record_cancel", "downtime_reason", "downtime", "defect_code", "lot_guide", "parameter_spec", "master_audit"]
-VIEWS = ["equipment_summary", "plant_summary", "daily_yield", "defect_pareto", "active_record", "lot_oee_input"]
+VIEWS = ["equipment_summary", "plant_summary", "daily_yield", "defect_pareto", "active_record", "lot_oee_input", "lot_defect"]   # lot_defect — 029
 UPDATE_KEYS = {  # 테이블: (거를 컬럼들, 같은 값으로 덮을 컬럼)
     "equipment": (["equip_cd"], "equip_name"),
     "product": (["product_id"], "part_name"),

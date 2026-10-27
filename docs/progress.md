@@ -172,8 +172,8 @@ CSV ──▶ replay.py ──▶ Mosquitto ──▶ collector.py ──▶ Sup
 ### DB
 
 ```
-마이그레이션  001~028
-구성          테이블 15 · View 8 · RPC 4 · 인덱스 3 · EXCLUDE 1 · publication 1 · 마스터 변경 이력 트리거
+마이그레이션  001~029
+구성          테이블 15 · View 9 · RPC 4 · 인덱스 3 · EXCLUDE 1 · publication 1 · 마스터 변경 이력 트리거
 집계          현황판 View 2개는 shot_part 원본에서 센다 (010)
 권한          역할 기반 RLS (011) · 실적은 worker·admin 만 INSERT · 고치기·지우기 없음 (012) · 같은 제출은 한 줄 (013)
 ```
@@ -183,7 +183,7 @@ CSV ──▶ replay.py ──▶ Mosquitto ──▶ collector.py ──▶ Sup
 ```
 ADR        19개   decisions/
 증거       7건    evidence/  (인덱스 EXPLAIN · 사이클-불량 가설 기각 · 배포 차단 · MVP 점검 · 제약 거절 · 10배 성능 · Lighthouse)
-테스트     113    Vitest 80 · pytest 12 · Playwright 21 · CI 세 칸
+테스트     118    Vitest 84 · pytest 12 · Playwright 22 · CI 세 칸
 작업 일지   25일   오늘.md
 ```
 
@@ -214,7 +214,7 @@ LOT           25 · 설비 3 · 제품 6
                 ② ✅ RLS 전수 점검 — worker · admin 비밀번호로 (10/27)
                 ③ 시연 리허설 (시연.md) → 아버지께 시연 → 피드백 반영 — ⏸ 보류 (10/27 사용자)
                 ④ 완성 선언 — README 상태 · v1.0 태그
-미룬 것          파레토 막대 → 그 불량 유형의 LOT (새 View 필요)
+✅ 파레토 막대 · 유형 → 그 불량 유형의 LOT (029 lot_defect · 10/27)
                 ✅ ADR 018 합계는 합치지 않는다 · 019 미입력 정지 (10/27)
 ```
 

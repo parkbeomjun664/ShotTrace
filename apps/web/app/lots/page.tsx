@@ -2,12 +2,13 @@
 // 이 화면이 답하는 질문 (M09): 어느 LOT이 문제였나 · 어디를 눌러야 하나
 // M09(정보 위계) · M10(표) · M27(N+1) · 10/26 — 생산 구간 · 수율 상태 · 불량만 · 정렬 · 줄 클릭
 // 🔵 거르기 · 정렬 상태는 주소(?defect=1&sort=yield&dir=asc)에 — 새로고침 · 공유해도 같은 화면
+// 10/27 — 불량 유형(?reason=가스) · 품질 파레토의 막대 · 표에서 넘어온다. 그 유형이 난 LOT 만 · 많은 순 (029 lot_defect)
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import { 같은날, 날짜, 시분, 진행중 } from "@/lib/format";
 import { applyList, isDemo, parseListParams, rateOf, yieldLevel, type ListParams, type SortKey } from "@/lib/lots";
-import { getLots } from "@/lib/queries";
+import { getLotDefects, getLots } from "@/lib/queries";
 
 const LEVEL_TEXT = { ok: "", warn: "text-status-warn", bad: "text-status-bad" } as const;
 const LEVEL_DOT = { ok: "", warn: "bg-status-warn", bad: "bg-status-bad" } as const;
@@ -15,7 +16,8 @@ const LEVEL_DOT = { ok: "", warn: "bg-status-warn", bad: "bg-status-bad" } as co
 function href(p: ListParams) {                         // 상태 → 주소. 기본값은 주소에 안 적는다
   const q = new URLSearchParams();
   if (p.defectOnly) q.set("defect", "1");
-  if (p.sort !== "start") q.set("sort", p.sort);
+  if (p.reason) q.set("reason", p.reason);
+  if (p.sort !== (p.reason ? "reason" : "start")) q.set("sort", p.sort);   // 기본 정렬 — 유형이 있으면 그 유형이 많은 순
   if (p.dir !== "desc") q.set("dir", p.dir);
   const s = q.toString();
   return s ? `/lots?${s}` : "/lots";
@@ -28,8 +30,12 @@ function 구간(start: string, end: string) {            // 생산 구간 — �
 
 export default async function Page({ searchParams }: PageProps<"/lots">) {
   const p = parseListParams(await searchParams);       // 🔴 Next 15+ 는 Promise — await
-  const all = await getLots();                         // 26건 — 다 받아 거르기 · 정렬은 순수함수가 (lib/lots.ts)
-  const lots = applyList(all, p);
+  const [all, counts] = await Promise.all([
+    getLots(),                                         // 26건 — 다 받아 거르기 · 정렬은 순수함수가 (lib/lots.ts)
+    p.reason ? getLotDefects(p.reason) : Promise.resolve(new Map<string, number>()),   // 유형이 있을 때만 — LOT → 그 유형 건수
+  ]);
+  const countOf = (l: { lot_id: string }) => counts.get(l.lot_id) ?? 0;
+  const lots = applyList(all, p, countOf);
 
   // 정렬 머리 — 같은 열을 다시 누르면 방향이 바뀐다. 새 열은 "나쁜 쪽 먼저"(수율 오름 · 불량 내림 · 구간 최신)
   const sortHead = (key: SortKey, label: string) => {   // 정렬은 globals.css 의 th · td 가운데 (10/27)
@@ -64,7 +70,17 @@ export default async function Page({ searchParams }: PageProps<"/lots">) {
         >
           {p.defectOnly ? "✓ " : ""}불량 있는 LOT만
         </Link>
-        {p.defectOnly && <span className="text-muted-foreground">{lots.length}건</span>}
+        {/* 불량 유형 — 품질 파레토에서 왔을 때만. ✕ 로 풀면 원래 목록 (정렬이 유형 순이었으면 기본으로) */}
+        {p.reason && (
+          <Link
+            href={href({ ...p, reason: null, sort: p.sort === "reason" ? "start" : p.sort })}
+            aria-label={`불량 유형 ${p.reason} 거르기 풀기`}
+            className="rounded-full border border-foreground bg-foreground px-3 py-1 text-background transition-colors hover:bg-foreground/80"
+          >
+            불량 유형: {p.reason} ✕
+          </Link>
+        )}
+        {(p.defectOnly || p.reason) && <span className="text-muted-foreground">{lots.length}건</span>}
       </div>
 
       {lots.length === 0 ? (
@@ -87,6 +103,7 @@ export default async function Page({ searchParams }: PageProps<"/lots">) {
                 {sortHead("start", "생산 구간")}
                 <th className="px-4 py-2 font-medium">생산</th>
                 {sortHead("fail", "불량")}
+                {p.reason && sortHead("reason", p.reason)}
                 {sortHead("yield", "수율")}
                 <th className="w-8" />
               </tr>
@@ -117,6 +134,7 @@ export default async function Page({ searchParams }: PageProps<"/lots">) {
                     <td className={`px-4 py-2.5 tabular-nums ${lot.fail_qty > 0 ? "font-medium" : "text-muted-foreground"}`}>
                       {lot.fail_qty}
                     </td>
+                    {p.reason && <td className="px-4 py-2.5 font-medium tabular-nums">{countOf(lot)}</td>}
                     {/* 수율 상태 — 95 이상 기본 · 90 이상 주의 · 그 아래 나쁨. 색 + 점 (색만으로 구분하지 않게 숫자가 뜻을 진다) */}
                     <td className={`px-4 py-2.5 tabular-nums ${lv ? LEVEL_TEXT[lv] : ""}`}>
                       {lv && lv !== "ok" && <span aria-hidden className={`mr-1.5 inline-block size-1.5 rounded-full align-middle ${LEVEL_DOT[lv]}`} />}

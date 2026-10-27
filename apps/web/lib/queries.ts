@@ -96,6 +96,17 @@ export async function getDefectPareto() {              // 불량 사유별 (3행
   return data;
 }
 
+export async function getLotDefects(reason: string) {   // 그 불량 유형이 난 LOT 과 건수 (029 · 10/27 · 파레토 → LOT 목록)
+  const supabase = await createSessionClient();
+  const { data, error } = await supabase
+    .from("lot_defect")
+    .select("lot_id, fail_qty")
+    .eq("fail_reason", reason);                        // 🔵 .eq 는 값을 매개변수로 보낸다 — 주소의 글자가 SQL 이 되지 않는다
+
+  if (error) throw error;
+  return new Map(data.map((d) => [d.lot_id!, d.fail_qty ?? 0]));   // LOT → 건수 · 없으면 그 LOT 은 0
+}
+
 export async function getDailyYield() {                // 일별 수율 (13행)
   const supabase = await createSessionClient();
   const {data, error} = await supabase
