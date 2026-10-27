@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- ShotTrace 아이콘 (10/27) — S + 초록 밑줄(현황판 「● 실시간 연결됨」의 초록). 16px 탭에서도 또렷하게 -->
+  <!-- 신호 선 시안은 심전도처럼 보여서 버렸다 · 글자는 시스템 굵은 고딕(Arial 이 없으면 비슷한 글꼴) -->
+  <rect width="32" height="32" rx="7" fill="#171717"/>
+  <text x="16" y="22.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="18" fill="#fff">S</text>
+  <path d="M6 26.5h20" stroke="#34d399" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
