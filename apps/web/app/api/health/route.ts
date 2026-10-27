@@ -1,4 +1,4 @@
-// 헬스체크 — 감시 서비스가 1분마다 부른다. 살아 있으면 200 · 아프면 503 · 데이터는 하나도 안 내보낸다 (M28)
+// 헬스체크 — 감시 서비스가 1분마다 부른다. 살아 있으면 200 · 아프면 503 · 데이터는 하나도 안 내보낸다
 import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";                // 🔴 부를 때마다 확인 — 빌드 순간의 "ok" 를 영원히 내보내지 않게

@@ -1,4 +1,4 @@
-# MQTT 브로커 + 수집기. 📓 M16 · M17 · ADR 011
+# MQTT 브로커 + 수집기. · ADR 011
 #
 #   docker compose up -d                켜기 (둘 다)
 #   docker compose down                 끄기
@@ -12,7 +12,7 @@ services:
   mosquitto:
     image: eclipse-mosquitto:2
     container_name: shottrace-mosquitto
-    restart: unless-stopped # 죽으면 다시 뜬다 (M28)
+    restart: unless-stopped # 죽으면 다시 뜬다
     ports:
       - "1883:1883"
     volumes:

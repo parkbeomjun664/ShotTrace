@@ -1,4 +1,4 @@
-// 입구 — 요청마다 손목밴드(토큰)를 확인하고, 만료됐으면 갈아준다 (M19 · Next 16 의 옛 middleware)
+// 입구 — 요청마다 손목밴드(토큰)를 확인하고, 만료됐으면 갈아준다 (Next 16 의 옛 middleware)
 // 🔴 진짜 문지기가 아니다. 막는 건 DB 의 RLS 다
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
@@ -45,6 +45,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {                                // 이미지·JS 까지 매번 물으면 느리다
-  matcher: ["/((?!_next/static|_next/image|icon.svg|robots.txt|api/health).*)"],   // 🔴 로봇 · 감시 서비스는 로그인을 안 한다 — 튕기면 죽어도 200 (M29 · M28)
+  matcher: ["/((?!_next/static|_next/image|icon.svg|robots.txt|api/health).*)"],   // 🔴 로봇 · 감시 서비스는 로그인을 안 한다 — 튕기면 죽어도 200
   // icon.svg — 탭 아이콘은 로그인 전(로그인 화면)에도 보여야 한다. favicon.ico 대신 (10/27)
 };

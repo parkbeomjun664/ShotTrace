@@ -11,8 +11,8 @@ const GROUPS = [
   [
     { href: "/lots", label: "LOT 추적" },
     { href: "/quality", label: "품질" },
-    { href: "/oee", label: "OEE" },                    // M24
-    { href: "/downtime", label: "비가동" },            // M23 · 017
+    { href: "/oee", label: "OEE" },
+    { href: "/downtime", label: "비가동" },            // 017
   ],
   [
     { href: "/records", label: "실적 입력", write: "worker" },   // 쓰기 화면 — 쓸 수 있는 역할이 아니면 자물쇠

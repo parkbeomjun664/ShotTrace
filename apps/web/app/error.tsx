@@ -1,4 +1,4 @@
-"use client";   // 🔴 1행 — 다시 시도(reset)를 눌러야 해서 브라우저에서 돈다 · 모든 화면 공통 에러 (M29)
+"use client";   // 🔴 1행 — 다시 시도(reset)를 눌러야 해서 브라우저에서 돈다 · 모든 화면 공통 에러
 
 import { HomeLink, Notice, PRIMARY } from "./Notice";
 

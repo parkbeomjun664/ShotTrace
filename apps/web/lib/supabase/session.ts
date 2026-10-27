@@ -1,4 +1,4 @@
-// 세션이 들어간 서버용 클라이언트 — 요청마다 새로 만든다 (M19)
+// 세션이 들어간 서버용 클라이언트 — 요청마다 새로 만든다
 import { createServerClient } from "@supabase/ssr";   // 세션을 쿠키에 두는 도구
 import { cookies } from "next/headers";                // 이 요청에 딸려 온 쿠키 상자
 

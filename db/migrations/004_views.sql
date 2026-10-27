@@ -1,4 +1,4 @@
--- 004_views.sql — 집계를 화면에서 DB로 (M11 · ADR 008)
+-- 004_views.sql — 집계를 화면에서 DB로 (ADR 008)
 
 CREATE VIEW daily_yield WITH (security_invoker = on) AS   -- 🔴 없으면 RLS 우회
 SELECT plan_date,

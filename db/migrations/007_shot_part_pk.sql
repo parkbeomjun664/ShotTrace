@@ -1,4 +1,4 @@
--- 007_shot_part_pk.sql — shot_part 의 PK 를 자연키로 (M17 · M21)
+-- 007_shot_part_pk.sql — shot_part 의 PK 를 자연키로
 --
 -- part_id 는 원본 CSV 의 _id 다. 설비가 보내는 값이 아니라 누군가의
 -- 내보내기에 붙은 행 번호라서 MQTT 메시지에 없다.

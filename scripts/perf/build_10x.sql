@@ -1,4 +1,4 @@
--- build_10x.sql — 성능 실험용 10배 데이터 (M27) · 화면과 안 섞이게 perf 스키마에 · 치우기: DROP SCHEMA perf CASCADE;
+-- build_10x.sql — 성능 실험용 10배 데이터 · 화면과 안 섞이게 perf 스키마에 · 치우기: DROP SCHEMA perf CASCADE;
 
 BEGIN;
 

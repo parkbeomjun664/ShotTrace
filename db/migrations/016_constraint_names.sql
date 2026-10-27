@@ -1,4 +1,4 @@
--- 016_constraint_names.sql — 이름 없는 제약에 이름을 붙인다 (M22)
+-- 016_constraint_names.sql — 이름 없는 제약에 이름을 붙인다
 -- 🔵 에러 메시지에 찍히는 건 제약 이름이다. 이름이 없으면 Postgres 가 테이블_check, _check1 로 번호를 매긴다
 
 BEGIN;

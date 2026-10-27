@@ -1,4 +1,4 @@
--- 017_downtime.sql — 비가동과 사유 명단 (M23 · OEE 가용성의 재료)
+-- 017_downtime.sql — 비가동과 사유 명단 (OEE 가용성의 재료)
 
 BEGIN;
 

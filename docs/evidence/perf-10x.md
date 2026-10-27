@@ -1,7 +1,7 @@
-# 10배 데이터에서 인덱스가 버티나 — EXPLAIN ANALYZE (M27)
+# 10배 데이터에서 인덱스가 버티나 — EXPLAIN ANALYZE
 
 - **날짜**: 2026-10-26
-- **관련**: [003-indexes-explain.md](003-indexes-explain.md) (9월 · 1배) · [ADR 007](../decisions/007-인덱스.md) · M06 ★ · M27
+- **관련**: [003-indexes-explain.md](003-indexes-explain.md) (9월 · 1배) · [ADR 007](../decisions/007-인덱스.md)
 - **방법**: `scripts/perf/build_10x.sql` → `scripts/perf/explain_10x.sql` → `DROP SCHEMA perf CASCADE`
 
 ## 데이터

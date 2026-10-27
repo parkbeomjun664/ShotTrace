@@ -8,7 +8,7 @@
 제조 IT 22년 경력자 인터뷰로 요구사항을 도출했고, KAMP 공개 실데이터(사출성형기 부품 5,232개 = 샷 2,626번 × 공정변수 24개)를
 시간축으로 재생해 사용한다. ISA-95 Level 3에 해당한다.
 
-**배포** — https://shot-trace.vercel.app · 둘러보기 계정 `viewer@example.com` / `parkbeomjun122!!` (읽기 전용)
+**배포** — https://shot-trace.vercel.app (로그인 필요 · 읽기 전용 체험 계정은 요청 시 안내)
 **현재 상태** — 기능 · 화면 완성 (2026-10-27) · 시연 리허설만 남음 · 2026-08 시작
 
 | | |
@@ -141,7 +141,7 @@ flowchart LR
 ## 폴더 구조
 
 ```
-db/migrations/     스키마의 유일한 진실 (001 ~ 022). 대시보드 클릭으로 바꾸지 않는다
+db/migrations/     스키마의 유일한 진실 (001 ~ 029 · 29개). 대시보드 클릭으로 바꾸지 않는다
 apps/web/          Next.js — app/ 화면 · lib/ 조회 · OEE 계산 · e2e/ Playwright
 services/
   simulator/       CSV 를 시간순 MQTT 발행 (Python)
@@ -174,7 +174,7 @@ KAMP(인공지능 중소벤처 제조 플랫폼)에서 공개한 **사출성형�
 
 **새로 합류한다면 → [`docs/인수인계.md`](docs/인수인계.md)** — 일하는 방식 · 환경 · 다음 할 일
 **지금 어디까지 왔나 → [`docs/progress.md`](docs/progress.md)**
-**그날그날의 기록 → [`docs/오늘.md`](docs/오늘.md)** · **왜 그렇게 했나 → [`docs/decisions/`](docs/decisions/)**
+**왜 그렇게 했나 → [`docs/decisions/`](docs/decisions/)**
 
 ### 돌려보기
 
@@ -194,8 +194,3 @@ pytest scripts/etl services/collector                   pytest (pip install -r r
 
 데모용 LOT 을 열고 닫는 SQL 은 [`scripts/demo/demo_lot.sql`](scripts/demo/demo_lot.sql) 에 있다.
 🔴 `--live` 없이 돌리면 원본 시각 그대로라 **이미 있는 행을 덮어쓴다**(멱등). 숫자가 안 움직인다.
-
-## 배경 문서
-
-- `docs/커리큘럼 — 프론트에서 MES까지.html` — 이 프로젝트를 완성하기 위한 학습 커리큘럼 (30모듈)
-- `docs/일정.md` — 주 · 일 단위 계획과 재계획 기록

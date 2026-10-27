@@ -1,4 +1,4 @@
--- 012_production_record.sql — 실적 기록과 역할 기반 쓰기 (M19)
+-- 012_production_record.sql — 실적 기록과 역할 기반 쓰기
 
 BEGIN;
 

@@ -1,4 +1,4 @@
--- 021_oee_input.sql — OEE 의 입력: 표준 사이클타임과 LOT 별 재료 (M24 · ADR 016)
+-- 021_oee_input.sql — OEE 의 입력: 표준 사이클타임과 LOT 별 재료 (ADR 016)
 
 BEGIN;
 

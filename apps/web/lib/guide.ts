@@ -1,4 +1,4 @@
-// LOT 대응 가이드 — Claude 를 부르는 곳은 여기 하나 (M25)
+// LOT 대응 가이드 — Claude 를 부르는 곳은 여기 하나
 //
 //   🔴 서버 전용 — 키(법인카드)가 이 파일에 있다. 브라우저 코드가 import 하면 빌드가 멈춘다
 //   흐름: 오픈북(evidence) → Claude → 택배 확인(stop_reason · Zod) → 가이드

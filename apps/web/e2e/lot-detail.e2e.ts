@@ -1,12 +1,14 @@
 // LOT 상세 (10/26) — 작은 차트 4개의 툴팁 동기화 · 이상 샷만 토글 · 화면 기록
 import { expect, test } from "@playwright/test";
 
+import { VIEWER } from "./viewer";
+
 const LOT = "S14-20201027-CN7LH";                      // 초기 불량 5개가 몰린 LOT — 이상 샷이 있다
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/login");
-  await page.getByPlaceholder("이메일").fill("viewer@example.com");
-  await page.getByPlaceholder("비밀번호").fill("parkbeomjun122!!");
+  await page.getByPlaceholder("이메일").fill(VIEWER.email);
+  await page.getByPlaceholder("비밀번호").fill(VIEWER.password);
   await page.getByRole("button", { name: "로그인", exact: true }).click();
   await expect(page).toHaveURL("/");
 });

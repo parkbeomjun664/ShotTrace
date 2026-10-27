@@ -1,4 +1,4 @@
-// LOT 목록의 규칙 — 수율 상태 · 시연 LOT · 거르기 · 정렬 (10/26 · M26 테스트 대상)
+// LOT 목록의 규칙 — 수율 상태 · 시연 LOT · 거르기 · 정렬 (10/26 · 테스트 대상)
 // 순수함수 — DB 를 안 부른다. 화면(app/lots/page.tsx)은 이걸로 받은 순서대로 그리기만 한다
 
 export type YieldLevel = "ok" | "warn" | "bad";

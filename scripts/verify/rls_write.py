@@ -21,7 +21,7 @@ URL = os.environ["NEXT_PUBLIC_SUPABASE_URL"]
 ANON = os.environ["NEXT_PUBLIC_SUPABASE_ANON_KEY"]
 SERVICE = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 
-VIEWER = ("viewer@example.com", "parkbeomjun122!!")  # 로그인 화면에 공개된 값
+VIEWER = ("viewer@example.com", os.environ["VIEWER_PASSWORD"])  # 루트 .env — 코드에 두지 않는다
 WORKER_EMAIL = "worker@example.com"
 
 results = []

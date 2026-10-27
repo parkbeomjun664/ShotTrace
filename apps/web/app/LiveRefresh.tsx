@@ -1,6 +1,6 @@
 "use client";   // 🔴 반드시 1행. 위에 코드가 있으면 지시어로 안 읽힌다 (주석은 괜찮다)
 
-// 실시간 신호 담당 — 알림을 받아 "서버야 다시 그려줘" 만 하고, 연결 상태를 보여준다 (M18)
+// 실시간 신호 담당 — 알림을 받아 "서버야 다시 그려줘" 만 하고, 연결 상태를 보여준다
 // 🔵 숫자를 계산하는 코드가 한 줄도 없다. 집계는 계속 DB 가 한다 (ADR 008)
 
 import { useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import { 날짜, 시분 } from "@/lib/format";
 import { receiveState, 전 } from "@/lib/receive";      // 무엇을 보여줄지는 순수함수가 정한다 (테스트 · 10/26)
 import { supabase } from "@/lib/supabase/client";     // 🔴 server.ts 아니다 — 연결은 브라우저가 든다
 
-export function LiveRefresh({ lastAt }: { lastAt?: string | null }) {   // lastAt — 마지막 수신 (현황판만 넘긴다 · M28)
+export function LiveRefresh({ lastAt }: { lastAt?: string | null }) {   // lastAt — 마지막 수신 (현황판만 넘긴다)
   const router = useRouter();
   const dirty = useRef(false);                        // 🔵 메모지 — 바뀌어도 화면을 다시 안 그린다
   const [연결, set연결] = useState(false);              // 🔵 이건 화면에 보여야 하니 useState
@@ -48,7 +48,7 @@ export function LiveRefresh({ lastAt }: { lastAt?: string | null }) {   // lastA
     };
   }, [router]);
 
-  // 🔴 색만으로 구분하지 않는다 (M09) — 글자가 뜻을 지고 색은 거든다
+  // 🔴 색만으로 구분하지 않는다 — 글자가 뜻을 지고 색은 거든다
   // 🔵 한 줄 · 한 상태 (10/26) — 연결은 살아 있어도 데이터는 끊길 수 있다. 끊기면 "연결됨" 은 지우고 끊김만
   const { kind, minutes } = receiveState({ connected: 연결, lastAt, now });
 

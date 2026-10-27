@@ -1,6 +1,6 @@
 // 현황판 — 잘 돌아가고 있나 · 설비는 살아있나
-// 이 화면이 답하는 질문 (M09): 전체가 잘 나오나 · 어느 설비가 문제인가
-// M09(정보 위계) · M10(숫자 표시) · M11(집계는 DB) → M18(실시간) → M24(OEE)
+// 이 화면이 답하는 질문: 전체가 잘 나오나 · 어느 설비가 문제인가
+// 정보 위계 · 숫자 표시 · 집계는 DB → 실시간 → OEE
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { getEquipmentSummary, getLastReceived, getLots, getPartsWithoutLot, getP
 import { CountUp } from "./CountUp";               // 큰 숫자는 0 에서 올라간다 (10/27)
 import { LiveRefresh } from "./LiveRefresh";       // 알림을 듣고 이 화면을 다시 그리게 한다
 
-export const revalidate = 0;   // 🔴 캐시를 끈다. 60 이면 refresh 해도 묵은 화면이 온다 (M18)
+export const revalidate = 0;   // 🔴 캐시를 끈다. 60 이면 refresh 해도 묵은 화면이 온다
 
 export default async function Page() {
   const [plant, equipment, lastReceived, lots, orphan] = await Promise.all([
@@ -35,7 +35,7 @@ export default async function Page() {
         </div>
       </div>
 
-      {/* 1층 — 숫자 하나. 3초 안에 판단 (M09 정보 위계) */}
+      {/* 1층 — 숫자 하나. 3초 안에 판단 (정보 위계) */}
       <Card>
         <CardHeader>
           <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -71,7 +71,7 @@ export default async function Page() {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-sm">
                   <span className="font-mono">{eq.equip_cd}</span>
-                  {/* 색만으로 구분하지 않는다 — 텍스트가 뜻을 진다 (M09) */}
+                  {/* 색만으로 구분하지 않는다 — 텍스트가 뜻을 진다 */}
                   <Badge variant={active ? "secondary" : "outline"}>
                     {active ? `● LOT ${eq.lot_count}` : "■ 실적 없음"}
                   </Badge>

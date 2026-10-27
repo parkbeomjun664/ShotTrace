@@ -1,4 +1,4 @@
--- 009_lot_open.sql — 진행 중 LOT 과 구간 겹침 방지 (M17 · M21 · ADR 006)
+-- 009_lot_open.sql — 진행 중 LOT 과 구간 겹침 방지 (ADR 006)
 --
 -- 진행 중 LOT 은 ended_at = 'infinity' 다. NULL 이 아니다.
 --   NULL 이면 조인마다 OR ended_at IS NULL 이 붙고, 한 군데만 빼먹어도

@@ -1,4 +1,4 @@
-"""수집기 테스트 — 진짜 DB · 시계 · 브로커 없이 (M26). 실행: pytest services/collector"""
+"""수집기 테스트 — 진짜 DB · 시계 · 브로커 없이. 실행: pytest services/collector"""
 
 import json
 from datetime import datetime, timezone

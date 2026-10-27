@@ -1,4 +1,4 @@
--- demo_lot.sql — 데모용 LOT 을 열고 · 닫고 · 치운다 (M18)
+-- demo_lot.sql — 데모용 LOT 을 열고 · 닫고 · 치운다
 --
 -- 왜 필요한가
 --   replay.py 는 원본 measured_at 을 그대로 보낸다. 이미 있는 행을 때리므로

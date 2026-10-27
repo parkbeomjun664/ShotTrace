@@ -1,4 +1,4 @@
-// robots.txt — 사내 시스템이라 검색엔진에는 로그인 화면만 (M29)
+// robots.txt — 사내 시스템이라 검색엔진에는 로그인 화면만
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {

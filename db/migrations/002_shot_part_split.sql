@@ -1,6 +1,6 @@
 -- 002_shot_part_split.sql — 패밀리 금형을 반영해 샷과 부품을 나눈다 (ADR 005)
 --
--- 📓 필기 M02 · M03 · ADR 001·005 를 펴고 본다.
+-- 관련: ADR 001 · 005
 --
 -- ─────────────────────────────────────────────────────────────
 -- 왜 001 을 고치나
@@ -26,9 +26,9 @@
 --      바뀐 것은 조인 뒤에 shot_part 로 제품을 한 번 더 좁힌다는 점뿐이다
 --
 --   🔴 shot 의 PK 가 곧 시간 구간 조인 인덱스다
---      (equipment_id, measured_at) — 왼쪽 접두사 규칙 (M06)
+--      (equipment_id, measured_at) — 왼쪽 접두사 규칙
 --
---   인덱스는 여기가 아니라 003_indexes.sql 에서 (M06)
+--   인덱스는 여기가 아니라 003_indexes.sql 에서
 --
 -- ─────────────────────────────────────────────────────────────
 
@@ -83,13 +83,13 @@ CREATE TABLE shot (
 -- ── 부품 — 한 샷에서 나온 것 ────────────────────────────────
 
 CREATE TABLE shot_part (
-    part_id       text PRIMARY KEY,                   -- 원본 _id → 멱등성 (M05 ⑦)
+    part_id       text PRIMARY KEY,                   -- 원본 _id → 멱등성
     equipment_id  text NOT NULL,                      -- ┐ 복합 FK
     measured_at   timestamptz NOT NULL,               -- ┘ → shot
     product_id    int  NOT NULL REFERENCES product(product_id),
     part_serial   int,                                -- 금형 캐비티 번호로 보인다
     pass_or_fail  char(1) NOT NULL CHECK (pass_or_fail IN ('Y','N')),
-    fail_reason   text,                               -- 양품이면 NULL (M02 ⑥)
+    fail_reason   text,                               -- 양품이면 NULL
 
     FOREIGN KEY (equipment_id, measured_at)
         REFERENCES shot(equipment_id, measured_at),   -- 부모 없는 부품 차단

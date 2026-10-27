@@ -1,10 +1,12 @@
 // 상단 내비게이션 (10/26) — 한 줄 · 고정 · 탭 묶음 · 사용자. 화면 기록은 e2e/__screenshots__/
 import { expect, test } from "@playwright/test";
 
+import { VIEWER } from "./viewer";
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/login");
-  await page.getByPlaceholder("이메일").fill("viewer@example.com");
-  await page.getByPlaceholder("비밀번호").fill("parkbeomjun122!!");
+  await page.getByPlaceholder("이메일").fill(VIEWER.email);
+  await page.getByPlaceholder("비밀번호").fill(VIEWER.password);
   await page.getByRole("button", { name: "로그인", exact: true }).click();
   await expect(page).toHaveURL("/");
 });

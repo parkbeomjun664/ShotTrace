@@ -1,4 +1,4 @@
-"use server";   // 🔴 1행 — 마스터 사용 중지 켜고 끄기 (M23 · 019) · 추가 · 수정 (028 · 10/26)
+"use server";   // 🔴 1행 — 마스터 사용 중지 켜고 끄기 (019) · 추가 · 수정 (028 · 10/26)
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";

@@ -1,4 +1,4 @@
-// 이 파일만 두면 Next가 Suspense 껍데기를 자동으로 씌운다 (M07)
+// 이 파일만 두면 Next가 Suspense 껍데기를 자동으로 씌운다
 // 뼈대(스켈레톤) — 실제 화면과 같은 자리에 회색 상자를 둔다. 데이터가 오면 그 자리에 그대로 채워져 화면이 덜 튄다 (10/26)
 // motion-safe — 움직임 줄이기를 켠 사람에게는 깜빡이지 않는다
 const BOX = "rounded-md bg-muted motion-safe:animate-pulse";

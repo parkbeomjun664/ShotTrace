@@ -1,5 +1,9 @@
-// E2E — 브라우저로 사용자 흐름을 시험한다 (M26). 실행: npm run e2e
+// E2E — 브라우저로 사용자 흐름을 시험한다. 실행: npm run e2e
 import { defineConfig } from "@playwright/test";
+
+try {
+  process.loadEnvFile(".env.local");                   // VIEWER_PASSWORD 등 — 로컬에만 있는 파일 · CI 는 Secret 이 이미 env 에 있다
+} catch {}
 
 export default defineConfig({
   testDir: "./e2e",

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavLinks } from "./NavLinks";                 // 메뉴 — 지금 보는 페이지에 밑줄 (브라우저에서 · 10/26)
-import { UserMenu } from "./UserMenu";                 // 헤더 오른쪽 — 누가 로그인했나 (M19)
+import { UserMenu } from "./UserMenu";                 // 헤더 오른쪽 — 누가 로그인했나
 import { getMyRole } from "@/lib/queries";
 import { createSessionClient } from "@/lib/supabase/session";
 
@@ -33,7 +33,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {   // 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {/* 이 헤더는 페이지를 옮겨도 다시 그려지지 않는다 (M07) */}
+        {/* 이 헤더는 페이지를 옮겨도 다시 그려지지 않는다 */}
         {/* 비로그인에겐 헤더를 안 그린다 — 로그인 화면이 제목을 갖는다 (10/26) */}
         {user && (
           // 한 줄 머리 띠 (10/26) — [로고] [탭] ……… [사용자]. 스크롤해도 위에 붙어 있다

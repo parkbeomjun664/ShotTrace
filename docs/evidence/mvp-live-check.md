@@ -1,7 +1,7 @@
 # MVP 점검 — 끝에서 끝까지 살아 움직이는가
 
 - **날짜**: 2026-10-08 (S05 목)
-- **관련**: M18 · `scripts/demo/demo_lot.sql` · [ADR 010](../decisions/010-시간의-설계.md) · [ADR 011](../decisions/011-수집기-구동-위치.md)
+- **관련**: `scripts/demo/demo_lot.sql` · [ADR 010](../decisions/010-시간의-설계.md) · [ADR 011](../decisions/011-수집기-구동-위치.md)
 - **대상**: 로컬 `localhost:3000` · 배포 `https://shot-trace.vercel.app`
 
 ## MVP 를 무엇이라고 보았나

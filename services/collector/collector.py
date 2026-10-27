@@ -1,4 +1,4 @@
-"""MQTT 를 구독해 shot 을 적재한다. 📓 M15 · M17"""
+"""MQTT 를 구독해 shot 을 적재한다."""
 
 import argparse
 import json
@@ -78,7 +78,7 @@ def on_message(client, userdata, msg):
         log.error("모르는 제품 %s — product 테이블에 없다", unknown)
         return
 
-    odd = [p.get("fail_reason") for p in payload["parts"]   # 🔴 쓰기 전에 거절 — shot 만 들어가는 반쪽을 막는다 (M21)
+    odd = [p.get("fail_reason") for p in payload["parts"]   # 🔴 쓰기 전에 거절 — shot 만 들어가는 반쪽을 막는다
            if p.get("fail_reason") is not None and p.get("fail_reason") not in userdata["defects"]]   # 양품(None)은 안 본다 — FK 와 같다
     if odd:
         userdata["bad"] += 1

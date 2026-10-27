@@ -1,6 +1,5 @@
 -- 001_init.sql — 테이블 4개
 --
--- 📓 필기 M02 (①~⑦) · M03 을 펴고 시작한다.
 --
 -- ─────────────────────────────────────────────────────────────
 -- 만들 것
@@ -27,13 +26,13 @@
 --   🔴 equipment_param 에 lot_id FK 를 넣지 않는다 (ADR 001)
 --      equipment_id + measured_at 으로만 LOT 과 연결한다
 --
---   🔴 제약조건은 문서가 아니라 DB가 강제하는 규칙이다 (M02 ⑤)
+--   🔴 제약조건은 문서가 아니라 DB가 강제하는 규칙이다
 --      NOT NULL · CHECK · FK 를 아끼지 말 것
 --
---   🔴 fail_reason 은 양품일 때 NULL 이어야 한다 (M02 ⑥)
+--   🔴 fail_reason 은 양품일 때 NULL 이어야 한다
 --      'None' 문자열이 들어가면 COUNT(fail_reason) 을 못 쓴다
 --
---   인덱스는 여기가 아니라 002_indexes.sql 에서 (M06)
+--   인덱스는 여기가 아니라 002_indexes.sql 에서
 --
 -- ─────────────────────────────────────────────────────────────
 
@@ -78,13 +77,13 @@ CREATE TABLE production_lot (
 
 
 CREATE TABLE equipment_param ( -- 살아있는 공정변수 24개
-    param_id      text PRIMARY KEY,                   -- 원본 _id → 멱등성 (M05 ⑦)
+    param_id      text PRIMARY KEY,                   -- 원본 _id → 멱등성
     equipment_id  text NOT NULL REFERENCES equipment(equip_cd),
     measured_at   timestamptz NOT NULL,               -- UTC (ADR 002)
     part_serial   int,                                -- 제품 일련번호
 
     pass_or_fail  char(1) NOT NULL CHECK (pass_or_fail IN ('Y','N')),
-    fail_reason   text,                               -- 양품이면 NULL (M02 ⑥)
+    fail_reason   text,                               -- 양품이면 NULL
 
     -- lot_id 는 일부러 없다. equipment_id + measured_at 으로만 잇는다 (ADR 001)
 
@@ -127,10 +126,10 @@ CREATE TABLE equipment_param ( -- 살아있는 공정변수 24개
 
 
 -- ── RLS ─────────────────────────────────────────────────────
--- 켜기만 하고 정책이 없으면 전부 거부된다 (M03 ⑤)
+-- 켜기만 하고 정책이 없으면 전부 거부된다
 -- 쓰기 정책은 만들지 않는다 → 자동으로 막힌다 (화이트리스트)
 -- ETL·수집기는 service_role 이라 RLS를 우회한다
--- USING (true) 는 임시. 로그인이 생기는 M19 에서 조인다.
+-- USING (true) 는 임시. 로그인이 생기는 에서 조인다.
 
 ALTER TABLE equipment       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product         ENABLE ROW LEVEL SECURITY;

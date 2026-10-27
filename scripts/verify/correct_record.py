@@ -52,7 +52,7 @@ try:
     workers = [login("worker@example.com", pw) for _ in range(2)]  # 동시 시험용으로 둘
 except AuthApiError as e:
     sys.exit(f"🔴 로그인 실패 — {e.message} (한/영 · Caps Lock 확인)")
-viewer = login("viewer@example.com", "parkbeomjun122!!")
+viewer = login("viewer@example.com", os.environ["VIEWER_PASSWORD"])  # 루트 .env
 admin = create_client(URL, SERVICE)  # RLS 를 건너뛰는 열쇠 — 기준 확인과 치우기에만
 
 lot_id = workers[0].table("production_lot").select("lot_id").limit(1).execute().data[0]["lot_id"]

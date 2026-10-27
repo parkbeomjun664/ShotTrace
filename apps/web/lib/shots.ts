@@ -1,4 +1,4 @@
-// LOT 상세의 샷 규칙 — 빈 구간 · 기준 범위 · 이상 샷 (10/26 · M26 테스트 대상)
+// LOT 상세의 샷 규칙 — 빈 구간 · 기준 범위 · 이상 샷 (10/26 · 테스트 대상)
 // 순수함수 — DB 를 안 부른다. 차트(LotCharts)와 표(page)가 같은 판정을 쓴다
 import { metricStats, type MetricKey } from "./evidence";   // 상대 경로 — Vitest 는 @/ 별칭을 모른다
 import type { LotShot } from "./queries";

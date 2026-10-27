@@ -1,4 +1,4 @@
--- 013_request_id.sql — 같은 제출은 장부에 한 줄만 (M20 · 멱등)
+-- 013_request_id.sql — 같은 제출은 장부에 한 줄만 (멱등)
 
 BEGIN;
 

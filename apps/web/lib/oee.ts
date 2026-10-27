@@ -1,4 +1,4 @@
-// OEE 계산기 — 순수함수: 같은 입력 → 같은 출력 · DB · 시계 · 화면을 안 본다 (M24)
+// OEE 계산기 — 순수함수: 같은 입력 → 같은 출력 · DB · 시계 · 화면을 안 본다
 export type OeeInput = {                               // 부르는 쪽이 DB 에서 모아 넣는다
   runMinutes: number;                                  // 가동시간 (분)
   lossMinutes: number;                                 // 셋업 + 계획 외 정지 (분) · 🔴 계획 정지는 넣지 않는다 — 분모에서 뺀다

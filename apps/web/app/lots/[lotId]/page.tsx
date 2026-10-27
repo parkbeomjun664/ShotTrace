@@ -1,11 +1,11 @@
 // LOT 추적 ★ — 이 프로젝트의 핵심 화면
 //
-// 이 화면이 답하는 질문 3개 (M09)
+// 이 화면이 답하는 질문 3개
 //   1. 이 LOT은 얼마나 잘 나왔나          → 수율
 //   2. 불량은 언제 몇 개 났나              → 파레토 + 표의 표시
 //   3. 그때 설비는 어땠나                  → 시간 구간 조인으로 붙인 공정변수
 //
-// 담당: M09(정보 위계) · M11(RPC) → M12(시계열 차트) → M24(대응 제안)
+// 담당: 정보 위계 · RPC → 시계열 차트 → 대응 제안
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -23,12 +23,12 @@ import { getSpecBand, toleranceFrom } from "@/lib/spec";             // 범위�
 import { Info } from "@/app/Info";
 import { Diamond, Dot, Legend, VDash } from "@/app/Legend";
 import { LotCharts } from "./LotCharts";
-import { LiveRefresh } from "@/app/LiveRefresh";   // 어제 만든 부품을 그대로 (M18)
+import { LiveRefresh } from "@/app/LiveRefresh";   // 어제 만든 부품을 그대로
 import { GuidePanel } from "./GuidePanel";
 
 
 export const revalidate = 0;   // 🔴 캐시를 끈다. 실시간 화면에 캐시를 켜두면 실시간이 아니다
-export const maxDuration = 60; // 가이드 버튼(Server Action)이 Claude 를 기다리는 시간 — 초 (M25)
+export const maxDuration = 60; // 가이드 버튼(Server Action)이 Claude 를 기다리는 시간 — 초
 
 const PAGE_SIZE = 20;                                  // 샷 표 한 쪽 — 463샷이면 HTML 이 611KB 였다 (ADR README · 10/26 페이지 나누기)
 
@@ -39,12 +39,12 @@ export default async function Page({ params, searchParams }: PageProps<"/lots/[l
   const pageNo = Math.max(1, Number(sp.page) || 1);
 
   const lot = await getLot(lotId);
-  if (!lot) notFound();                                // 없는 LOT은 404 (M04 ⑧)
+  if (!lot) notFound();                                // 없는 LOT은 404
                                                        // 이 아래로 lot 은 null 아님
 
-  const [shots, guide, role, baseline, specRows] = await Promise.all([   // 서로 기다릴 필요 없는 다섯 — 한 번에 (M27)
+  const [shots, guide, role, baseline, specRows] = await Promise.all([   // 서로 기다릴 필요 없는 다섯 — 한 번에
     getLotShots(lot.lot_id),                           // ★ RPC — 조인은 DB 안에
-    getLotGuide(lot.lot_id),                           // 저장된 가이드 (M25)
+    getLotGuide(lot.lot_id),                           // 저장된 가이드
     getMyRole(),
     getLotBaseline(lot.lot_id),                        // 기준 범위 재료 — 이전 정상 LOT (025)
     getParameterSpec(),                                // 최소 허용 폭 — admin 이 마스터에서 바꾼다 (028)
@@ -182,7 +182,7 @@ export default async function Page({ params, searchParams }: PageProps<"/lots/[l
         </Card>
       </div>
 
-      {/* 1.5층 — 불량이 있으면 대응 가이드 (M25) · 숫자는 Claude 가 아니라 이 샷들에서 */}
+      {/* 1.5층 — 불량이 있으면 대응 가이드 · 숫자는 Claude 가 아니라 이 샷들에서 */}
       {집계.fail > 0 && (
         <GuidePanel lotId={lot.lot_id} guide={guide} stats={metricStats(shots)} blocked={막힘} />
       )}
@@ -258,12 +258,12 @@ export default async function Page({ params, searchParams }: PageProps<"/lots/[l
                   return (
                     <tr
                       key={x.measured_at}     // LOT 안에서 시각이 곧 부품이다 (007)
-                      // 불량 행만 배경으로 띄운다 — 눈이 여기 먼저 가야 한다 (M09)
+                      // 불량 행만 배경으로 띄운다 — 눈이 여기 먼저 가야 한다
                       className={`border-b last:border-0 ${bad ? "bg-destructive/10" : ""}`}
                     >
                       <td className="px-3 py-1.5 font-mono tabular-nums">{시각(x.measured_at)}</td>
                       <td className="px-3 py-1.5">
-                        {/* 색만으로 구분하지 않는다 — 텍스트가 뜻을 진다 (M09) */}
+                        {/* 색만으로 구분하지 않는다 — 텍스트가 뜻을 진다 */}
                         {bad ? <Badge variant="destructive">{x.fail_reason}</Badge> : <span className="text-muted-foreground">양품</span>}
                       </td>
                       <td className={`px-3 py-1.5 tabular-nums ${off("cycle_time")}`}>{소수(x.cycle_time, 2)}</td>

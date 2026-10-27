@@ -1,4 +1,4 @@
-// 모든 화면 공통 로딩 — 더 깊은 곳에 loading.tsx 가 있으면 그게 먼저 (가장 가까운 것이 이긴다 · M07 · M29)
+// 모든 화면 공통 로딩 — 더 깊은 곳에 loading.tsx 가 있으면 그게 먼저 (가장 가까운 것이 이긴다)
 // 뼈대(스켈레톤) — 화면마다 모양이 달라서 공통 틀만: 제목 · 구분선 · 카드 줄 · 본문 상자 (10/26)
 // motion-safe — 움직임 줄이기를 켠 사람에게는 깜빡이지 않는다
 const BOX = "rounded-md bg-muted motion-safe:animate-pulse";

@@ -1,10 +1,12 @@
 // 비가동 (10/26) — viewer 잠금 · 시연 토글 · 빗금 → 목록 줄. DB 에 아무것도 안 쓴다 (viewer)
 import { expect, test } from "@playwright/test";
 
+import { VIEWER } from "./viewer";
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/login");
-  await page.getByPlaceholder("이메일").fill("viewer@example.com");
-  await page.getByPlaceholder("비밀번호").fill("parkbeomjun122!!");
+  await page.getByPlaceholder("이메일").fill(VIEWER.email);
+  await page.getByPlaceholder("비밀번호").fill(VIEWER.password);
   await page.getByRole("button", { name: "로그인", exact: true }).click();
   await expect(page).toHaveURL("/");
 });

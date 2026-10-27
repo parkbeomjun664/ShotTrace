@@ -1,10 +1,10 @@
-// DB 조회를 한곳에 모은다 · M11(집계는 DB에서) · M27(왕복 횟수)
+// DB 조회를 한곳에 모은다 · 집계는 DB에서 · 왕복 횟수
 import type { Database } from "@/types/database";  // DB 스키마 타입
-import { createSessionClient } from "@/lib/supabase/session";   // 세션 클라이언트 — RLS 를 진짜로 거친다 (M19)
+import { createSessionClient } from "@/lib/supabase/session";   // 세션 클라이언트 — RLS 를 진짜로 거친다
     // 화면은 직접 쿼리하지 않는다
-import { computeOee } from "@/lib/oee";               // 계산기 — DB 는 재료만, 계산은 순수함수가 (M24)
+import { computeOee } from "@/lib/oee";               // 계산기 — DB 는 재료만, 계산은 순수함수가
 import { GuideSchema } from "@/lib/evidence";
-import { selectable } from "@/lib/master";            // 고를 수 있는 항목 — 사용 중지 제외 (10/26)         // 가이드 상자 — 저장된 jsonb 를 꺼낼 때 다시 검사 (M25)
+import { selectable } from "@/lib/master";            // 고를 수 있는 항목 — 사용 중지 제외 (10/26)         // 가이드 상자 — 저장된 jsonb 를 꺼낼 때 다시 검사
 
 export async function getLots() {                      // LOT 25건 + 각 제품명
   const supabase = await createSessionClient();         // 🔴 함수 안에서 — 요청마다 그 사람으로
@@ -15,7 +15,7 @@ export async function getLots() {                      // LOT 25건 + 각 제품
     )                                                  // product(…) ← FK 따라 한 번에
     .order("started_at", { ascending: false });        // 최근 LOT 먼저
 
-  if (error) throw error;                              // 🔴 빈 화면 대신 터뜨린다 (M04 ⑧)
+  if (error) throw error;                              // 🔴 빈 화면 대신 터뜨린다
   return data;                                         // 여기 오면 data 는 null 이 아니다
 }
 
@@ -60,7 +60,7 @@ export async function getLotShots(lotId: string): Promise<LotShot[]> {
 }
 
 
-// ── 순수함수 — DB를 안 부른다. 받은 배열만 계산 (M26 테스트 대상) ──
+// ── 순수함수 — DB를 안 부른다. 받은 배열만 계산 (테스트 대상) ──
 //    summarize · byEquipment 는 006_summary_views.sql 로 옮겼다
 
 export function tally(shots: LotShot[]) {              // LOT 수량을 샷에서 직접 센다
@@ -82,7 +82,7 @@ export function pareto(shots: LotShot[]) {             // 불량 사유별 건�
 }
 
 
-// ── View 조회 — 집계는 DB가 한다 (M11 · 004_views.sql) ──
+// ── View 조회 — 집계는 DB가 한다 (004_views.sql) ──
 //    View 컬럼은 전부 number | null 이다. Postgres 가 NOT NULL 을 보장 못 한다
 
 export async function getDefectPareto() {              // 불량 사유별 (3행)
@@ -306,7 +306,7 @@ export async function getPartsWithoutLot() {          // 어느 LOT 에도 안 �
   return data?.part_count ?? 0;                        // 집계 1행은 늘 나온다 — 그래도 View 타입은 null 허용
 }
 
-export async function getLastReceived() {            // 수집기가 마지막으로 일한 때 — 관측성의 경고등 (M28)
+export async function getLastReceived() {            // 수집기가 마지막으로 일한 때 — 관측성의 경고등
   const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("shot")
@@ -354,7 +354,7 @@ export async function getLotOee() {                  // LOT 별 OEE — 재료(0
   });
 }
 
-export async function getLotDowntimes(equipCd: string, startedAt: string, endedAt: string) {   // LOT 시간과 겹친 비가동 — 가이드의 재료 (M25)
+export async function getLotDowntimes(equipCd: string, startedAt: string, endedAt: string) {   // LOT 시간과 겹친 비가동 — 가이드의 재료
   const supabase = await createSessionClient();
   const { data, error } = await supabase
     .from("downtime")

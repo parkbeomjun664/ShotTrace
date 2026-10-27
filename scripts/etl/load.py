@@ -1,14 +1,13 @@
 """
 ShotTrace ETL — CSV를 Supabase로
 
-📓 필기 M05(ETL) · M14(Python·pandas) 를 펴고 시작한다.
 
 ─────────────────────────────────────────────────────────────
-순서 — FK가 이 순서를 강제한다 (M05 ②)
+순서 — FK가 이 순서를 강제한다
 ─────────────────────────────────────────────────────────────
   1. CSV 읽기
   2. 완전 중복 제거            🔴 집계보다 먼저 (ADR 004)
-  3. 'None' → NA              안 하면 파레토 1등이 None (M02 ⑥)
+  3. 'None' → NA              안 하면 파레토 1등이 None
   4. 한글 날짜 파싱            전부 '오전 12:00:00' 이라 앞 10자만 쓴다
   5. equipment / product 추출  중복 제거
   6. LOT 집계 (groupby)        🔴 ended_at = max + 1초 (ADR 006)
@@ -28,11 +27,11 @@ ShotTrace ETL — CSV를 Supabase로
 ─────────────────────────────────────────────────────────────
 잊지 말 것
 ─────────────────────────────────────────────────────────────
-  🔴 변환 로직은 순수함수로 분리한다 (M05 ③) → M26 에서 테스트 대상
-  🔴 멱등하게 만든다 (M05 ⑦) → 두 번 돌려도 행이 안 늘어난다
-  🔴 배치로 넣는다 (M05 ⑥) → 한 줄씩이면 왕복 5,232번, 1,000개씩이면 6번
+  🔴 변환 로직은 순수함수로 분리한다 → test_load.py 의 테스트 대상
+  🔴 멱등하게 만든다 → 두 번 돌려도 행이 안 늘어난다
+  🔴 배치로 넣는다 → 한 줄씩이면 왕복 5,232번, 1,000개씩이면 6번
   🔴 빈 값은 0 이 아니라 NULL 로
-  🔴 pandas 는 반복문을 쓰지 않는다 (M14 ⑤)
+  🔴 pandas 는 반복문을 쓰지 않는다
      단, 25행짜리 레코드 조립은 예외. 금지 대상은 수천 행 컬럼 연산이다
 """
 
@@ -52,7 +51,7 @@ CSV_PATH     = ROOT / "data" / "labeled_data.csv"
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")   # RLS 우회 — 서버 전용
 
-BATCH = 1000                                            # 왕복 6번 (M05 ⑥)
+BATCH = 1000                                            # 왕복 6번
 
 DEAD_COLS = [                                           # ADR 003 — 전 구간 0
     "Switch_Over_Position", "Barrel_Temperature_7",
@@ -75,7 +74,7 @@ RENAME = {                                              # 나머지 24개는 소
 }
 
 
-# ── 순수함수 — DB 도 파일도 안 건드린다 (M05 ③) ─────────────
+# ── 순수함수 — DB 도 파일도 안 건드린다 ─────────────
 
 def parse_tonnage(equip_name: str) -> int | None:
     m = re.search(r"(\d+)\s*(?:톤|TON)", equip_name, re.I)   # 650톤 / 1800TON
@@ -180,7 +179,7 @@ def prepare(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def upsert(client, table: str, rows: list[dict], conflict: str) -> None:
-    for i in range(0, len(rows), BATCH):                # 1,000개씩 (M05 ⑥)
+    for i in range(0, len(rows), BATCH):                # 1,000개씩
         client.table(table).upsert(rows[i:i + BATCH], on_conflict=conflict).execute()
     print(f"  {table:16} {len(rows):>5}행")
 

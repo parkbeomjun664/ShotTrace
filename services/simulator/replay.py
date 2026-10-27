@@ -1,4 +1,4 @@
-"""CSV 를 시각 순으로 재생해 MQTT 로 발행한다. 📓 M14 · M16"""
+"""CSV 를 시각 순으로 재생해 MQTT 로 발행한다."""
 
 import argparse
 import json

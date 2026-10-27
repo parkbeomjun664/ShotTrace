@@ -1,4 +1,4 @@
--- 011_roles.sql — 앱 역할과 역할 기반 읽기 (M19 · ADR 008)
+-- 011_roles.sql — 앱 역할과 역할 기반 읽기 (ADR 008)
 -- 🔴 코드(queries.ts · client.ts)를 먼저 옮긴 뒤에 실행한다. 옛 코드는 anon 이라 빈 화면이 된다
 
 BEGIN;

@@ -1,4 +1,4 @@
--- 006_summary_views.sql — 현황판 집계를 DB로 (M11 · ADR 008)
+-- 006_summary_views.sql — 현황판 집계를 DB로 (ADR 008)
 
 CREATE VIEW equipment_summary WITH (security_invoker = on) AS
 SELECT e.equip_cd

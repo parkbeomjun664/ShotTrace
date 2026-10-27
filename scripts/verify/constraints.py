@@ -1,4 +1,4 @@
-"""제약 거부 실험 (M22) — 종류마다 하나씩 일부러 어겨보고, DB 가 막는지 본다.
+"""제약 거부 실험 — 종류마다 하나씩 일부러 어겨보고, DB 가 막는지 본다.
 
     python scripts/verify/constraints.py
 
@@ -117,7 +117,7 @@ for kind, what, table, row, key, expect in CASES:
 db.table("downtime").delete().eq("request_id", anchor["request_id"]).execute()   # 상대도 치운다
 
 today = dt.date.today().isoformat()
-md = f"""# 제약 거부 실험 — 코드가 실수해도 DB 가 막는다 (M22)
+md = f"""# 제약 거부 실험 — 코드가 실수해도 DB 가 막는다
 
 - **날짜**: {today}
 - **방법**: `scripts/verify/constraints.py` — service_role 로 종류마다 하나씩 일부러 어긴다

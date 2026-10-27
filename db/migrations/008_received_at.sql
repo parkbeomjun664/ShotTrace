@@ -1,4 +1,4 @@
--- 008_received_at.sql — 이벤트 시각과 처리 시각을 나눈다 (M17 · ADR 002)
+-- 008_received_at.sql — 이벤트 시각과 처리 시각을 나눈다 (ADR 002)
 --
 -- measured_at  이벤트 시각 — 설비가 찍은 때.   조인 · LOT · 수율의 기준
 -- received_at  처리 시각  — 수집기가 받은 때. "방금 들어왔나" 의 기준

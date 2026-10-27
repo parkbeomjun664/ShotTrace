@@ -1,4 +1,4 @@
--- 003_indexes.sql — 조회 인덱스 3개 (M06 ★ · ADR 007)
+-- 003_indexes.sql — 조회 인덱스 3개 (ADR 007)
 
 CREATE INDEX idx_shot_part_lot_lookup                      -- LOT 상세 시간구간 조인 ★
     ON shot_part (equipment_id, product_id, measured_at);  -- 🔴 등호 먼저, 범위 나중

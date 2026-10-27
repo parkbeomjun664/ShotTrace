@@ -1,4 +1,4 @@
-"""ETL 순수함수 테스트 — 9월에 데이터가 놀라게 한 가장자리를 남긴다 (M26). 실행: pytest scripts/etl"""
+"""ETL 순수함수 테스트 — 9월에 데이터가 놀라게 한 가장자리를 남긴다. 실행: pytest scripts/etl"""
 
 import pandas as pd
 

@@ -1,4 +1,4 @@
-// computeOee 의 규칙을 적어둔다 — 틀려도 에러가 안 나는 곳이라 기계가 매번 확인한다 (M26)
+// computeOee 의 규칙을 적어둔다 — 틀려도 에러가 안 나는 곳이라 기계가 매번 확인한다
 import { describe, expect, it } from "vitest";
 
 import { aggregateOee, computeOee, oeeLevel, waterfall } from "./oee";

@@ -7,7 +7,7 @@ import { shotDiffWarn } from "@/lib/records";
 import { getMyRole } from "@/lib/queries";
 import { createSessionClient } from "@/lib/supabase/session";
 
-const RecordInput = z                                  // 서버의 검문소 — required 는 안내문일 뿐 (M20)
+const RecordInput = z                                  // 서버의 검문소 — required 는 안내문일 뿐
   .object({
     lotId: z.string().min(1, { error: "LOT 을 고르세요" }),     // 빈 선택("")을 막는다
     requestId: z.uuid({ error: "화면을 새로고침한 뒤 다시 저장하세요" }),   // 번호표가 uuid 모양인가 — 지워지거나 바뀌면 여기서

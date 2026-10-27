@@ -1,6 +1,6 @@
 "use server";   // 🔴 1행 — 이 파일의 함수는 전부 서버에서 돈다 (Server Action)
 
-// 로그인 · 로그아웃 — 폼이 이 함수를 바로 부른다. API 라우트를 따로 안 만든다 (M19)
+// 로그인 · 로그아웃 — 폼이 이 함수를 바로 부른다. API 라우트를 따로 안 만든다
 import { redirect } from "next/navigation";
 
 import { createSessionClient } from "@/lib/supabase/session";

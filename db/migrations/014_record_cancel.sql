@@ -1,4 +1,4 @@
--- 014_record_cancel.sql — 실적 취소 장부와 살아 있는 실적 (M21)
+-- 014_record_cancel.sql — 실적 취소 장부와 살아 있는 실적
 
 BEGIN;
 

@@ -1,4 +1,4 @@
-"""RLS 전수 점검 — 역할 다섯 × 모든 테이블 · View · 함수를 실제로 두드려본다 (M19).
+"""RLS 전수 점검 — 역할 다섯 × 모든 테이블 · View · 함수를 실제로 두드려본다.
 
     python scripts/verify/rls_matrix.py
 
@@ -70,7 +70,7 @@ temp_pw = secrets.token_urlsafe(16)
 temp_user = admin_db.auth.admin.create_user({"email": temp_email, "password": temp_pw, "email_confirm": True}).user
 try:
     clients["명단없음"] = login(temp_email, temp_pw)
-    clients["viewer"] = login("viewer@example.com", "parkbeomjun122!!")  # 로그인 화면에 공개된 값
+    clients["viewer"] = login("viewer@example.com", os.environ["VIEWER_PASSWORD"])  # 루트 .env — 코드에 두지 않는다
     for who in ("worker", "admin"):
         pw = "" if "--viewer-only" in sys.argv else getpass.getpass(f"{who}@example.com 비밀번호 (엔터 = 건너뛰기): ")
         if pw:

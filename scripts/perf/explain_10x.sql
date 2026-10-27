@@ -1,4 +1,4 @@
--- explain_10x.sql — 10배 데이터에서 인덱스가 버티나 (M27 · 9월 evidence/003 의 다시 재기)
+-- explain_10x.sql — 10배 데이터에서 인덱스가 버티나 (9월 evidence/003 의 다시 재기)
 -- 덩어리 하나씩 SQL Editor 에 붙여 Run 한다 (Editor 는 마지막 결과만 보여준다)
 
 

@@ -1,4 +1,4 @@
--- 015_correct_record.sql — 정정 = 취소 + 새 줄을 한 번에 (M21)
+-- 015_correct_record.sql — 정정 = 취소 + 새 줄을 한 번에
 
 BEGIN;
 

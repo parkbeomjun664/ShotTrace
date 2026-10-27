@@ -1,4 +1,4 @@
-# Lighthouse — 고치기 전과 후 (M29)
+# Lighthouse — 고치기 전과 후
 
 - **날짜**: 2026-10-26
 - **방법**: 배포본(https://shot-trace.vercel.app)을 Lighthouse 12 · 헤드리스 Chrome 으로. `/login` 외에는

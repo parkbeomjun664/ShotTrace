@@ -1,4 +1,4 @@
-# CI — 푸시할 때마다 테스트 20개를 기계가 돌린다 (M28)
+# CI — 푸시할 때마다 테스트 118개를 기계가 돌린다 (Vitest 84 · pytest 12 · Playwright 22)
 name: CI
 
 on:
@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  web:                                                  # 타입 검사 + Vitest (computeOee 6)
+  web:                                                  # 타입 검사 + Vitest 84 (lib/ 순수함수)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -24,7 +24,7 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm test
 
-  python:                                               # pytest (수집기 5 · ETL 7)
+  python:                                               # pytest 12 (수집기 5 · ETL 7)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +35,7 @@ jobs:
       - run: pip install -r services/collector/requirements.txt -r scripts/etl/requirements.txt -r requirements-dev.txt
       - run: pytest scripts/etl services/collector -v
 
-  e2e:                                                  # Playwright 2 — 막히는 흐름만 · DB 에 아무것도 안 쓴다
+  e2e:                                                  # Playwright 22 — viewer 로 · DB 에 아무것도 안 쓴다
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -43,6 +43,7 @@ jobs:
     env:                                                # 🔴 비밀은 코드가 아니라 GitHub Secrets 에서
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      VIEWER_PASSWORD: ${{ secrets.VIEWER_PASSWORD }}   # 둘러보기 계정 — 코드에 두지 않는다 (e2e/viewer.ts)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

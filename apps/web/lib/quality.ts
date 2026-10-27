@@ -1,4 +1,4 @@
-// 품질 화면의 계산 — 파레토 누적 비율 (10/26 · M26 테스트 대상)
+// 품질 화면의 계산 — 파레토 누적 비율 (10/26 · 테스트 대상)
 // 순수함수 — DB 를 안 부른다. 화면(app/quality)은 받은 줄을 그리기만 한다
 
 export type ParetoRow = { reason: string; count: number; share: number; cum: number };   // share · cum 은 %

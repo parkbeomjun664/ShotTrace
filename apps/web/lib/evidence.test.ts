@@ -1,4 +1,4 @@
-// 가이드의 근거 숫자 규칙 — 화면이 Claude 옆에 붙이는 숫자라 조용히 틀리면 안 된다 (M25)
+// 가이드의 근거 숫자 규칙 — 화면이 Claude 옆에 붙이는 숫자라 조용히 틀리면 안 된다
 import { describe, expect, it } from "vitest";
 
 import { GuideSchema, defectPositions, metricStats } from "./evidence";

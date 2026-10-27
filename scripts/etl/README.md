@@ -1,6 +1,5 @@
 # ETL — CSV를 Supabase로
 
-📓 필기 **M05**(ETL) · **M14**(Python·pandas)
 
 ## 준비 (Windows PowerShell)
 
@@ -13,11 +12,11 @@ python -m venv .venv
 pip install -r scripts\etl\requirements.txt
 ```
 
-> 🔴 **활성화 전에 `pip install` 하면 전역에 깔린다.** `(.venv)` 표시를 먼저 확인한다. (M14 ③)
+> 🔴 **활성화 전에 `pip install` 하면 전역에 깔린다.** `(.venv)` 표시를 먼저 확인한다.
 >
 > 🔴 **venv를 두 개 만들지 않는다.** pandas는 A에, 다른 패키지는 B에 깔리면
 > *"아까는 됐는데"* 가 반복된다. 에러 메시지의 **python.exe 경로**를 보면
-> 어느 venv가 실행했는지 알 수 있다. (M04 ③)
+> 어느 venv가 실행했는지 알 수 있다.
 
 VS Code에서 `Ctrl+Shift+P` → `Python: Select Interpreter` → 루트 `.venv` 를 고르면
 터미널을 새로 열 때 자동으로 활성화된다.
@@ -43,11 +42,11 @@ python -m watchfiles --filter python "..\..\.venv\Scripts\python.exe explore.py"
 쓰면 watchfiles가 venv가 아닌 전역 python을 띄워서 `ModuleNotFoundError` 가 난다.
 
 터미널 하나를 이것 전용으로 쓴다. 프롬프트가 안 돌아오는 게 정상이다 — 계속
-살아서 감시하는 프로세스이기 때문. (M15 ①) 끄려면 `Ctrl+C`.
+살아서 감시하는 프로세스이기 때문. 끄려면 `Ctrl+C`.
 
 `requirements.txt` 에는 넣지 않았다. 적재에 필요한 게 아니라 개발 편의 도구다.
 
-## 끝나면 반드시 확인 (M04 ⑧)
+## 끝나면 반드시 확인
 
 에러 없이 끝난 건 성공이 아니다. **숫자로 확인해야 성공이다.**
 
@@ -83,7 +82,7 @@ HAVING l.total_qty <> COUNT(sp.part_id);
 🔴 `sp.product_id = l.product_id` 를 빼면 **정확히 2배**가 나온다. S14 는 한 샷에서
 LH·RH 를 동시에 찍기 때문이다.
 
-**멱등성 검증** (M05 ⑦) — 두 번 돌려도 행 수가 같아야 한다
+**멱등성 검증** — 두 번 돌려도 행 수가 같아야 한다
 
 ```powershell
 ..\..\.venv\Scripts\python.exe load.py

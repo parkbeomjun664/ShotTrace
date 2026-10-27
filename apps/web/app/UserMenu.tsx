@@ -1,4 +1,4 @@
-// 헤더 오른쪽 — 레이아웃이 읽은 "누구냐" 를 그리기만 한다 (M19 · 10/20)
+// 헤더 오른쪽 — 레이아웃이 읽은 "누구냐" 를 그리기만 한다 (10/20)
 import Link from "next/link";
 
 import { LogoutButton } from "./LogoutButton";   // 한 번 묻고 나간다 (10/27)

@@ -1,4 +1,4 @@
--- 023_lot_guide.sql — LOT 대응 가이드 보관함 (M25 · LLM 이 만든 것의 영수증)
+-- 023_lot_guide.sql — LOT 대응 가이드 보관함 (LLM 이 만든 것의 영수증)
 
 BEGIN;
 

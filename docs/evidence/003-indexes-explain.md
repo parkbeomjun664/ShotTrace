@@ -1,7 +1,7 @@
 # 인덱스 증거 — EXPLAIN ANALYZE
 
 - **날짜**: 2026-09-09
-- **관련**: `db/migrations/003_indexes.sql` · [ADR 007](../decisions/007-인덱스.md) · M06 ★
+- **관련**: `db/migrations/003_indexes.sql` · [ADR 007](../decisions/007-인덱스.md)
 - **데이터**: `shot_part` 5,232행 · `production_lot` 25행
 
 측정 대상 LOT — `S14-20201103-CN7LH` (`product_id = 1`, 463개)

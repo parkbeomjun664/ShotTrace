@@ -1,4 +1,4 @@
-// OEE — LOT 별 가동률 × 성능 × 품질 · 화면은 계산하지 않는다 (재료 = View · 계산 = computeOee) (M24)
+// OEE — LOT 별 가동률 × 성능 × 품질 · 화면은 계산하지 않는다 (재료 = View · 계산 = computeOee)
 // 10/26 — 전체 KPI(생산량 가중) · 손실 워터폴(10/27 가로 막대 단계로) · 최신순 · OEE 상태 색 · 가장 약한 칸 강조 · 줄 클릭
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";

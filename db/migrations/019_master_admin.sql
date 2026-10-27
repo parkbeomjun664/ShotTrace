@@ -1,4 +1,4 @@
--- 019_master_admin.sql — 마스터는 admin 만 고친다 · 지우지 않고 사용 중지 (M23)
+-- 019_master_admin.sql — 마스터는 admin 만 고친다 · 지우지 않고 사용 중지
 
 BEGIN;
 

@@ -1,4 +1,4 @@
--- 005_rpc.sql — 시간 구간 조인을 DB 함수로 (M11 · ADR 001·005·006)
+-- 005_rpc.sql — 시간 구간 조인을 DB 함수로 (ADR 001·005·006)
 
 CREATE FUNCTION get_lot_shots(p_lot_id text)               -- p_ = 컬럼명과 구분
 RETURNS TABLE (                                            -- 반환 모양 선언

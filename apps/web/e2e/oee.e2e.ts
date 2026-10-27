@@ -1,10 +1,12 @@
 // OEE 표 (10/26) — 시연 LOT 은 기본 숨김 · 포함하면 맨 아래
 import { expect, test } from "@playwright/test";
 
+import { VIEWER } from "./viewer";
+
 test("시연 LOT 은 기본 숨김 · 토글하면 맨 아래에 붙는다", async ({ page }) => {
   await page.goto("/login");
-  await page.getByPlaceholder("이메일").fill("viewer@example.com");
-  await page.getByPlaceholder("비밀번호").fill("parkbeomjun122!!");
+  await page.getByPlaceholder("이메일").fill(VIEWER.email);
+  await page.getByPlaceholder("비밀번호").fill(VIEWER.password);
   await page.getByRole("button", { name: "로그인", exact: true }).click();
   await expect(page).toHaveURL("/");
   await page.goto("/oee");

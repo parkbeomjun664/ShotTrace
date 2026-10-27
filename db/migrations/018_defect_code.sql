@@ -1,4 +1,4 @@
--- 018_defect_code.sql — 불량 사유에 명단을 붙인다 (M23)
+-- 018_defect_code.sql — 불량 사유에 명단을 붙인다
 
 BEGIN;
 

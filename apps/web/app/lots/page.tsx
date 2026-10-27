@@ -1,6 +1,6 @@
 // LOT 목록 — 최근 LOT을 훑고 하나를 고른다
-// 이 화면이 답하는 질문 (M09): 어느 LOT이 문제였나 · 어디를 눌러야 하나
-// M09(정보 위계) · M10(표) · M27(N+1) · 10/26 — 생산 구간 · 수율 상태 · 불량만 · 정렬 · 줄 클릭
+// 이 화면이 답하는 질문: 어느 LOT이 문제였나 · 어디를 눌러야 하나
+// 정보 위계 · 표 · N+1 · 10/26 — 생산 구간 · 수율 상태 · 불량만 · 정렬 · 줄 클릭
 // 🔵 거르기 · 정렬 상태는 주소(?defect=1&sort=yield&dir=asc)에 — 새로고침 · 공유해도 같은 화면
 // 10/27 — 불량 유형(?reason=가스) · 품질 파레토의 막대 · 표에서 넘어온다. 그 유형이 난 LOT 만 · 많은 순 (029 lot_defect)
 import { ChevronRight } from "lucide-react";
@@ -92,7 +92,7 @@ export default async function Page({ searchParams }: PageProps<"/lots">) {
           </Link>
         </div>
       ) : (
-        // 넓은 표는 자기 안에서 가로 스크롤한다 — 페이지가 밀리지 않게 (M10)
+        // 넓은 표는 자기 안에서 가로 스크롤한다 — 페이지가 밀리지 않게
         <div className="mt-4 overflow-x-auto rounded-xl border">
           {/* 🔴 주석을 <table> 뒤에 두면 공백이 "글자" 로 들어간다 — 그래서 여기 */}
           <table className="w-full whitespace-nowrap text-sm">
@@ -130,7 +130,7 @@ export default async function Page({ searchParams }: PageProps<"/lots">) {
                     </td>
                     <td className="px-4 py-2.5 tabular-nums text-muted-foreground">{구간(lot.started_at, lot.ended_at)}</td>
                     <td className="px-4 py-2.5 tabular-nums">{lot.total_qty.toLocaleString()}</td>
-                    {/* 불량 0은 흐리게 — 눈이 0이 아닌 곳에 먼저 가야 한다 (M09) */}
+                    {/* 불량 0은 흐리게 — 눈이 0이 아닌 곳에 먼저 가야 한다 */}
                     <td className={`px-4 py-2.5 tabular-nums ${lot.fail_qty > 0 ? "font-medium" : "text-muted-foreground"}`}>
                       {lot.fail_qty}
                     </td>

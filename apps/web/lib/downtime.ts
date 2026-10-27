@@ -1,4 +1,4 @@
-// 비가동 화면의 계산 — 구간 겹침 · 타임라인 자리 (10/26 · M26 테스트 대상)
+// 비가동 화면의 계산 — 구간 겹침 · 타임라인 자리 (10/26 · 테스트 대상)
 // 순수함수 — DB 를 안 부른다. 겹침을 진짜로 막는 건 DB 의 EXCLUDE 제약(017 downtime_no_overlap)이다
 
 type Span = { start: number; end: number };            // ms · [start, end) 반열린 구간 (ADR 006)
