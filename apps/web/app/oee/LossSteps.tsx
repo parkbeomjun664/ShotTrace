@@ -5,7 +5,7 @@
 
 type Step = { label: string; hint: string; left: number; lost: number; oee?: boolean };
 
-const STRIPES = "repeating-linear-gradient(135deg, var(--muted-foreground) 0 1.5px, transparent 1.5px 6px)";   // 빗금 = 빠진 몫
+export const STRIPES = "repeating-linear-gradient(135deg, var(--muted-foreground) 0 1.5px, transparent 1.5px 6px)";   // 빗금 = 빠진 몫
 
 export function LossSteps({ a, p, q }: { a: number; p: number; q: number }) {   // 퍼센트(0 ~ 100) · 누적값 — 가동 후 · 성능 후 · 품질 후(= OEE)
   const steps: Step[] = [
@@ -23,9 +23,12 @@ export function LossSteps({ a, p, q }: { a: number; p: number; q: number }) {   
             <p className={`text-sm ${s.oee ? "font-semibold" : "font-medium"}`}>{s.label}</p>
             <p className="text-xs text-muted-foreground">{s.hint}</p>
           </div>
-          <div className="flex h-7 overflow-hidden rounded bg-muted" aria-hidden>
-            <div className={s.oee ? "bg-primary" : "bg-foreground/30"} style={{ width: `${s.left}%` }} />
-            <div style={{ width: `${s.lost}%`, backgroundImage: STRIPES }} />
+          <div className="h-7 overflow-hidden rounded bg-muted" aria-hidden>
+            {/* 줄마다 0.15초씩 늦게 왼쪽에서 자란다 — 위에서 아래로 깎여 내려가는 흐름 (10/27 · globals.css) */}
+            <div className="animate-grow flex h-full" style={{ animationDelay: `${300 + i * 150}ms` }}>
+              <div className={s.oee ? "bg-primary" : "bg-foreground/30"} style={{ width: `${s.left}%` }} />
+              <div style={{ width: `${s.lost}%`, backgroundImage: STRIPES }} />
+            </div>
           </div>
           <p className="text-right tabular-nums">
             <span className={s.oee ? "text-lg font-bold" : "font-medium"}>{d1(s.left)}%</span>

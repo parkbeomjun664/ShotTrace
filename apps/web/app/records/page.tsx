@@ -35,33 +35,33 @@ export default async function Page() {               // 서버 컴포넌트 — 
   return (
     <section>
       <h1 className="text-2xl font-bold tracking-tight">실적 입력</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        작업자가 생산·불량 수량을 기록해요 · 수정 대신 취소 후 재등록으로 이력이 남아요
+      <p className="mt-2 text-base text-muted-foreground">
+        생산 · 불량 수량 기록 · 정정해도 원래 줄이 남아요
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[360px_1fr]">
         {/* 왼쪽 — 입력. 넓은 화면에서는 원장을 내려도 따라온다 (머리 띠 아래에 붙는다) */}
-        <aside className="h-fit space-y-3 rounded-xl border p-5 lg:sticky lg:top-24">
+        <aside className="h-fit min-w-0 space-y-3 rounded-xl border p-5 lg:sticky lg:top-24">
           <h2 className="font-semibold">새 실적</h2>
           {readOnly && <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">둘러보기 계정은 읽기 전용이에요. 저장 · 정정 버튼이 잠겨 있어요.</p>}
           <RecordForm lots={options} requestId={crypto.randomUUID()} readOnly={readOnly} />
         </aside>
 
-        {/* 오른쪽 — 원장. 지우개가 없다: 취소된 줄도 남는다 */}
-        <div>
+        {/* 오른쪽 — 원장. 지우개가 없다: 취소된 줄도 남는다 · min-w-0 — 넓은 표가 칸을 밀지 않고 안에서 가로 스크롤 */}
+        <div className="min-w-0">
           <h2 className="font-semibold">최근 실적</h2>
           {rows.length === 0 ? (
-            <p className="mt-3 rounded-xl border p-8 text-center text-sm text-muted-foreground">아직 기록이 없습니다</p>
+            <p className="mt-3 rounded-xl border p-8 text-center text-sm text-muted-foreground">아직 기록이 없어요</p>
           ) : (
             <div className="mt-3 overflow-x-auto rounded-xl border">
               {/* 🔴 주석을 <table> 뒤에 두면 공백이 "글자" 로 들어간다 — 그래서 여기 */}
               <table className="w-full whitespace-nowrap text-sm">
-                <thead className="border-b text-left text-muted-foreground">
+                <thead className="border-b text-muted-foreground">
                   <tr>
                     <th className="px-4 py-2 font-medium">시각</th>
                     <th className="px-4 py-2 font-medium">LOT</th>
-                    <th className="px-4 py-2 text-right font-medium">양품</th>
-                    <th className="px-4 py-2 text-right font-medium">불량</th>
+                    <th className="px-4 py-2 font-medium">양품</th>
+                    <th className="px-4 py-2 font-medium">불량</th>
                     <th className="px-4 py-2 font-medium">입력자</th>
                     <th className="px-4 py-2 font-medium">상태</th>
                   </tr>
@@ -71,14 +71,14 @@ export default async function Page() {               // 서버 컴포넌트 — 
                     <tr key={r.record_id} id={`rec-${r.record_id}`} className={`border-b last:border-0 ${r.canceled ? "text-muted-foreground" : ""}`}>
                       <td className="px-4 py-2 tabular-nums">{날짜(r.recorded_at)} {시각(r.recorded_at)}</td>
                       <td className={`px-4 py-2 font-mono ${r.canceled ? "line-through" : ""}`}>{r.lot_id}</td>
-                      <td className={`px-4 py-2 text-right tabular-nums ${r.canceled ? "line-through" : ""}`}>{r.pass_qty}</td>
-                      <td className={`px-4 py-2 text-right tabular-nums ${r.canceled ? "line-through" : ""}`}>{r.fail_qty}</td>
+                      <td className={`px-4 py-2 tabular-nums ${r.canceled ? "line-through" : ""}`}>{r.pass_qty}</td>
+                      <td className={`px-4 py-2 tabular-nums ${r.canceled ? "line-through" : ""}`}>{r.fail_qty}</td>
                       <td className="px-4 py-2">{r.mine ? "나" : "다른 계정"}</td>
                       <td className="px-4 py-2">
                         {r.canceled ? (
                           r.replacedBy ? <a href={`#rec-${r.replacedBy}`} className="text-xs hover:underline">정정됨 → #{r.replacedBy}</a> : <span className="text-xs">취소됨</span>
                         ) : (
-                          <span className="flex items-center gap-2">
+                          <span className="flex items-center justify-center gap-2">
                             {r.correctionOf && (
                               <span className="rounded bg-amber-50 px-1.5 py-0.5 text-xs text-amber-900" title={`#${r.correctionOf.record_id} 을 정정`}>
                                 정정({r.correctionOf.reason})

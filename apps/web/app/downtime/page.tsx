@@ -11,6 +11,8 @@ import { selectable } from "@/lib/master";
 import { aggregateOee } from "@/lib/oee";
 import { getDowntimeReasons, getEquipments, getLotOee, getLots, getMyRole, getRecentDowntimes, getUnrecordedStops } from "@/lib/queries";
 
+import { Info } from "../Info";
+import { Box, Legend } from "../Legend";
 import { AddDowntime } from "./AddDowntime";
 import { StopList, type StopItem } from "./StopList";
 
@@ -68,6 +70,7 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
   const win = dayWindow(dayLots.map((l) => ({ start: Date.parse(l.started_at), end: Date.parse(l.ended_at) })));
   const bar = (s: string, e: string) => (win ? segment(win, { start: Date.parse(s), end: Date.parse(e) }) : null);
   const ticks = win ? hourTicks(win) : [];
+  const dayReasons = [...new Set(downtimes.filter((d) => kstDay(d.started_at) === day).map((d) => d.reason_code))];   // 범례 — 그날 막대에 실제로 나온 사유만
   const anchor = (equip: string, startedAt: string) => `stop-${equip}-${Date.parse(startedAt)}`;   // 빗금 → 목록 줄
 
   // 목록 — 240분 이상은 계획 정지 후보로 따로
@@ -100,9 +103,7 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">비가동</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            설비가 멈춘 시간과 이유를 기록해요 · 샷 간격으로 찾은 정지는 사유만 고르면 돼요
-          </p>
+          <p className="mt-2 text-base text-muted-foreground">설비가 멈춘 시간과 이유 · 찾은 정지는 사유만 고르면 끝</p>
         </div>
         <div className="flex items-center gap-2">
           {demoStops > 0 || lots.some((l) => isDemo(l.plan_date)) ? (
@@ -137,9 +138,19 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
             ))}
           </div>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          검은 막대 = LOT 생산 구간 · 색 막대 = 기록된 비가동 · 빗금 = 사유 미입력 정지(누르면 목록으로) · 날짜 옆 점 = 미입력 정지가 있는 날
-        </p>
+        {/* 범례 — 긴 "A = B" 문장 대신 막대와 같은 색 견본 (10/27) */}
+        <Legend
+          className="mt-2"
+          items={[
+            { mark: <Box className="bg-primary/80" />, label: "생산" },
+            ...dayReasons.map((c) => ({
+              mark: <Box style={{ background: REASON_COLOR[c] ?? "#9ca3af" }} />,
+              label: reasons.find((x) => x.code === c)?.name ?? c,
+            })),
+            { mark: <Box className="border border-gray-400" style={{ background: HATCH }} />, label: "사유 미입력 (누르면 목록)" },
+            { mark: <span className="text-base leading-none text-foreground">•</span>, label: "미입력 있는 날" },
+          ]}
+        />
 
         {win ? (
           <div className="mt-3 space-y-3 rounded-xl border p-4">
@@ -221,7 +232,13 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
           미입력 {unrecorded.length}건 · 총 {길이(totalMin)}
           {unrecorded.length > 0 && ` · 모두 기록하면 가동률 약 ${pct(after)} (지금 ${pct(now)})`}
         </p>
-        <p className="mt-0.5 text-xs text-muted-foreground">OEE 는 그대로예요 — 성능 손실이던 시간이 가동률 손실로 옮겨 가요</p>
+        <div className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+          기록해도 OEE는 그대로
+          <Info id="stop-oee" label="기록해도 OEE 가 그대로인 이유">
+            <p>멈춘 시간은 이미 성능 손실(느리게 돈 시간)에 들어가 있어요.</p>
+            <p>사유를 고르면 그 시간이 가동률 손실로 옮겨 갈 뿐, 곱한 OEE 는 같아요.</p>
+          </Info>
+        </div>
         {unrecorded.length === 0 ? (
           <p className="mt-3 rounded-xl border p-8 text-center text-sm text-muted-foreground">사유를 기다리는 정지가 없어요</p>
         ) : (
@@ -235,7 +252,7 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
           <h2 className="font-semibold">
             계획 정지 후보 <span className="font-normal text-muted-foreground">({PLANNED_CANDIDATE_MIN}분 이상)</span>
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">계획 사유를 고르면 OEE 의 계획 시간에서 빠져요</p>
+          <p className="mt-1 text-sm text-muted-foreground">계획 사유를 고르면 OEE 계산에서 빠져요</p>
           <StopList items={candidates} reasons={plannedFirst} readOnly={readOnly} />
         </div>
       )}
@@ -244,30 +261,30 @@ export default async function Page({ searchParams }: PageProps<"/downtime">) {
       <div>
         <h2 className="font-semibold">기록된 비가동</h2>
         {downtimes.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">아직 기록이 없습니다</p>
+          <p className="mt-2 text-sm text-muted-foreground">아직 기록이 없어요</p>
         ) : (
           <table className="mt-2 w-full text-sm">
-            <thead className="border-b text-left text-muted-foreground">
+            <thead className="border-b text-muted-foreground">
               <tr>
-                <th className="py-2 pr-4 font-medium">설비</th>
-                <th className="py-2 pr-4 font-medium">사유</th>
-                <th className="py-2 pr-4 font-medium">시작</th>
-                <th className="py-2 pr-4 text-right font-medium">분</th>
-                <th className="py-2 pr-4 font-medium">출처</th>
-                <th className="py-2 font-medium">메모</th>
+                <th className="px-4 py-2 font-medium">설비</th>
+                <th className="px-4 py-2 font-medium">사유</th>
+                <th className="px-4 py-2 font-medium">시작</th>
+                <th className="px-4 py-2 font-medium">분</th>
+                <th className="px-4 py-2 font-medium">출처</th>
+                <th className="px-4 py-2 font-medium">메모</th>
               </tr>
             </thead>
             <tbody>
               {downtimes.map((d) => (
                 <tr key={d.downtime_id} className="border-b last:border-0">
-                  <td className="py-2 pr-4 font-mono">{d.equip_cd}</td>
-                  <td className="py-2 pr-4">{d.downtime_reason?.name}</td>{/* FK 를 따라 온 이름 — 표에는 코드뿐 */}
-                  <td className="py-2 pr-4 tabular-nums text-muted-foreground">
+                  <td className="px-4 py-2 font-mono">{d.equip_cd}</td>
+                  <td className="px-4 py-2">{d.downtime_reason?.name}</td>{/* FK 를 따라 온 이름 — 표에는 코드뿐 */}
+                  <td className="px-4 py-2 tabular-nums text-muted-foreground">
                     {날짜(d.started_at)} {시각(d.started_at)}
                   </td>
-                  <td className="py-2 pr-4 text-right tabular-nums">{분길이(d.started_at, d.ended_at)}</td>
-                  <td className="py-2 pr-4 text-muted-foreground">{d.source === "inferred" ? "샷 간격" : "직접 입력"}</td>
-                  <td className="py-2 text-muted-foreground">{d.note}</td>
+                  <td className="px-4 py-2 tabular-nums">{분길이(d.started_at, d.ended_at)}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{d.source === "inferred" ? "샷 간격" : "직접 입력"}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{d.note}</td>
                 </tr>
               ))}
             </tbody>

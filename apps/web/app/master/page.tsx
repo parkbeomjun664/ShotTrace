@@ -77,7 +77,7 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
   return (
     <section>
       <h1 className="text-2xl font-bold tracking-tight">마스터</h1>
-      <p className="mt-2 text-sm text-muted-foreground">설비·제품·사유 기준 정보를 관리해요 · 삭제 대신 사용 중지로 이력이 남아요</p>
+      <p className="mt-2 text-base text-muted-foreground">설비 · 제품 · 사유 기준 정보 · 삭제 대신 사용 중지</p>
       {sp.denied && <p className="mt-2 text-sm text-red-600">바꿀 권한이 없어요 (admin 만 할 수 있어요)</p>}
       {!admin && <p className="mt-2 text-sm text-muted-foreground">admin 계정만 바꿀 수 있어요 — 지금은 읽기 전용이에요</p>}
 
@@ -95,7 +95,8 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
             </Link>
           ))}
         </nav>
-        <div className="mb-2 flex items-center gap-2">
+        {/* min-h-9 — 「추가」 버튼(34px)보다 크게 · 버튼이 없는 탭(판정 기준 · 버튼 없는 계정)에서도 높이를 지켜 표가 올라가지 않는다 (10/27) */}
+        <div className="mb-2 flex min-h-9 items-center gap-2">
           {tab !== "spec" && (
             <Link
               href={href(tab, !showInactive)}
@@ -145,11 +146,11 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
         <table className="w-full whitespace-nowrap text-sm">
           {tab === "equipment" && (
             <>
-              <thead className="border-b text-left text-muted-foreground">
+              <thead className="border-b text-muted-foreground">
                 <tr>
                   <th className={TH}>코드</th>
                   <th className={TH}>이름</th>
-                  <th className={`${TH} text-right`}>톤수</th>
+                  <th className={`${TH}`}>톤수</th>
                   <th className={TH}>상태</th>
                   <th className={TH}>작업</th>
                 </tr>
@@ -159,10 +160,10 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
                   <tr key={e.equip_cd} className={rowClass(e.active)}>
                     <td className={`${TD} font-mono`}>{e.equip_cd}</td>
                     <td className={TD}>{e.equip_name}</td>
-                    <td className={`${TD} text-right tabular-nums`}>{e.tonnage ? `${e.tonnage}톤` : "—"}</td>
+                    <td className={`${TD} tabular-nums`}>{e.tonnage ? `${e.tonnage}톤` : "—"}</td>
                     <td className={TD}><Status active={e.active} /></td>
                     <td className={TD}>
-                      <span className="flex gap-1.5">
+                      <span className="flex justify-center gap-1.5">
                         {admin && (
                           <MasterDialog button="수정" title={`설비 수정 · ${e.equip_cd}`} table="equipment" recordKey={e.equip_cd}>
                             <input type="hidden" name="equip_cd" value={e.equip_cd} /> {/* 검문소용 — 액션은 키를 고치지 않는다 */}
@@ -182,11 +183,11 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
 
           {tab === "product" && (
             <>
-              <thead className="border-b text-left text-muted-foreground">
+              <thead className="border-b text-muted-foreground">
                 <tr>
                   <th className={TH}>코드</th>
                   <th className={TH}>품명</th>
-                  <th className={`${TH} text-right`}>
+                  <th className={`${TH}`}>
                     표준 CT (s){" "}
                     <span title="OEE 성능 계산 기준 — 샷 수 × 표준 CT ÷ 가동 시간 (ADR 016)" className="cursor-help">ⓘ</span>
                   </th>
@@ -201,10 +202,10 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
                     <td className={TD}>
                       {p.part_name} <span className="text-muted-foreground">({p.car_model} {p.side})</span>
                     </td>
-                    <td className={`${TD} text-right tabular-nums`}>{p.std_cycle_sec ?? "—"}</td>
+                    <td className={`${TD} tabular-nums`}>{p.std_cycle_sec ?? "—"}</td>
                     <td className={TD}><Status active={p.active} /></td>
                     <td className={TD}>
-                      <span className="flex gap-1.5">
+                      <span className="flex justify-center gap-1.5">
                         {admin && (
                           <MasterDialog button="수정" title={`제품 수정 · ${p.product_id}`} table="product" recordKey={String(p.product_id)}>
                             <Field label="품명"><input name="part_name" required defaultValue={p.part_name} className={INPUT} /></Field>
@@ -227,7 +228,7 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
 
           {tab === "downtime" && (
             <>
-              <thead className="border-b text-left text-muted-foreground">
+              <thead className="border-b text-muted-foreground">
                 <tr>
                   <th className={TH}>코드</th>
                   <th className={TH}>이름</th>
@@ -248,7 +249,7 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
                     </td>
                     <td className={TD}><Status active={r.active} /></td>
                     <td className={TD}>
-                      <span className="flex gap-1.5">
+                      <span className="flex justify-center gap-1.5">
                         {admin && (
                           <MasterDialog button="수정" title={`비가동 사유 수정 · ${r.code}`} table="downtime_reason" recordKey={r.code}>
                             <input type="hidden" name="code" value={r.code} />
@@ -270,7 +271,7 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
 
           {tab === "defect" && (
             <>
-              <thead className="border-b text-left text-muted-foreground">
+              <thead className="border-b text-muted-foreground">
                 <tr>
                   <th className={TH}>사유</th>
                   <th className={TH}>상태</th>
@@ -284,7 +285,7 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
                     <td className={TD}><Status active={d.active} /></td>
                     <td className={TD}>
                       {/* 불량 사유는 이름이 곧 키 — 바꾸면 5천 줄의 부품 기록이 따라 바뀐다(ON UPDATE CASCADE). 수정 대신 추가 + 사용 중지 */}
-                      <span className="flex gap-1.5">
+                      <span className="flex justify-center gap-1.5">
                         {admin && <Toggle table="defect_code" keyValue={d.reason} active={d.active} />}
                         {hist(d.reason, d.reason)}
                       </span>
@@ -297,10 +298,10 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
 
           {tab === "spec" && (
             <>
-              <thead className="border-b text-left text-muted-foreground">
+              <thead className="border-b text-muted-foreground">
                 <tr>
                   <th className={TH}>파라미터</th>
-                  <th className={`${TH} text-right`}>
+                  <th className={`${TH}`}>
                     최소 허용 폭{" "}
                     <span title="LOT 상세의 기준 범위 = 평균 ± max(3σ, 최소 허용 폭)" className="cursor-help">ⓘ</span>
                   </th>
@@ -312,10 +313,10 @@ export default async function Page({ searchParams }: PageProps<"/master">) {
                 {specs.map((s) => (
                   <tr key={s.metric} className="border-b last:border-0">
                     <td className={TD}>{SPEC_LABEL[s.metric] ?? s.metric}</td>
-                    <td className={`${TD} text-right tabular-nums`}>{s.kind === "pct" ? `평균의 ${(Number(s.value) * 100).toFixed(1)}` : `± ${s.value}`}</td>
+                    <td className={`${TD} tabular-nums`}>{s.kind === "pct" ? `평균의 ${(Number(s.value) * 100).toFixed(1)}` : `± ${s.value}`}</td>
                     <td className={TD}>{s.unit}</td>
                     <td className={TD}>
-                      <span className="flex gap-1.5">
+                      <span className="flex justify-center gap-1.5">
                         {admin && (
                           <MasterDialog button="수정" title={`판정 기준 수정 · ${SPEC_LABEL[s.metric] ?? s.metric}`} table="parameter_spec" recordKey={s.metric}>
                             <Field label={s.kind === "pct" ? "평균에 대한 비율 (0.01 = 1%)" : `고정 폭 (${s.unit})`}>

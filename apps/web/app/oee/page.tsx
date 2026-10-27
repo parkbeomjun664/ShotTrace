@@ -6,7 +6,10 @@ import Link from "next/link";
 import { isDemo } from "@/lib/lots";
 import { aggregateOee, oeeLevel, waterfall, type Oee } from "@/lib/oee";
 import { getLotOee, getLots } from "@/lib/queries";
-import { LossSteps } from "./LossSteps";
+import { CountUp } from "../CountUp";   // 큰 숫자는 0 에서 올라간다 (10/27)
+import { Info } from "../Info";
+import { Box, Dot, Legend } from "../Legend";
+import { LossSteps, STRIPES } from "./LossSteps";
 
 const pct = (v: number | null) => (v === null ? "—" : `${(v * 100).toFixed(1)}%`);   // null = 계산 안 함 → "—"
 const LEVEL_TEXT = { ok: "", warn: "text-status-warn", bad: "text-status-bad" } as const;
@@ -53,9 +56,14 @@ export default async function Page({ searchParams }: PageProps<"/oee">) {
     <section className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">OEE</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          OEE = 가동률 × 성능 × 품질 · 계획 정지는 제외, 셋업은 손실로 포함 · 표준 사이클타임은 제품 마스터 값(처음 값은 실측 중앙값)
-        </p>
+        {/* 부제는 핵심 한 줄 — 계산 규칙은 ⓘ 안으로 (10/27) */}
+        <div className="mt-2 flex items-center gap-1 text-base text-muted-foreground">
+          OEE = 가동률 × 성능 × 품질
+          <Info id="oee-rule" label="OEE 계산 규칙">
+            <p>계획 정지(교대 · 휴식 · 점검)는 계획 시간에서 빼요. 셋업(금형 교체)은 손실로 넣어요.</p>
+            <p>표준 사이클타임은 제품 마스터 값이에요. 처음 값은 실측 중앙값으로 넣었어요.</p>
+          </Info>
+        </div>
       </div>
 
       {/* 전체 KPI — KAMP LOT {kamp.length}개를 생산량으로 가중 */}
@@ -72,22 +80,33 @@ export default async function Page({ searchParams }: PageProps<"/oee">) {
               <p
                 className={`mt-2 text-3xl font-bold tabular-nums ${c.main && lv ? LEVEL_TEXT[lv] : ""} ${"unrecorded" in c && c.unrecorded ? "text-muted-foreground" : ""}`}
               >
-                {pct(c.value)}
+                {c.value === null ? "—" : <CountUp value={c.value * 100} suffix="%" />}
               </p>
               {c.main && <p className="mt-1 text-xs text-muted-foreground">World-class 85%</p>}
             </div>
           ))}
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          KAMP LOT {kamp.length}개를 생산량으로 가중 · 시연 LOT 제외
-          {noDowntime && " · 비가동 기록이 없어 가동률은 100% — 기록 안 된 멈춤은 성능 손실로 보여요"}
-        </p>
+        <div className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
+          KAMP LOT {kamp.length}개 · 생산량 가중 · 시연 제외
+          {noDowntime && (
+            <Info id="oee-no-downtime" label="가동률이 100% 인 이유">
+              <p>비가동 기록이 없어서 가동률이 100%로 나와요.</p>
+              <p>기록 안 된 멈춤은 성능 손실에 들어가 있어요. 비가동 화면에서 사유를 넣으면 가동률 손실로 옮겨 가요.</p>
+            </Info>
+          )}
+        </div>
       </div>
 
       {/* 영역마다 카드 — 품질 화면과 같다 (10/27) */}
       <div className="rounded-xl border bg-card p-6">
         <h2 className="font-semibold">OEE가 되기까지</h2>
-        <p className="mt-1 text-sm text-muted-foreground">계획 시간 100%에서 손실을 하나씩 빼요 · 빗금이 그 단계에서 빠진 몫</p>
+        <Legend
+          className="mt-2"
+          items={[
+            { mark: <Box className="bg-foreground/30" />, label: "남은 시간" },
+            { mark: <Box className="bg-muted" style={{ backgroundImage: STRIPES }} />, label: "이 단계에서 빠진 몫" },
+          ]}
+        />
         <div className="mt-4">
           <LossSteps a={(1 - w.availabilityLoss) * 100} p={(1 - w.availabilityLoss - w.performanceLoss) * 100} q={w.oee * 100} />
         </div>
@@ -98,7 +117,13 @@ export default async function Page({ searchParams }: PageProps<"/oee">) {
         <div className="p-6 pb-4">
           <h2 className="font-semibold">LOT 별</h2>
           <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm text-muted-foreground">OEE 85% 미만은 호박색, 60% 미만은 빨강 · 회색 칸은 그 LOT 에서 가장 약한 지표</p>
+            <Legend
+              items={[
+                { mark: <Dot className="bg-status-warn" />, label: "OEE 85% 미만" },
+                { mark: <Dot className="bg-status-bad" />, label: "60% 미만" },
+                { mark: <Box className="border border-sky-200 bg-sky-50" />, label: "가장 약한 지표" },
+              ]}
+            />
             {demoCount > 0 && (
               <Link
                 href={showDemo ? "/oee" : "/oee?demo=1"}
@@ -115,13 +140,13 @@ export default async function Page({ searchParams }: PageProps<"/oee">) {
         <div className="overflow-x-auto border-t">
           {/* 🔴 주석을 <table> 뒤에 두면 공백이 "글자" 로 들어간다 — 그래서 여기 */}
           <table className="w-full whitespace-nowrap text-sm">
-            <thead className="border-b text-left text-muted-foreground">
+            <thead className="border-b text-muted-foreground">
               <tr>
                 <th className="px-6 py-2 font-medium">LOT</th>
-                <th className="px-4 py-2 text-right font-medium">가동률</th>
-                <th className="px-4 py-2 text-right font-medium">성능</th>
-                <th className="px-4 py-2 text-right font-medium">품질</th>
-                <th className="px-4 py-2 text-right font-medium">OEE</th>
+                <th className="px-4 py-2 font-medium">가동률</th>
+                <th className="px-4 py-2 font-medium">성능</th>
+                <th className="px-4 py-2 font-medium">품질</th>
+                <th className="px-4 py-2 font-medium">OEE</th>
                 <th className="w-8" />
               </tr>
             </thead>
@@ -129,7 +154,7 @@ export default async function Page({ searchParams }: PageProps<"/oee">) {
               {table.map((l) => {
                 const weak = weakest(l.oee);
                 const olv = oeeLevel(l.oee.oee);
-                const cell = (k: "a" | "p" | "q") => `px-4 py-2.5 text-right tabular-nums ${weak === k ? "bg-muted" : ""}`;
+                const cell = (k: "a" | "p" | "q") => `px-4 py-2.5 tabular-nums ${weak === k ? "bg-sky-50 dark:bg-sky-950" : ""}`;   // 옅은 하늘색 — 머리글 회색과 겹치지 않고, 상태 색(호박 · 빨강)과도 다른 "여기 봐" (10/27)
                 return (
                   // 줄 전체가 링크 — 진짜 링크는 LOT 칸 하나, after:inset-0 으로 줄 전체를 덮는다 (LOT 목록과 같다)
                   <tr key={l.lot_id} className="relative border-b last:border-0 hover:bg-muted/50">
@@ -151,7 +176,7 @@ export default async function Page({ searchParams }: PageProps<"/oee">) {
                       )}
                     </td>
                     <td className={cell("q")}>{pct(l.oee.quality)}</td>
-                    <td className={`px-4 py-2.5 text-right font-semibold tabular-nums ${olv ? LEVEL_TEXT[olv] : ""}`}>
+                    <td className={`px-4 py-2.5 font-semibold tabular-nums ${olv ? LEVEL_TEXT[olv] : ""}`}>
                       {olv && olv !== "ok" && <span aria-hidden className={`mr-1.5 inline-block size-1.5 rounded-full align-middle ${LEVEL_DOT[olv]}`} />}
                       {pct(l.oee.oee)}
                     </td>

@@ -17,10 +17,12 @@ import {
 } from "recharts";
 
 import type { ParetoRow } from "@/lib/quality";
+import { useMotion } from "@/app/useMotion";
 
 const AXIS = { fontSize: 12, fill: "currentColor" };
 
 export function ParetoChart({ data }: { data: ParetoRow[] }) {   // 데이터는 props 로
+  const motion = useMotion();                          // 움직임 줄이기면 그리기 애니메이션 끔 (10/27)
   return (
     <ResponsiveContainer width="100%" height={260}>
       <ComposedChart data={data} margin={{ top: 20, right: 0, bottom: 0, left: -20 }}>
@@ -53,7 +55,7 @@ export function ParetoChart({ data }: { data: ParetoRow[] }) {   // 데이터는
             );
           }}
         />
-        <Bar yAxisId="count" dataKey="count" fill="var(--primary)" maxBarSize={72} radius={[4, 4, 0, 0]}>
+        <Bar yAxisId="count" dataKey="count" fill="var(--primary)" maxBarSize={72} radius={[4, 4, 0, 0]} isAnimationActive={motion}>
           <LabelList dataKey="count" position="top" fontSize={12} fill="currentColor" />
         </Bar>
         <Line
@@ -63,7 +65,8 @@ export function ParetoChart({ data }: { data: ParetoRow[] }) {   // 데이터는
           stroke="#6b7280"                             // 중립 회색(gray-500) — 상태 색(주의 · 나쁨)은 수율 경고에만 쓴다 (10/26)
           strokeWidth={2}
           dot={{ r: 3, fill: "#6b7280" }}
-          isAnimationActive={false}
+          isAnimationActive={motion}
+          animationBegin={400}                         // 막대가 선 뒤에 — 막대 다음 누적선 (10/27)
         />
       </ComposedChart>
     </ResponsiveContainer>

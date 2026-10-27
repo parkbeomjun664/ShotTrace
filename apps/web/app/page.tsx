@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getEquipmentSummary, getLastReceived, getLots, getPartsWithoutLot, getPlantSummary } from "@/lib/queries";
+import { CountUp } from "./CountUp";               // 큰 숫자는 0 에서 올라간다 (10/27)
 import { LiveRefresh } from "./LiveRefresh";       // 알림을 듣고 이 화면을 다시 그리게 한다
 
 export const revalidate = 0;   // 🔴 캐시를 끈다. 60 이면 refresh 해도 묵은 화면이 온다 (M18)
@@ -25,7 +26,7 @@ export default async function Page() {
       {/* 제목 묶음 — 아래 선으로 내용과 경계를 둔다 (10/26 · 붙어 보였다) */}
       <div className="border-b pb-6">
         <h1 className="text-2xl font-bold tracking-tight">현황판</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-base text-muted-foreground">
           2020-10-16 ~ 11-06 · KAMP 사출성형기 실데이터
         </p>
         {/* 🔵 상태는 한 줄 · 한 상태 (10/26) — 연결(브라우저가 앎) + 마지막 수신(서버가 앎)을 LiveRefresh 가 하나로 */}
@@ -45,7 +46,7 @@ export default async function Page() {
           {/* 🔴 ?? 0 이면 "0.00%" — 명단에 없는 사람에게 "전부 불량" 이라고 거짓말한다 (10/13)
               == null 은 null 과 undefined 를 같이 잡는다 (plant?. 가 undefined 를 낼 수 있다) */}
           <p className="text-4xl font-bold tabular-nums">
-            {plant?.yield_pct == null ? "—" : `${plant.yield_pct.toFixed(2)}%`}
+            {plant?.yield_pct == null ? "—" : <CountUp value={plant.yield_pct} decimals={2} suffix="%" />}
           </p>
           <p className="mt-2 text-sm tabular-nums text-muted-foreground">
             양품 {(plant?.pass_qty ?? 0).toLocaleString()} / 생산{" "}
@@ -54,8 +55,8 @@ export default async function Page() {
           </p>
           {/* 0 이 아니면 — LOT 을 안 열었거나 경계가 틀렸다는 신호. 품질 화면(LOT 합계)과 이만큼 다르다 */}
           {orphan > 0 && (
-            <p className="mt-1 text-xs text-muted-foreground">
-              LOT에 안 묶인 부품 {orphan.toLocaleString()}개 — 품질 화면 합계에는 들어가지 않아요
+            <p className="mt-1 text-sm text-muted-foreground">
+              LOT에 안 묶인 부품 {orphan.toLocaleString()}개 포함 (품질 화면엔 없음)
             </p>
           )}
         </CardContent>
@@ -106,13 +107,13 @@ export default async function Page() {
         <div className="mt-3 overflow-x-auto rounded-xl border">
           {/* 좁은 화면 — 글자를 쪼개지 않고 표 안에서 옆으로 민다 · 🔴 주석을 <table> 뒤에 두면 공백이 "글자" 로 들어간다 */}
           <table className="w-full whitespace-nowrap text-sm">
-            <thead className="border-b text-left text-muted-foreground">
+            <thead className="border-b text-muted-foreground">
               <tr>
                 <th className="px-4 py-2 font-medium">LOT</th>
                 <th className="px-4 py-2 font-medium">제품</th>
-                <th className="px-4 py-2 text-right font-medium">생산</th>
-                <th className="px-4 py-2 text-right font-medium">불량</th>
-                <th className="px-4 py-2 text-right font-medium">수율</th>
+                <th className="px-4 py-2 font-medium">생산</th>
+                <th className="px-4 py-2 font-medium">불량</th>
+                <th className="px-4 py-2 font-medium">수율</th>
               </tr>
             </thead>
             <tbody>
@@ -126,11 +127,11 @@ export default async function Page() {
                       </Link>
                     </td>
                     <td className="px-4 py-2">{lot.product?.car_model} {lot.product?.side}</td>
-                    <td className="px-4 py-2 text-right tabular-nums">{lot.total_qty.toLocaleString()}</td>
-                    <td className={`px-4 py-2 text-right tabular-nums ${lot.fail_qty > 0 ? "font-medium" : "text-muted-foreground"}`}>
+                    <td className="px-4 py-2 tabular-nums">{lot.total_qty.toLocaleString()}</td>
+                    <td className={`px-4 py-2 tabular-nums ${lot.fail_qty > 0 ? "font-medium" : "text-muted-foreground"}`}>
                       {lot.fail_qty}
                     </td>
-                    <td className="px-4 py-2 text-right tabular-nums">{rate === null ? "—" : `${rate.toFixed(2)}%`}</td>
+                    <td className="px-4 py-2 tabular-nums">{rate === null ? "—" : `${rate.toFixed(2)}%`}</td>
                   </tr>
                 );
               })}

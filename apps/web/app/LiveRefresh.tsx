@@ -14,6 +14,9 @@ export function LiveRefresh({ lastAt }: { lastAt?: string | null }) {   // lastA
   const router = useRouter();
   const dirty = useRef(false);                        // 🔵 메모지 — 바뀌어도 화면을 다시 안 그린다
   const [연결, set연결] = useState(false);              // 🔵 이건 화면에 보여야 하니 useState
+  // 🔴 지금 시각도 상태로 — 그리는 도중 Date.now() 를 부르면 그릴 때마다 값이 달라진다 (10/27 린트)
+  //    초기값 함수는 처음 한 번만 돈다 · 아래 1초 타이머가 같이 갱신해 "N분 전" 이 저절로 늘어난다
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const channel = supabase
@@ -33,6 +36,7 @@ export function LiveRefresh({ lastAt }: { lastAt?: string | null }) {   // lastA
             //    첫 연결의 틈 메우기와 재연결 복구를 이 한 줄이 같이 한다
 
     const timer = setInterval(() => {
+      setNow(Date.now());
       if (!dirty.current) return;                     // 조용하면 아무것도 안 한다
       dirty.current = false;                          // 🔴 먼저 끈다. 켠 채로 두면 매초 조회한다
       router.refresh();                               // 서버를 다시 그린다 = 값은 DB 에서 온다
@@ -46,7 +50,7 @@ export function LiveRefresh({ lastAt }: { lastAt?: string | null }) {   // lastA
 
   // 🔴 색만으로 구분하지 않는다 (M09) — 글자가 뜻을 지고 색은 거든다
   // 🔵 한 줄 · 한 상태 (10/26) — 연결은 살아 있어도 데이터는 끊길 수 있다. 끊기면 "연결됨" 은 지우고 끊김만
-  const { kind, minutes } = receiveState({ connected: 연결, lastAt, now: Date.now() });
+  const { kind, minutes } = receiveState({ connected: 연결, lastAt, now });
 
   if (kind === "stale" && lastAt && minutes !== null) {
     return (

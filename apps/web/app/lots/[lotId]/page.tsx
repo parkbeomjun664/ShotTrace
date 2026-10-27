@@ -16,10 +16,12 @@ import { metricStats } from "@/lib/evidence";
 
 
 // 시각 포맷은 lib/format.ts 한 곳에서만 만든다 (ADR 002)
-import { 같은날, 날짜, 분길이, 소수, 시각, 시분, 진행중 } from "@/lib/format";
+import { 날짜, 분길이, 소수, 시각, 시분, 진행중 } from "@/lib/format";
 import { isDemo } from "@/lib/lots";
 import { CHART_METRICS, bands, indexGaps, isAnomaly, outOfBand, type Band, type ChartMetric } from "@/lib/shots";
 import { getSpecBand, toleranceFrom } from "@/lib/spec";             // 범위는 한 곳에서 — 차트 띠 · 점 · 표가 같은 값 (10/26)   // 빈 구간 · 기준 범위 · 이상 샷 — 차트와 표가 같은 판정 (10/26)
+import { Info } from "@/app/Info";
+import { Diamond, Dot, Legend, VDash } from "@/app/Legend";
 import { LotCharts } from "./LotCharts";
 import { LiveRefresh } from "@/app/LiveRefresh";   // 어제 만든 부품을 그대로 (M18)
 import { GuidePanel } from "./GuidePanel";
@@ -189,18 +191,25 @@ export default async function Page({ params, searchParams }: PageProps<"/lots/[l
       <div>
         <div className="flex items-center gap-1.5">
           <h2 className="font-semibold">그때 설비 상태</h2>
-          {/* 개발 메모 대신 ⓘ 팝오버 (10/26) — 궁금한 사람만 연다 */}
-          <button popoverTarget="join-info" aria-label="샷을 LOT 에 잇는 방법" className="text-sm text-muted-foreground hover:text-foreground">
-            ⓘ
-          </button>
-          <div id="join-info" popover="auto" className="m-auto max-w-sm rounded-lg border bg-background p-4 text-sm shadow-lg">
-            샷은 <code>started_at ≤ 측정 시각 &lt; ended_at</code> 반열린 구간으로 LOT 에 연결해요 (<code>get_lot_shots</code>).
-            설비 신호에는 LOT 번호가 없어요 — 설비와 시간으로 찾아요 (ADR 001).
-          </div>
+          {/* 개발 메모 대신 ⓘ 팝오버 (10/26) — 궁금한 사람만 연다 · 10/27 범례에서 뺀 계산 방법도 여기로 */}
+          <Info id="join-info" label="차트 읽는 법">
+            <p>
+              샷은 <code>started_at ≤ 측정 시각 &lt; ended_at</code> 반열린 구간으로 LOT 에 연결해요 (<code>get_lot_shots</code>).
+              설비 신호에는 LOT 번호가 없어요 — 설비와 시간으로 찾아요 (ADR 001).
+            </p>
+            <p>정상 범위 = 양품 평균 ± 3σ (최소 허용 폭 적용) · {기준}</p>
+            <p>샷 없음 = 샷 사이가 표준 CT × 5 를 넘은 곳 · 가로축은 샷 순번</p>
+          </Info>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          연한 초록 띠 = 양품 평균 ± 3σ (최소 허용 폭 적용 · {기준}) · 빨간 점 = 범위 밖 · 빨간 마름모 = 불량 샷 · 세로 점선 = 샷 없음 (표준 CT × 5 초과) · x 축은 샷 순번
-        </p>
+        <Legend
+          className="mt-2"
+          items={[
+            { mark: <span className="h-3 w-5 rounded-sm border border-emerald-300" style={{ background: "#d1fae5" }} />, label: "정상 범위" },
+            { mark: <Dot className="bg-status-bad" />, label: "범위 밖" },
+            { mark: <Diamond color="var(--status-bad)" />, label: "불량 샷" },
+            { mark: <VDash />, label: "샷 없음" },
+          ]}
+        />
         <div className="mt-3">
           <LotCharts rows={rows} gaps={gaps} bands={b} stdCycleSec={std} />
         </div>
@@ -229,16 +238,16 @@ export default async function Page({ params, searchParams }: PageProps<"/lots/[l
           <div className="mt-3 overflow-x-auto rounded-xl border">
             {/* 🔴 주석을 <table> 뒤에 두면 공백이 "글자" 로 들어간다 — 그래서 여기 */}
             <table className="w-full whitespace-nowrap text-sm">
-              <thead className="border-b bg-muted text-left text-muted-foreground">
+              <thead className="border-b text-muted-foreground">
                 <tr>
                   <th className="px-3 py-2 font-medium">시각 KST</th>
                   <th className="px-3 py-2 font-medium">판정</th>
-                  <th className="px-3 py-2 text-right font-medium">사이클 s</th>
-                  <th className="px-3 py-2 text-right font-medium">사출압 bar</th>
+                  <th className="px-3 py-2 font-medium">사이클 s</th>
+                  <th className="px-3 py-2 font-medium">사출압 bar</th>
                   {/* 원본 Cushion_Position 그대로 — S14 는 650 대라 쿠션량이 아니라 스크루 절대 위치로 보인다 (10/26 확인 · 단위 표기 뺌) */}
-                  <th className="px-3 py-2 text-right font-medium">쿠션 위치(원본)</th>
-                  <th className="px-3 py-2 text-right font-medium">배럴1 ℃</th>
-                  <th className="px-3 py-2 text-right font-medium">금형3 ℃</th>
+                  <th className="px-3 py-2 font-medium">쿠션 위치(원본)</th>
+                  <th className="px-3 py-2 font-medium">배럴1 ℃</th>
+                  <th className="px-3 py-2 font-medium">금형3 ℃</th>
                 </tr>
               </thead>
               <tbody>
@@ -257,11 +266,11 @@ export default async function Page({ params, searchParams }: PageProps<"/lots/[l
                         {/* 색만으로 구분하지 않는다 — 텍스트가 뜻을 진다 (M09) */}
                         {bad ? <Badge variant="destructive">{x.fail_reason}</Badge> : <span className="text-muted-foreground">양품</span>}
                       </td>
-                      <td className={`px-3 py-1.5 text-right tabular-nums ${off("cycle_time")}`}>{소수(x.cycle_time, 2)}</td>
-                      <td className={`px-3 py-1.5 text-right tabular-nums ${off("max_injection_pressure")}`}>{소수(x.max_injection_pressure)}</td>
-                      <td className="px-3 py-1.5 text-right tabular-nums">{소수(x.cushion_position, 2)}</td>
-                      <td className={`px-3 py-1.5 text-right tabular-nums ${off("barrel_temperature_1")}`}>{소수(x.barrel_temperature_1)}</td>
-                      <td className={`px-3 py-1.5 text-right tabular-nums ${off("mold_temperature_3")}`}>{소수(x.mold_temperature_3)}</td>
+                      <td className={`px-3 py-1.5 tabular-nums ${off("cycle_time")}`}>{소수(x.cycle_time, 2)}</td>
+                      <td className={`px-3 py-1.5 tabular-nums ${off("max_injection_pressure")}`}>{소수(x.max_injection_pressure)}</td>
+                      <td className="px-3 py-1.5 tabular-nums">{소수(x.cushion_position, 2)}</td>
+                      <td className={`px-3 py-1.5 tabular-nums ${off("barrel_temperature_1")}`}>{소수(x.barrel_temperature_1)}</td>
+                      <td className={`px-3 py-1.5 tabular-nums ${off("mold_temperature_3")}`}>{소수(x.mold_temperature_3)}</td>
                     </tr>
                   );
                 })}

@@ -22,7 +22,7 @@ export function StopList({ items, reasons, readOnly }: { items: StopItem[]; reas
       <div className="mt-3 overflow-x-auto rounded-xl border">
         {/* 🔴 주석을 <table> 뒤에 두면 공백이 "글자" 로 들어간다 — 그래서 여기 */}
         <table className="w-full whitespace-nowrap text-sm">
-          <thead className="border-b text-left text-muted-foreground">
+          <thead className="border-b text-muted-foreground">
             <tr>
               <th className="w-10 px-4 py-2">
                 <input type="checkbox" aria-label="모두 선택" disabled={readOnly} title={readOnly ? LOCKED : undefined} onChange={(e) => toggleAll(e.target.checked)} />
@@ -30,7 +30,7 @@ export function StopList({ items, reasons, readOnly }: { items: StopItem[]; reas
               <th className="px-4 py-2 font-medium">설비</th>
               <th className="px-4 py-2 font-medium">LOT</th>
               <th className="px-4 py-2 font-medium">시작 ~ 종료</th>
-              <th className="px-4 py-2 text-right font-medium">길이</th>
+              <th className="px-4 py-2 font-medium">길이</th>
             </tr>
           </thead>
           <tbody>
@@ -44,7 +44,7 @@ export function StopList({ items, reasons, readOnly }: { items: StopItem[]; reas
                   <Link href={`/lots/${s.lotId}`} className="hover:underline">{s.lotId}</Link>
                 </td>
                 <td className="px-4 py-2 tabular-nums text-muted-foreground">{s.range}</td>
-                <td className="px-4 py-2 text-right tabular-nums">{s.minutes}분</td>
+                <td className="px-4 py-2 tabular-nums">{s.minutes}분</td>
               </tr>
             ))}
           </tbody>

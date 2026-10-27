@@ -32,12 +32,12 @@ export default async function Page({ searchParams }: PageProps<"/lots">) {
   const lots = applyList(all, p);
 
   // 정렬 머리 — 같은 열을 다시 누르면 방향이 바뀐다. 새 열은 "나쁜 쪽 먼저"(수율 오름 · 불량 내림 · 구간 최신)
-  const sortHead = (key: SortKey, label: string, right = false) => {   // right — 숫자 열은 머리글도 오른쪽 (값과 한 줄)
+  const sortHead = (key: SortKey, label: string) => {   // 정렬은 globals.css 의 th · td 가운데 (10/27)
     const on = p.sort === key;
     const first = key === "yield" ? "asc" : "desc";
     const dir = on ? (p.dir === "asc" ? "desc" : "asc") : first;
     return (
-      <th className={`px-4 py-2 font-medium ${right ? "text-right" : ""}`} aria-sort={on ? (p.dir === "asc" ? "ascending" : "descending") : undefined}>
+      <th className="px-4 py-2 font-medium" aria-sort={on ? (p.dir === "asc" ? "ascending" : "descending") : undefined}>
         <Link href={href({ ...p, sort: key, dir })} className={`hover:text-foreground ${on ? "text-foreground" : ""}`}>
           {label}
           {on ? (p.dir === "asc" ? " ↑" : " ↓") : ""}
@@ -49,8 +49,8 @@ export default async function Page({ searchParams }: PageProps<"/lots">) {
   return (
     <section>
       <h1 className="text-2xl font-bold tracking-tight">LOT 목록</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        총 {all.length}건 · LOT를 선택하면 생산 당시 설비 상태를 볼 수 있어요
+      <p className="mt-1 text-base text-muted-foreground">
+        총 {all.length}건 · 누르면 그때 설비 상태
       </p>
 
       {/* 거르기 — 하나뿐. 기간 · 소량 숨김은 뺐다 (3주 데이터 · 1개짜리 LOT 은 경계 문제의 흔적이라 숨기지 않는다) */}
@@ -80,14 +80,14 @@ export default async function Page({ searchParams }: PageProps<"/lots">) {
         <div className="mt-4 overflow-x-auto rounded-xl border">
           {/* 🔴 주석을 <table> 뒤에 두면 공백이 "글자" 로 들어간다 — 그래서 여기 */}
           <table className="w-full whitespace-nowrap text-sm">
-            <thead className="border-b text-left text-muted-foreground">
+            <thead className="border-b text-muted-foreground">
               <tr>
                 <th className="px-4 py-2 font-medium">LOT</th>
                 <th className="px-4 py-2 font-medium">제품</th>
                 {sortHead("start", "생산 구간")}
-                <th className="px-4 py-2 text-right font-medium">생산</th>
-                {sortHead("fail", "불량", true)}
-                {sortHead("yield", "수율", true)}
+                <th className="px-4 py-2 font-medium">생산</th>
+                {sortHead("fail", "불량")}
+                {sortHead("yield", "수율")}
                 <th className="w-8" />
               </tr>
             </thead>
@@ -112,13 +112,13 @@ export default async function Page({ searchParams }: PageProps<"/lots">) {
                       {lot.product?.car_model} {lot.product?.side}
                     </td>
                     <td className="px-4 py-2.5 tabular-nums text-muted-foreground">{구간(lot.started_at, lot.ended_at)}</td>
-                    <td className="px-4 py-2.5 text-right tabular-nums">{lot.total_qty.toLocaleString()}</td>
+                    <td className="px-4 py-2.5 tabular-nums">{lot.total_qty.toLocaleString()}</td>
                     {/* 불량 0은 흐리게 — 눈이 0이 아닌 곳에 먼저 가야 한다 (M09) */}
-                    <td className={`px-4 py-2.5 text-right tabular-nums ${lot.fail_qty > 0 ? "font-medium" : "text-muted-foreground"}`}>
+                    <td className={`px-4 py-2.5 tabular-nums ${lot.fail_qty > 0 ? "font-medium" : "text-muted-foreground"}`}>
                       {lot.fail_qty}
                     </td>
                     {/* 수율 상태 — 95 이상 기본 · 90 이상 주의 · 그 아래 나쁨. 색 + 점 (색만으로 구분하지 않게 숫자가 뜻을 진다) */}
-                    <td className={`px-4 py-2.5 text-right tabular-nums ${lv ? LEVEL_TEXT[lv] : ""}`}>
+                    <td className={`px-4 py-2.5 tabular-nums ${lv ? LEVEL_TEXT[lv] : ""}`}>
                       {lv && lv !== "ok" && <span aria-hidden className={`mr-1.5 inline-block size-1.5 rounded-full align-middle ${LEVEL_DOT[lv]}`} />}
                       {rate === null ? "—" : `${rate.toFixed(2)}%`}
                     </td>

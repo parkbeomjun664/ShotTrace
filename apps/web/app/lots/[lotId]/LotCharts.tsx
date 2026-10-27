@@ -32,11 +32,12 @@ export function LotCharts({
   bands: Record<ChartMetric, Band>;
   stdCycleSec: number | null;
 }) {
+  const [hovered, setHovered] = useState<ChartMetric | null>(null);   // 값 상자는 마우스를 올린 차트에만 — 세로 기준선은 네 차트 모두 (syncId)
+  // 🔴 훅은 return 보다 위 — 샷 수에 따라 훅 순서가 바뀌면 React 가 상태를 엉뚱한 칸에 준다 (10/27 린트가 잡음)
   if (rows.length === 0) {                             // 빈 상태 — 차트를 안 만든다
-    return <p className="py-8 text-center text-sm text-muted-foreground">이 구간에 샷이 없습니다</p>;
+    return <p className="py-8 text-center text-sm text-muted-foreground">이 구간에 샷이 없어요</p>;
   }
 
-  const [hovered, setHovered] = useState<ChartMetric | null>(null);   // 값 상자는 마우스를 올린 차트에만 — 세로 기준선은 네 차트 모두 (syncId)
   const xTicks = indexTicks(rows.map((r) => `${r.date} ${r.hm}`));   // 같은 시각 글자는 한 번만
   const xLabel = tickLabels(xTicks, rows.map((r) => r.date), rows.map((r) => r.hm));   // 앞 눈금과 날짜가 같으면 시:분만
   const few = rows.length <= 30;                       // 샷이 적으면 정상 점도 찍는다 — 1샷 LOT 은 점이 없으면 안 보인다

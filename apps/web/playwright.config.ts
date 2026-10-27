@@ -8,6 +8,7 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:3000",
     channel: "chrome",                                 // PC 에 깔린 Chrome — 브라우저를 따로 내려받지 않는다
+    reducedMotion: "reduce",                           // 들어올 때 움직임 끔 (10/27) — 화면 기록이 반쯤 떠오른 순간을 찍지 않게 · 클릭도 바로
   },
   webServer: {
     command: "npm run dev",

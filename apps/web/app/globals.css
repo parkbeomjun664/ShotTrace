@@ -129,6 +129,22 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* 표는 머리글 · 내용 모두 가운데 — 머리글이 그 열 값들의 한가운데 오게 (10/27 · 대칭)
+     base 층이라 칸마다 text-left 같은 걸 주면 그게 이긴다 */
+  th, td {
+    text-align: center;
+  }
+  /* 열 사이 세로 선 — 줄 선만 있으면 값들이 옆 열과 이어져 보였다 (10/27). 색은 위 * 의 border-border */
+  th + th, td + td {
+    border-left-width: 1px;
+  }
+  /* 머리글 줄 — 옅은 회색 바탕 + 본문 색 글자로 "제목" 처럼 (10/27). thead 의 text-muted-foreground 보다 th 에 직접 준 색이 이긴다 */
+  thead {
+    background-color: var(--muted);
+  }
+  th {
+    color: var(--foreground);
+  }
   html {
     @apply font-sans;
   }
@@ -140,3 +156,25 @@
 }
 .target-flash { scroll-margin-top: 6rem; }
 .target-flash:target { animation: target-flash 2s ease-out; }
+
+/* ── 들어올 때 움직임 (10/27) — 화면이 딱딱하다는 말에 한 스푼 ─────────────
+   🔴 움직임 줄이기를 켠 사람에게는 아무것도 안 움직인다 (no-preference 안에서만)
+   페이지 블록이 위에서부터 차례로 살짝 떠오른다 — 페이지를 옮길 때마다 새 section 이라 다시 돈다.
+   실시간 새로고침(router.refresh)은 section 을 새로 만들지 않아 다시 돌지 않는다 */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes grow {
+  from { transform: scaleX(0); }
+  to { transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  main > section > * { animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  main > section > :nth-child(2) { animation-delay: 70ms; }
+  main > section > :nth-child(3) { animation-delay: 140ms; }
+  main > section > :nth-child(4) { animation-delay: 210ms; }
+  main > section > :nth-child(n + 5) { animation-delay: 280ms; }
+  /* 막대가 왼쪽에서 자란다 — 지연은 줄마다 style 로 (OEE 「OEE가 되기까지」) */
+  .animate-grow { transform-origin: left; animation: grow 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+}

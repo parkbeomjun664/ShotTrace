@@ -35,7 +35,7 @@ export function NavLinks({ role }: { role: string | null }) {
             href={item.href}
             aria-current={here ? "page" : undefined}   // 화면 읽기 프로그램에도 "여기" 를 알린다
             // 🔴 whitespace-nowrap — 좁아지면 "현황/판" 처럼 쪼개졌다 · 하단 2px 바 = 지금 보는 탭
-            className={`flex shrink-0 items-center gap-1 whitespace-nowrap border-b-2 px-3 py-5 text-[15px] transition-colors ${
+            className={`relative flex shrink-0 items-center gap-1 whitespace-nowrap border-b-2 px-3 py-5 text-[15px] transition-colors ${
               here
                 ? "border-primary font-semibold text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"

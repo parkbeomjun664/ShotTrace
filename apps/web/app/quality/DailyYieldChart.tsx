@@ -8,6 +8,7 @@ import { CartesianGrid, Line, LineChart, ReferenceArea, ReferenceLine, Responsiv
 import { 날짜 } from "@/lib/format";
 import { yieldLevel } from "@/lib/lots";
 import type { DayPoint } from "@/lib/quality";
+import { useMotion } from "@/app/useMotion";
 
 const AXIS = { fontSize: 12, fill: "currentColor" };
 const DOT = { ok: "currentColor", warn: "var(--status-warn)", bad: "var(--status-bad)" } as const;
@@ -28,6 +29,7 @@ function gaps(data: DayPoint[]) {                      // 생산 없는 날이 �
 // 🔵 x 축은 숫자(시각) — 실제 날짜 간격대로 놓인다 (10/26)
 // 선은 잇고, 생산 없는 날은 연회색 띠로 — 쉰 날이 보이면서 선은 읽기 쉽다
 export function DailyYieldChart({ data }: { data: DayPoint[] }) {
+  const motion = useMotion();                          // 움직임 줄이기면 그리기 애니메이션 끔 (10/27)
   const ticks = data.filter((d) => d.yield !== null).map((d) => d.ts);   // 눈금은 생산한 날에만
   return (
     <ResponsiveContainer width="100%" height={220}>
@@ -75,7 +77,8 @@ export function DailyYieldChart({ data }: { data: DayPoint[] }) {
           stroke="currentColor"
           strokeWidth={1.5}
           connectNulls                                 // 빈 날은 건너 잇는다 — 쉰 날은 뒤의 연회색 띠가 보여준다
-          isAnimationActive={false}
+          isAnimationActive={motion}                   // 왼쪽에서 오른쪽으로 그려진다 · 움직임 줄이기면 끔 (10/27)
+          animationDuration={1000}
           dot={({ cx, cy, payload, index }) => {     // 기준 미달 점만 색 — 정상은 글자색
             const y = (payload as DayPoint).yield;
             if (y === null) return <g key={index} />;   // 빈 날엔 점도 없다

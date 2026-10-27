@@ -19,12 +19,13 @@ export function LogoutButton() {
       >
         로그아웃
       </button>
-      <dialog ref={ref} className="m-auto w-full max-w-xs whitespace-normal rounded-xl border p-6 text-left backdrop:bg-black/30">
+      {/* 가운데 정렬 · 같은 너비 버튼 두 개 — 제목은 왼쪽, 버튼은 오른쪽이라 비대칭이었다 (10/27) */}
+      <dialog ref={ref} className="m-auto w-full max-w-xs whitespace-normal rounded-xl border p-6 text-center backdrop:bg-black/30">
         <h2 className="font-semibold">로그아웃하시겠습니까?</h2>
         {/* 🔴 로그아웃은 링크가 아니라 폼(POST) — 링크면 prefetch 가 미리 눌러버린다 */}
-        <form action={logout} className="mt-6 flex justify-end gap-2">
+        <form action={logout} className="mt-6 grid grid-cols-2 gap-2">
           {/* autoFocus — 실수로 Enter 를 쳐도 나가지 않게 「취소」에 먼저 */}
-          <button type="button" autoFocus onClick={() => ref.current?.close()} className="cursor-pointer rounded-md border px-3 py-1.5 text-sm hover:bg-muted">
+          <button type="button" autoFocus onClick={() => ref.current?.close()} className="h-10 cursor-pointer rounded-md border text-sm hover:bg-muted">
             취소
           </button>
           <Confirm />
@@ -38,7 +39,7 @@ export function LogoutButton() {
 function Confirm() {
   const { pending } = useFormStatus();
   return (
-    <button disabled={pending} className="cursor-pointer rounded-md bg-black px-3 py-1.5 text-sm text-white hover:bg-black/80 disabled:opacity-50 dark:bg-white dark:text-black">
+    <button disabled={pending} className="h-10 cursor-pointer rounded-md bg-black text-sm text-white hover:bg-black/80 disabled:opacity-50 dark:bg-white dark:text-black">
       {pending ? "로그아웃 중…" : "로그아웃"}
     </button>
   );
