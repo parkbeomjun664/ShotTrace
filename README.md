@@ -8,14 +8,14 @@
 제조 IT 22년 경력자 인터뷰로 요구사항을 도출했고, KAMP 공개 실데이터(사출성형기 부품 5,232개 = 샷 2,626번 × 공정변수 24개)를
 시간축으로 재생해 사용한다. ISA-95 Level 3에 해당한다.
 
-**배포** — https://shot-trace.vercel.app (로그인 필요 · 읽기 전용 체험 계정은 요청 시 안내)
+**배포** — https://shot-trace.vercel.app · 로그인 화면의 **「둘러보기로 시작」** 버튼으로 읽기 전용 체험
 **현재 상태** — 기능 · 화면 완성 (2026-10-27) · 시연 리허설만 남음 · 2026-08 시작
 
 | | |
 |---|---|
 | 화면 | 현황판(실시간) · LOT 추적(+ **LLM 대응 가이드**) · 품질 · **OEE** · 실적 입력/정정 · 비가동 · 마스터 |
 | 데이터베이스 | PostgreSQL 마이그레이션 29개 · 표 15 · View 9 · RPC 4 · RLS 역할 3 · 마스터 변경 이력(트리거) |
-| 검증 | 자동 테스트 118 (Vitest 84 · pytest 12 · Playwright 22) · CI · 제약 실험 13/13 · RLS 전수 점검 |
+| 검증 | 자동 테스트 119 (Vitest 84 · pytest 12 · Playwright 23) · CI · 제약 실험 13/13 · RLS 전수 점검 |
 | 설계 기록 | [ADR 19개](docs/decisions/) — 결정마다 **버린 대안** 포함 |
 
 **한 문장 · 30초 · 5분 설명** — [`docs/설명.md`](docs/설명.md)
@@ -113,7 +113,7 @@ flowchart LR
 | 무엇 | 결과 | 어디 |
 |---|---|---|
 | 단위 테스트 | 화면 규칙을 순수함수로 — OEE · 파레토 · 기준 범위 · 비가동 구간 · 원장 잇기 · 가이드 근거 등 80 · 수집기 5 (가짜 DB) · ETL 7 (경계값) | `apps/web/lib/*.test.ts` · `services/collector/` · `scripts/etl/` |
-| E2E | 22 — 품질 파레토 → 그 유형의 LOT · 비로그인 차단 · viewer 잠금 · 정렬 · 시연 토글 · 차트 툴팁 · 현황판 합계 = 품질 + LOT 밖 부품 — DB 에 아무것도 안 쓰는 흐름만 | `apps/web/e2e/` |
+| E2E | 23 — 둘러보기로 시작 · 품질 파레토 → 그 유형의 LOT · 비로그인 차단 · viewer 잠금 · 정렬 · 시연 토글 · 차트 툴팁 · 현황판 합계 = 품질 + LOT 밖 부품 — DB 에 아무것도 안 쓰는 흐름만 | `apps/web/e2e/` |
 | CI | 푸시마다 web(tsc · Vitest) · python(pytest) · e2e(Playwright) | `.github/workflows/ci.yml` |
 | 제약 실험 | 종류별로 일부러 어겨 13/13 막힘 (PK · UNIQUE · FK · CHECK · EXCLUDE · NOT NULL) | [evidence/constraints-reject](docs/evidence/constraints-reject.md) |
 | RLS 전수 점검 | 역할 5 × 테이블 · View · 함수 23 — 모든 칸이 예상대로 | `scripts/verify/rls_matrix.py` |

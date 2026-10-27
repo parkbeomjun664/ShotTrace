@@ -1,5 +1,6 @@
 // 로그인 — 나는 누구인가 (인증). 무엇을 해도 되는가(인가)는 RLS 가 정한다
 import { LoginForm } from "./LoginForm";
+import { ViewerButton } from "./ViewerButton";
 
 export default function Page() {
   return (
@@ -15,7 +16,15 @@ export default function Page() {
 
       {/* 폼은 브라우저 컴포넌트로 — 실패해도 이메일을 남기려면 결과를 들고 있어야 한다 (10/27) */}
       <LoginForm />
-      {/* 둘러보기 계정 안내는 화면에서 뺐다 (10/26) · README 에서도 뺐다 (공개용 정리) */}
+      {/* 둘러보기 — 계정 안내 문구 대신 버튼 하나 (공개용 정리) · 비밀번호는 서버만 안다 */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          또는
+          <span className="h-px flex-1 bg-border" />
+        </div>
+        <ViewerButton />
+      </div>
 
       {/* 작은 푸터 — 첫 화면에서 이게 무엇인지 (10/26) */}
       <p className="text-center text-xs text-muted-foreground">© 2026 ShotTrace · 포트폴리오 프로젝트</p>

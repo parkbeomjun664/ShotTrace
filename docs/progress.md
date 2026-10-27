@@ -182,7 +182,7 @@ CSV ──▶ replay.py ──▶ Mosquitto ──▶ collector.py ──▶ Sup
 ```
 ADR        19개   decisions/
 증거       7건    evidence/  (인덱스 EXPLAIN · 사이클-불량 가설 기각 · 배포 차단 · MVP 점검 · 제약 거절 · 10배 성능 · Lighthouse)
-테스트     118    Vitest 84 · pytest 12 · Playwright 22 · CI 세 칸
+테스트     119    Vitest 84 · pytest 12 · Playwright 23 · CI 세 칸
 ```
 
 ---
