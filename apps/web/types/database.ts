@@ -132,6 +132,30 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempt: {
+        Row: {
+          account: string
+          attempted_at: string
+          id: number
+          ip: string | null
+          success: boolean
+        }
+        Insert: {
+          account: string
+          attempted_at?: string
+          id?: never
+          ip?: string | null
+          success: boolean
+        }
+        Update: {
+          account?: string
+          attempted_at?: string
+          id?: never
+          ip?: string | null
+          success?: boolean
+        }
+        Relationships: []
+      }
       lot_guide: {
         Row: {
           content: Json
@@ -824,6 +848,15 @@ export type Database = {
           pass_or_fail: string
         }[]
       }
+      login_threats: {
+        Args: { p_account_focus?: number; p_spray?: number; p_window?: string }
+        Returns: {
+          distinct_n: number
+          kind: string
+          since: string
+          target: string
+        }[]
+      }
       lot_baseline: {
         Args: { p_lot_id: string }
         Returns: {
@@ -833,6 +866,11 @@ export type Database = {
           source: string
           std: number
         }[]
+      }
+      prune_login_attempt: { Args: { p_keep?: string }; Returns: number }
+      record_login_attempt: {
+        Args: { p_account: string; p_ip: string; p_success: boolean }
+        Returns: undefined
       }
     }
     Enums: {

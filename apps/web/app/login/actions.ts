@@ -2,6 +2,7 @@
 
 // 로그인 · 로그아웃 — 폼이 이 함수를 바로 부른다. API 라우트를 따로 안 만든다
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";                 // ⭐ 요청 헤더에서 IP 를 읽는다 (W1)
 
 import { createSessionClient } from "@/lib/supabase/session";
 
@@ -14,6 +15,13 @@ export async function login(_prev: { email: string } | null, formData: FormData)
     email,
     password: String(formData.get("password") ?? ""),
   });                                                  // 성공하면 setAll 이 손목밴드를 채운다
+
+  // ⭐ 성패를 장부에 남긴다 (W1) — 접근 로그엔 안 보이는 '계정' 신호. 🔴 기록 실패가 로그인을 막지 않게 best-effort
+  try {
+    // 🔴 x-forwarded-for 첫 홉은 위조 가능 → Vercel 이 직접 채우는 x-real-ip 를 쓴다 (로컬엔 없어 "")
+    const ip = (await headers()).get("x-real-ip")?.trim() ?? "";
+    await supabase.rpc("record_login_attempt", { p_account: email, p_success: !error, p_ip: ip });
+  } catch {}
 
   if (error) return { email };                         // 🔴 이유를 안 나눈다 — 계정 존재 여부가 샌다 · 비밀번호는 돌려주지 않는다
   redirect("/");                                       // 🔴 redirect 는 던진다 · try 안에서 쓰지 않는다
