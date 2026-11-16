@@ -4,6 +4,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";                 // ⭐ 요청 헤더에서 IP 를 읽는다 (W1)
 
+import { notifyThreats } from "@/lib/alert";             // ⭐ 위협 알림 전송 (③)
 import { createSessionClient } from "@/lib/supabase/session";
 
 // useActionState 가 부른다 — 첫 칸은 이전 결과. 실패하면 쪽지로 이메일을 돌려줘 폼이 다시 채운다 (10/27)
@@ -21,6 +22,10 @@ export async function login(_prev: { email: string } | null, formData: FormData)
     // 🔴 x-forwarded-for 첫 홉은 위조 가능 → Vercel 이 직접 채우는 x-real-ip 를 쓴다 (로컬엔 없어 "")
     const ip = (await headers()).get("x-real-ip")?.trim() ?? "";
     await supabase.rpc("record_login_attempt", { p_account: email, p_success: !error, p_ip: ip });
+    if (error) {                                         // ⭐ 실패일 때만 — 이 IP·계정이 문턱을 넘었나 (경량·원자적 중복방지)
+      const { data: hits } = await supabase.rpc("check_login_alert", { p_account: email, p_ip: ip });
+      if (hits?.length) await notifyThreats(hits);       // 넘었고 쿨다운 밖이면 알림 (best-effort)
+    }
   } catch {}
 
   if (error) return { email };                         // 🔴 이유를 안 나눈다 — 계정 존재 여부가 샌다 · 비밀번호는 돌려주지 않는다

@@ -132,6 +132,24 @@ export type Database = {
         }
         Relationships: []
       }
+      login_alert: {
+        Row: {
+          kind: string
+          last_sent_at: string
+          target: string
+        }
+        Insert: {
+          kind: string
+          last_sent_at?: string
+          target: string
+        }
+        Update: {
+          kind?: string
+          last_sent_at?: string
+          target?: string
+        }
+        Relationships: []
+      }
       login_attempt: {
         Row: {
           account: string
@@ -820,6 +838,21 @@ export type Database = {
     }
     Functions: {
       app_role: { Args: never; Returns: string }
+      check_login_alert: {
+        Args: {
+          p_account: string
+          p_cooldown?: string
+          p_focus?: number
+          p_ip: string
+          p_spray?: number
+          p_window?: string
+        }
+        Returns: {
+          alert_kind: string
+          alert_n: number
+          alert_target: string
+        }[]
+      }
       correct_record: {
         Args: {
           p_fail_qty: number
