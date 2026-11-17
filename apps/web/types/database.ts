@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_guard_event: {
+        Row: {
+          at: string
+          detail: string | null
+          id: number
+          kind: string
+          lot_id: string | null
+        }
+        Insert: {
+          at?: string
+          detail?: string | null
+          id?: never
+          kind: string
+          lot_id?: string | null
+        }
+        Update: {
+          at?: string
+          detail?: string | null
+          id?: never
+          kind?: string
+          lot_id?: string | null
+        }
+        Relationships: []
+      }
       defect_code: {
         Row: {
           active: boolean
@@ -935,6 +959,19 @@ export type Database = {
         }[]
       }
       prune_login_attempt: { Args: { p_keep?: string }; Returns: number }
+      record_ai_guard_event: {
+        Args: {
+          p_cooldown?: string
+          p_detail: string
+          p_kind: string
+          p_lot_id: string
+        }
+        Returns: {
+          alert_kind: string
+          alert_n: number
+          alert_target: string
+        }[]
+      }
       record_login_attempt: {
         Args: { p_account: string; p_ip: string; p_success: boolean }
         Returns: undefined

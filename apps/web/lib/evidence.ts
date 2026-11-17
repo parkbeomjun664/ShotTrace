@@ -115,3 +115,43 @@ export function buildEvidence(input: {                 // 오픈북 — Claude �
   };
 }
 export type Evidence = ReturnType<typeof buildEvidence>;
+
+// ── 출력-데이터 교차검증 (인젝션 ② · 위장 은폐 근본 방어) ────────────────────
+// 🔴 모델 자체 필터는 확률적이다(하드닝이 뚫릴 수 있다). 그래서 '센 신호인데 정상이라 함' 모순을
+//    데이터로 결정적으로 잡는다. 1차는 구조(|z| 큰데 원인 0개) — 표현을 바꿔도 못 숨긴다. 키워드는 보조(좁게).
+const Z_STRONG = 2;                                    // 이 이상이면 '강한 불량 신호'로 본다
+const NORMALCY_PHRASES = ["조치 불필요", "점검 불필요", "정상입니다"] as const;   // 불량 가이드엔 거의 안 나오는 단정 문구만
+
+export function guideContradictsData(
+  guide: Guide,
+  stats: MetricStat[],
+): { contradiction: boolean; reason: string } {
+  const maxAbsZ = Math.max(0, ...stats.map((s) => (s.z === null ? 0 : Math.abs(s.z))));
+  if (maxAbsZ < Z_STRONG) return { contradiction: false, reason: "" };   // 강한 신호 없음 → 교차검증 대상 아님
+
+  // 1차(근본): 빨간불(강한 z)인데 원인 0개 — "빨간불인데 원인 0개"는 표현을 바꿔도 못 숨긴다
+  if (guide.causes.length === 0) {
+    return { contradiction: true, reason: `강한 신호(|z|=${maxAbsZ.toFixed(1)}) 인데 원인 0개` };
+  }
+
+  // 보조(좁게): 단정적 정상 표현 — 강한 신호가 있는데 "조치 불필요/정상입니다" 라고 함
+  const text = [guide.summary, ...guide.causes.flatMap((c) => [c.title, c.reasoning, c.check])].join(" ");
+  const hit = NORMALCY_PHRASES.find((p) => text.includes(p));
+  if (hit) return { contradiction: true, reason: `강한 신호(|z|=${maxAbsZ.toFixed(1)}) 인데 "${hit}" 주장` };
+
+  return { contradiction: false, reason: "" };
+}
+
+// ── 노골적 인젝션 패턴 스캔 (인젝션 ③ · 기록·경보용, 차단 아님) ──────────────
+// 🔴 이건 #1(위장 은폐)을 막지 못한다 — 그건 ② 가 한다. 여기선 "무시하세요"·"OVERRIDE" 같은
+//    티 나는 인젝션을 포렌식으로 남긴다. 로그 전용이라 다소 넓어도 되지만, 좁게 시작한다.
+const INJECTION_MARKERS = [
+  "이전 지시", "무시하세요", "무시하라", "무시해", "따르지 마", "override",
+  "system 프롬프트", "시스템 프롬프트", "디버그 모드", "정상으로 써", "정상입니다 라고",
+  "ignore previous", "ignore all",
+] as const;
+
+export function scanForInjection(texts: string[]): string[] {   // 매칭된 마커 목록 (없으면 [])
+  const hay = texts.join(" \n ").toLowerCase();
+  return INJECTION_MARKERS.filter((m) => hay.includes(m.toLowerCase()));
+}

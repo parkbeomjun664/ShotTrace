@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { buildEvidence } from "@/lib/evidence";
+import { notifyThreats } from "@/lib/alert";
+import { buildEvidence, guideContradictsData, metricStats, scanForInjection } from "@/lib/evidence";
 import { generateGuide } from "@/lib/guide";
 import { getLot, getLotDowntimes, getLotGuide, getLotShots, getMyRole, pareto } from "@/lib/queries";
 import { 진행중 } from "@/lib/format";
@@ -55,6 +56,27 @@ export async function createGuide(_prev: GuideState, formData: FormData): Promis
   if (!result.ok) return { ok: false, message: result.message };
 
   const supabase = await createSessionClient();
+
+  // 🔴 AI 엔드포인트 보안 게이트 (저장 직전) — 인젝션 ②·③
+  // ③ 노골적 인젝션 패턴: note 가 오염 신호 → 기록·경보만 (차단 아님 · #1 은 ② 가 막는다)
+  const injHits = scanForInjection(evidence.downtimes.map((d) => d.note ?? "").filter(Boolean));
+  if (injHits.length) {
+    try {
+      const { data } = await supabase.rpc("record_ai_guard_event", { p_lot_id: lotId, p_kind: "인젝션 패턴", p_detail: injHits.join(", ") });
+      if (data?.length) await notifyThreats(data);
+    } catch {}
+  }
+
+  // ② 출력-데이터 교차검증: 강한 신호인데 '정상'이라 하면(위장 은폐 의심) 저장하지 않는다
+  const contra = guideContradictsData(result.guide, metricStats(shots));
+  if (contra.contradiction) {
+    try {
+      const { data } = await supabase.rpc("record_ai_guard_event", { p_lot_id: lotId, p_kind: "교차검증 차단", p_detail: contra.reason });
+      if (data?.length) await notifyThreats(data);
+    } catch {}
+    return { ok: false, message: "가이드가 데이터와 모순돼 저장하지 않았어요 (검토가 필요해요)" };   // 🔴 저장 차단
+  }
+
   const { error } = await supabase.from("lot_guide").insert({
     lot_id: lotId,
     content: result.guide,
