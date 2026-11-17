@@ -1,12 +1,36 @@
 // 입구 — 요청마다 손목밴드(토큰)를 확인하고, 만료됐으면 갈아준다 (Next 16 의 옛 middleware)
 // 🔴 진짜 문지기가 아니다. 막는 건 DB 의 RLS 다
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 
-export async function proxy(request: NextRequest) {
+import { notifyThreats } from "@/lib/alert";             // 🔵 경로 스캔 알림 (W2) — W1 과 같은 전송
+import type { Database } from "@/types/database";
+
+// 흔한 탐침 경로 접두어 — 이걸로 '시작'하는 요청만 경로 스캔 후보로 본다 (W2).
+// 🔴 ShotTrace 실제 경로(/lots·/quality·/master…)와 안 겹친다 → 정상 트래픽 오탐 0
+const PROBE_PREFIXES = [
+  "/.env", "/.git", "/wp-login", "/wp-admin", "/phpmyadmin", "/admin",
+  "/.aws", "/.ssh", "/config", "/backup", "/actuator", "/vendor", "/server-status", "/shell",
+] as const;
+
+// 탐침 요청을 장부에 남기고 · 이 IP 가 문턱을 넘었나 판정해 넘으면 알림. 🔴 best-effort — 실패해도 요청 흐름 안 막음
+async function recordScan(supabase: SupabaseClient<Database>, ip: string, path: string) {
+  try {
+    await supabase.rpc("record_scan_attempt", { p_ip: ip, p_path: path });
+    if (ip) {                                           // 미상 IP(로컬 등)는 판정 불가 — 기록만 되고 판정은 건너뜀
+      const { data: hits } = await supabase.rpc("check_scan_alert", { p_ip: ip });
+      if (hits?.length) await notifyThreats(hits);
+    }
+  } catch {
+    // 기록·전송 실패가 요청을 막지 않는다
+  }
+}
+
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
   let response = NextResponse.next({ request });       // let — setAll 에서 다시 만든다
 
-  const supabase = createServerClient(                 // 🔴 여기도 요청마다 새로
+  const supabase = createServerClient<Database>(       // 🔴 여기도 요청마다 새로
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -29,6 +53,14 @@ export async function proxy(request: NextRequest) {
       },
     },
   );
+
+  // 🔴 가벼운 선별 — 정상 요청은 접두사 검사 한 번으로 바로 빠진다(edge 부담 0).
+  //    탐침이면 응답은 안 늦추고(waitUntil) 뒤에서 기록·판정·통지 (W2)
+  const { pathname } = request.nextUrl;
+  if (PROBE_PREFIXES.some((p) => pathname.startsWith(p))) {
+    const ip = request.headers.get("x-real-ip")?.trim() ?? "";
+    event.waitUntil(recordScan(supabase, ip, pathname));
+  }
 
   const {
     data: { user },

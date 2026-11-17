@@ -470,6 +470,27 @@ export type Database = {
           },
         ]
       }
+      scan_attempt: {
+        Row: {
+          at: string
+          id: number
+          ip: string | null
+          path: string
+        }
+        Insert: {
+          at?: string
+          id?: never
+          ip?: string | null
+          path: string
+        }
+        Update: {
+          at?: string
+          id?: never
+          ip?: string | null
+          path?: string
+        }
+        Relationships: []
+      }
       shot: {
         Row: {
           average_back_pressure: number | null
@@ -853,6 +874,19 @@ export type Database = {
           alert_target: string
         }[]
       }
+      check_scan_alert: {
+        Args: {
+          p_cooldown?: string
+          p_ip: string
+          p_paths?: number
+          p_window?: string
+        }
+        Returns: {
+          alert_kind: string
+          alert_n: number
+          alert_target: string
+        }[]
+      }
       correct_record: {
         Args: {
           p_fail_qty: number
@@ -904,6 +938,19 @@ export type Database = {
       record_login_attempt: {
         Args: { p_account: string; p_ip: string; p_success: boolean }
         Returns: undefined
+      }
+      record_scan_attempt: {
+        Args: { p_ip: string; p_path: string }
+        Returns: undefined
+      }
+      scan_threats: {
+        Args: { p_paths?: number; p_window?: string }
+        Returns: {
+          distinct_n: number
+          kind: string
+          since: string
+          target: string
+        }[]
       }
     }
     Enums: {
