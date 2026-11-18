@@ -73,6 +73,15 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
     return NextResponse.redirect(url);
   }
 
+  // 🔴 /security 는 admin 전용 — 렌더(스트리밍) 전에 여기서 판정해 '진짜 404 상태코드'로 숨긴다.
+  //    (페이지의 notFound() 는 동적 스트리밍이라 200 으로 나감 — 내용만 404. proxy 는 렌더 전이라 상태코드가 산다)
+  if (user && request.nextUrl.pathname === "/security") {
+    const { data: role } = await supabase.rpc("app_role");
+    if (role !== "admin") {
+      return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });   // not-found.tsx + 404
+    }
+  }
+
   return response;
 }
 
