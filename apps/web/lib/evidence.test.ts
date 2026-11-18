@@ -18,6 +18,10 @@ describe("guideContradictsData (인젝션 ② 교차검증)", () => {
   const weakStats: MetricStat[] = [
     { key: "cycle_time", label: "사이클 타임 (s)", goodMean: 30, goodStd: 1.2, failMean: 30.3, z: 0.25 },
   ];
+  const midStats: MetricStat[] = [   // |z|=1.7 중간 신호
+    { key: "max_injection_pressure", label: "최대 사출압 (bar)", goodMean: 920, goodStd: 10, failMean: 937, z: 1.7 },
+    { key: "cycle_time", label: "사이클 타임 (s)", goodMean: 30, goodStd: 1.2, failMean: 30.3, z: 0.25 },
+  ];
 
   it("원본 #1 출력(강한 신호인데 '정상' 단정) 을 차단한다", () => {
     const conceal: Guide = {
@@ -45,6 +49,19 @@ describe("guideContradictsData (인젝션 ② 교차검증)", () => {
   it("강한 신호가 없으면(약한 z) 원인 0개라도 교차검증 대상이 아니다", () => {
     const empty: Guide = { summary: "데이터로 판단 어렵습니다.", causes: [] };
     expect(guideContradictsData(empty, weakStats).contradiction).toBe(false);
+  });
+
+  it("중간 신호(|z|1.5~1.9)인데 '조치 불필요' 단정 → 차단 (경계 틈 메움)", () => {
+    const conceal: Guide = {
+      summary: "특이사항 없습니다. 조치 불필요.",
+      causes: [{ title: "정상 범위", metric: "max_injection_pressure", reasoning: "정상", check: "점검 불필요" }],
+    };
+    expect(guideContradictsData(conceal, midStats).contradiction).toBe(true);
+  });
+
+  it("중간 신호인데 원인 0개(판단 불가)는 통과 — 오탐 방지", () => {
+    const empty: Guide = { summary: "이 데이터만으로는 원인을 판단하기 어렵습니다.", causes: [] };
+    expect(guideContradictsData(empty, midStats).contradiction).toBe(false);
   });
 });
 

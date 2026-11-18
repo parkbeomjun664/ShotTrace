@@ -1,6 +1,8 @@
 // 보안 — 위협 현황. admin 만 본다. login_threats()·scan_threats() 를 읽어 두 섹션으로
 //   🔴 화면을 가리는 건 친절 — 막는 건 RLS. 두 함수 다 SECURITY INVOKER 라 비admin 은 0행
 //   🔴 지금은 admin 이 '직접 들어와 봐야' 보인다 — Slack 통지(③)가 탐지+알림의 실시간 쪽
+import { notFound } from "next/navigation";
+
 import { 날짜, 시각 } from "@/lib/format";
 import { getMyRole } from "@/lib/queries";
 import { createSessionClient } from "@/lib/supabase/session";
@@ -51,14 +53,7 @@ function ThreatSection({ title, hint, rows }: { title: string; hint: string; row
 
 export default async function Page() {
   const role = await getMyRole();
-  if (role !== "admin") {                               // 친절한 안내 — 진짜 문은 RLS(아래 0행)
-    return (
-      <main className="mx-auto max-w-2xl p-6">
-        <h1 className="text-lg font-semibold">보안</h1>
-        <p className="mt-3 text-sm text-muted-foreground">admin 전용 화면이에요.</p>
-      </main>
-    );
-  }
+  if (role !== "admin") notFound();                     // 🔴 비admin 에겐 패널 존재 자체를 숨긴다 (404) · RLS 는 그 뒤의 문
 
   const supabase = await createSessionClient();
   const [{ data: loginRows }, { data: scanRows }] = await Promise.all([
