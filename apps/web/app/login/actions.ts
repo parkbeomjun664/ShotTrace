@@ -8,9 +8,24 @@ import { notifyThreats } from "@/lib/alert";             // ⭐ 위협 알림 �
 import { createSessionClient } from "@/lib/supabase/session";
 
 // useActionState 가 부른다 — 첫 칸은 이전 결과. 실패하면 쪽지로 이메일을 돌려줘 폼이 다시 채운다 (10/27)
-export async function login(_prev: { email: string } | null, formData: FormData) {
+export async function login(_prev: { email: string; blocked?: boolean } | null, formData: FormData) {
   const supabase = await createSessionClient();        // 🔵 Server Action 은 쿠키를 쓸 수 있다
   const email = String(formData.get("email") ?? "");   // get 은 null 일 수 있다 → 문자열로
+  // 🔴 x-forwarded-for 첫 홉은 위조 가능 → Vercel 이 직접 채우는 x-real-ip (로컬엔 없어 "")
+  const ip = (await headers()).get("x-real-ip")?.trim() ?? "";
+
+  // 🔴 차단 게이트 (W1: 탐지 → 탐지+차단) — 반복 실패(이 ip·계정)/스프레이(이 IP)가 문턱을 넘었으면
+  //    비밀번호 확인 전에 거부한다. 올바른 비번도 쿨다운(15분) 동안 거부 = 잠금.
+  //    🔴 계정 집중(여러 IP→한 계정)은 차단에서 뺐다 — 피해자(정상 IP)까지 잠그는 DoS 방지 (login_blocked)
+  if (ip) {
+    try {
+      const { data: blocked } = await supabase.rpc("login_blocked", { p_account: email, p_ip: ip });
+      if (blocked) {
+        await supabase.rpc("record_login_attempt", { p_account: email, p_success: false, p_ip: ip });   // 차단된 시도도 기록 → 쿨다운 유지
+        return { email, blocked: true };                 // 폼은 "너무 많은 시도" 안내
+      }
+    } catch {}                                           // 차단 체크 실패가 로그인을 막지 않는다 (탐지·알림은 그대로)
+  }
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -19,8 +34,6 @@ export async function login(_prev: { email: string } | null, formData: FormData)
 
   // ⭐ 성패를 장부에 남긴다 (W1) — 접근 로그엔 안 보이는 '계정' 신호. 🔴 기록 실패가 로그인을 막지 않게 best-effort
   try {
-    // 🔴 x-forwarded-for 첫 홉은 위조 가능 → Vercel 이 직접 채우는 x-real-ip 를 쓴다 (로컬엔 없어 "")
-    const ip = (await headers()).get("x-real-ip")?.trim() ?? "";
     await supabase.rpc("record_login_attempt", { p_account: email, p_success: !error, p_ip: ip });
     if (error) {                                         // ⭐ 실패일 때만 — 이 IP·계정이 문턱을 넘었나 (경량·원자적 중복방지)
       const { data: hits } = await supabase.rpc("check_login_alert", { p_account: email, p_ip: ip });

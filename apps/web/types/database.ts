@@ -939,6 +939,15 @@ export type Database = {
           pass_or_fail: string
         }[]
       }
+      login_blocked: {
+        Args: {
+          p_account: string
+          p_ip: string
+          p_threshold?: number
+          p_window?: string
+        }
+        Returns: boolean
+      }
       login_threats: {
         Args: { p_account_focus?: number; p_spray?: number; p_window?: string }
         Returns: {

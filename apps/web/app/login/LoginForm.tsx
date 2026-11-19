@@ -25,7 +25,9 @@ export function LoginForm() {
       {/* 실패 문구는 버튼 바로 아래 — 눌렀는데 안 되면 눈은 버튼 근처를 본다 (10/26) */}
       {state && (
         <p role="alert" className="text-sm text-red-600">
-          이메일 또는 비밀번호가 일치하지 않습니다.
+          {state.blocked
+            ? "로그인 시도가 너무 많아요. 잠시 뒤(약 15분) 다시 시도해 주세요."
+            : "이메일 또는 비밀번호가 일치하지 않습니다."}
         </p>
       )}
     </form>
